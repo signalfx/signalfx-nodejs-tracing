@@ -7,7 +7,7 @@ describe('plugins/util/log', () => {
   let tracer
 
   beforeEach(() => {
-    tracer = require('../../..').init({ service: 'test', plugins: false })
+    tracer = require('../../..').init({ service: 'test', plugins: false, zipkin: false })
     log = require('../../../src/plugins/util/log')
   })
 

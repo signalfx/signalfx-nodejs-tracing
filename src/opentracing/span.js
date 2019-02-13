@@ -31,6 +31,7 @@ class DatadogSpan extends Span {
     this._spanContext = this._createContext(parent)
     this._spanContext._name = operationName
     this._spanContext._tags = tags
+    this._spanContext._logs = []
     this._spanContext._metrics = metrics
   }
 
@@ -103,6 +104,14 @@ class DatadogSpan extends Span {
     } catch (e) {
       log.error(e)
     }
+  }
+
+  _log (keyValuePairs, timestamp) {
+    const logged = {
+      timestamp: timestamp || platform.now(),
+      value: keyValuePairs
+    }
+    this._spanContext._logs.push(logged)
   }
 
   _finish (finishTime) {

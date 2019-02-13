@@ -6,11 +6,13 @@ const Reference = opentracing.Reference
 const Span = require('./span')
 const SpanContext = require('./span_context')
 const Writer = require('../writer')
+const ZipkinV2Writer = require('../zipkin/writer')
 const Recorder = require('../recorder')
 const Sampler = require('../sampler')
 const PrioritySampler = require('../priority_sampler')
 const TextMapPropagator = require('./propagation/text_map')
 const HttpPropagator = require('./propagation/http')
+const B3TextMapPropagator = require('./propagation/b3_text_map')
 const BinaryPropagator = require('./propagation/binary')
 const LogPropagator = require('./propagation/log')
 const formats = require('../../ext/formats')
@@ -29,15 +31,27 @@ class DatadogTracer extends Tracer {
     this._tags = config.tags
     this._logInjection = config.logInjection
     this._prioritySampler = new PrioritySampler(config.env)
-    this._writer = new Writer(this._prioritySampler, config.url, config.bufferSize)
+    if (config.zipkin) {
+      this._writer = new ZipkinV2Writer(
+        this._prioritySampler, config.url, config.bufferSize,
+        config.path, config.headers
+      )
+    } else {
+      this._writer = new Writer(this._prioritySampler, config.url, config.bufferSize)
+    }
     this._recorder = new Recorder(this._writer, config.flushInterval)
     this._recorder.init()
     this._sampler = new Sampler(config.sampleRate)
     this._propagators = {
-      [formats.TEXT_MAP]: new TextMapPropagator(),
-      [formats.HTTP_HEADERS]: new HttpPropagator(),
       [formats.BINARY]: new BinaryPropagator(),
       [formats.LOG]: new LogPropagator()
+    }
+    if (config.zipkin) {
+      this._propagators[formats.TEXT_MAP] = new B3TextMapPropagator()
+      this._propagators[formats.HTTP_HEADERS] = new B3TextMapPropagator()
+    } else {
+      this._propagators[formats.TEXT_MAP] = new TextMapPropagator()
+      this._propagators[formats.HTTP_HEADERS] = new HttpPropagator()
     }
   }
 

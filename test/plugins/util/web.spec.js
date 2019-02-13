@@ -44,7 +44,7 @@ describe('plugins/util/web', () => {
     }
     config = { hooks: {} }
 
-    tracer = require('../../..').init({ plugins: false })
+    tracer = require('../../..').init({ plugins: false, zipkin: false })
     web = require('../../../src/plugins/util/web')
   })
 
