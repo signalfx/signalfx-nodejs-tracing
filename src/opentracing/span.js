@@ -7,6 +7,7 @@ const SpanContext = require('./span_context')
 const platform = require('../platform')
 const log = require('../log')
 const constants = require('../constants')
+const ext = require('../../ext')
 
 const SAMPLE_RATE_METRIC_KEY = constants.SAMPLE_RATE_METRIC_KEY
 
@@ -31,6 +32,7 @@ class DatadogSpan extends Span {
     this._spanContext = this._createContext(parent)
     this._spanContext._name = operationName
     this._spanContext._tags = tags
+    this._spanContext._logs = []
     this._spanContext._metrics = metrics
   }
 
@@ -105,6 +107,14 @@ class DatadogSpan extends Span {
     }
   }
 
+  _log (keyValuePairs, timestamp) {
+    const logged = {
+      timestamp: timestamp || platform.now(),
+      value: keyValuePairs
+    }
+    this._spanContext._logs.push(logged)
+  }
+
   _finish (finishTime) {
     if (this._duration !== undefined) {
       return
@@ -117,7 +127,10 @@ class DatadogSpan extends Span {
     this._spanContext._isFinished = true
     this._prioritySampler.sample(this)
 
-    if (this._spanContext._sampled) {
+    const samplingPriority = this._spanContext._sampling.priority
+    if (this._spanContext._sampled !== false &&
+        !(samplingPriority === ext.priority.USER_REJECT ||
+          samplingPriority === ext.priority.AUTO_REJECT)) {
       this._recorder.record(this)
     }
 

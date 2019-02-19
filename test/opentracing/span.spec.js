@@ -2,6 +2,7 @@
 
 const Uint64BE = require('int64-buffer').Uint64BE
 const constants = require('../../src/constants')
+const ext = require('../../ext')
 
 const SAMPLE_RATE_METRIC_KEY = constants.SAMPLE_RATE_METRIC_KEY
 
@@ -198,6 +199,32 @@ describe('Span', () => {
       span.finish()
 
       expect(recorder.record).to.not.have.been.called
+    })
+
+    const reject = [ext.priority.AUTO_REJECT, ext.priority.USER_REJECT]
+    reject.forEach((priority) => {
+      it(`should not record the span if priority ${priority}`, () => {
+        recorder.record.returns(Promise.resolve())
+
+        span = new Span(tracer, recorder, sampler, prioritySampler, { operationName: 'operation' })
+        span.context()._sampling.priority = priority
+        span.finish()
+
+        expect(recorder.record).to.not.have.been.called
+      })
+    })
+
+    const keep = [ext.priority.AUTO_KEEP, ext.priority.USER_KEEP]
+    keep.forEach((priority) => {
+      it(`should record the span if priority ${priority}`, () => {
+        recorder.record.returns(Promise.resolve())
+
+        span = new Span(tracer, recorder, sampler, prioritySampler, { operationName: 'operation' })
+        span.context()._sampling.priority = priority
+        span.finish()
+
+        expect(recorder.record).to.have.been.calledWith(span)
+      })
     })
 
     it('should not record the span if already finished', () => {

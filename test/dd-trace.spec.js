@@ -24,7 +24,8 @@ describe('dd-trace', () => {
         service: 'test',
         port: listener.address().port,
         flushInterval: 0,
-        plugins: false
+        plugins: false,
+        zipkin: false
       })
     })
   })

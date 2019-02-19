@@ -21,6 +21,9 @@ class Config {
       'localhost'
     )
     const port = coalesce(options.port, platform.env('DD_TRACE_AGENT_PORT'), 8126)
+    const zipkin = coalesce(options.zipkin, true)
+    const path = coalesce(options.path, '/api/v2/spans')
+    const headers = coalesce(options.headers, {})
     const sampleRate = coalesce(Math.min(Math.max(options.sampleRate, 0), 1), 1)
     const flushInterval = coalesce(parseInt(options.flushInterval, 10), 2000)
     const plugins = coalesce(options.plugins, true)
@@ -30,6 +33,9 @@ class Config {
     this.logInjection = String(logInjection) === 'true'
     this.env = env
     this.url = url ? new URL(url) : new URL(`${protocol}://${hostname}:${port}`)
+    this.zipkin = zipkin
+    this.path = path
+    this.headers = headers
     this.tags = Object.assign({}, options.tags)
     this.flushInterval = flushInterval
     this.bufferSize = 100000
