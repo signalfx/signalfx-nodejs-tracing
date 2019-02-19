@@ -22,6 +22,29 @@ class Tracer extends BaseTracer {
     ].join(' '))
   }
 
+  /**
+   * Initializes the tracer. This should be called before importing other libraries.
+   *
+   * @param {Object} [options] Configuration options.
+   * @param {boolean} [options.enabled=true] Whether to enable the tracer.
+   * @param {boolean} [options.debug=false] Enable debug logging in the tracer.
+   * @param {string} [options.service] The service name to be used for this program.
+   * @param {string} [options.url=null] The url to the trace agent that the tracer will submit to. Takes
+   * precedence over hostname and port, if set.
+   * @param {string} [options.hostname=localhost] The address of the trace agent that the tracer will submit to.
+   * @param {number|string} [options.port=8126] The port of the trace agent that the tracer will submit to.
+   * @param {boolean} [options.zipkin=true] Enable Zipkin v2 JSON writer instead of trace agent writer
+   * @param {string} [options.path='/api/v2/spans'] The endpoint for Zipkin collector that the tracer will submit to.
+   * Used with both options.url and options.hostname/port.
+   * @param {Object} [options.headers={}] Any headers to provide to ZipkinV2Writer POST requests
+   * @param {number} [options.sampleRate=1] Percentage of spans to sample as a float between 0 and 1.
+   * @param {number} [options.flushInterval=2000] Interval in milliseconds at which the tracer
+   * will submit traces to the agent.
+   * @param {Object|boolean} [options.experimental={}] Experimental features can be enabled all at once
+   * using boolean `true` or individually using key/value pairs.
+   * @param {boolean} [options.plugins=true] Whether to load all built-in plugins.
+   * @returns {Tracer} Self
+   */
   init (options) {
     if (this._tracer === noop) {
       try {

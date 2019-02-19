@@ -13,6 +13,7 @@ class DatadogSpanContext extends SpanContext {
     this._children = props.children || []
     this._isFinished = props.isFinished || false
     this._tags = props.tags || {}
+    this._logs = props.logs || []
     this._metrics = props.metrics || {}
     this._sampled = props.sampled === undefined || props.sampled
     this._sampling = props.sampling || {}

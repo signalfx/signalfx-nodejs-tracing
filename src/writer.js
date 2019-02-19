@@ -12,6 +12,8 @@ class Writer {
     this._prioritySampler = prioritySampler
     this._url = url
     this._size = size
+    this.format = format
+    this.encode = encode
   }
 
   get length () {
@@ -23,7 +25,7 @@ class Writer {
     const trace = spanContext._trace
 
     if (trace.started.length === trace.finished.length) {
-      const formattedTrace = trace.finished.map(format)
+      const formattedTrace = trace.finished.map(this.format)
 
       if (spanContext._sampling.drop === true) {
         log.debug(() => `Dropping trace due to user configured filtering: ${JSON.stringify(formattedTrace)}`)
@@ -32,7 +34,7 @@ class Writer {
 
       log.debug(() => `Encoding trace: ${JSON.stringify(formattedTrace)}`)
 
-      const buffer = encode(formattedTrace)
+      const buffer = this.encode(formattedTrace)
 
       log.debug(() => `Adding encoded trace to buffer: ${buffer.toString('hex').match(/../g).join(' ')}`)
 
