@@ -3,7 +3,7 @@ version: 2
 node-core-base: &node-core-base
   docker:
     - image: node:8
-  working_directory: ~/dd-trace-js
+  working_directory: ~/signalfx-nodejs-tracing
   resource_class: small
   steps:
     - checkout
@@ -32,7 +32,7 @@ node-core-base: &node-core-base
 node-plugin-base: &node-plugin-base
   docker:
     - image: node:8
-  working_directory: ~/dd-trace-js
+  working_directory: ~/signalfx-nodejs-tracing
   resource_class: small
   steps:
     - checkout
@@ -64,7 +64,7 @@ jobs:
   lint:
     docker:
       - image: node
-    working_directory: ~/dd-trace-js
+    working_directory: ~/signalfx-nodejs-tracing
     resource_class: small
     steps:
       - checkout
@@ -110,7 +110,7 @@ jobs:
   node-leaks:
     docker:
       - image: node:8
-    working_directory: ~/dd-trace-js
+    working_directory: ~/signalfx-nodejs-tracing
     resource_class: small
     steps:
       - checkout

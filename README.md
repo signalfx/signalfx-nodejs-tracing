@@ -1,108 +1,69 @@
-# dd-trace-js
+# SignalFx-Tracing Library for JavaScript
 
-[![npm](https://img.shields.io/npm/v/dd-trace.svg?colorB=blue)](https://www.npmjs.com/package/dd-trace)
-[![npm (tag)](https://img.shields.io/npm/v/dd-trace/dev.svg)](https://www.npmjs.com/package/dd-trace/v/dev)
-[![CircleCI](https://circleci.com/gh/DataDog/dd-trace-js.svg?style=shield)](https://circleci.com/gh/DataDog/dd-trace-js)
-[![Build Status](https://dev.azure.com/datadog-apm/dd-trace-js/_apis/build/status/build-node-core-windows)](https://dev.azure.com/datadog-apm/dd-trace-js/_build/latest)
+[![npm (tag)](https://img.shields.io/npm/v/signalfx-tracing/dev.svg)](https://www.npmjs.com/package/signalfx-tracing/v/dev)
 
-**JavaScript APM Tracer**
+This library provides an OpenTracing-compatible tracer and automatically configurable instrumentations for many popular JavaScript libraries and frameworks.  It supports Node.js versions 4.7+, 6.9+, and 8+.
 
-Datadog APM tracing client for JavaScript.
+## Installation
 
-## Getting Started
-
-For a basic product overview, check out our [setup documentation](https://docs.datadoghq.com/tracing/languages/nodejs/).
-
-For installation, configuration, and details about using the API, check out our [API documentation](https://datadog.github.io/dd-trace-js).
-
-For descriptions of terminology used in APM, take a look at the [official documentation](https://docs.datadoghq.com/tracing/visualization/).
-
-## Development
-
-Before contributing to this open source project, read our [CONTRIBUTING.md](https://github.com/DataDog/dd-trace-js/blob/master/CONTRIBUTING.md).
-
-### Requirements
-
-Since this project supports multiple Node versions, using a version
-manager such as [nvm](https://github.com/creationix/nvm) is recommended.
-
-We use [yarn](https://yarnpkg.com/) for its workspace functionality, so make sure to install that as well.
-
-To get started once you have Node and yarn installed, run:
-
-```sh
-$ yarn
+```bash
+  $ npm install signalfx-tracing
+  # or from a cloned repository
+  $ git clone https://github.com/signalfx/signalfx-nodejs-tracing.git
+  $ npm install ./signalfx-nodejs-tracing
 ```
 
-### Testing
+## Usage
 
-Before running the tests, the data stores need to be running.
-The easiest way to start all of them is to use the provided
-docker-compose configuration:
+```javascript
+// Configure OpenTracing tracer to report traces to Smart Agent or Gateway and initiate
+// auto-instrumentation.  Must occur before target library require statements.
+const tracer = require('signalfx-tracing').init({
+  service: 'my-traced-service', 
+  url: 'http://my_agent_or_gateway:9080/v1/trace'
+})
 
-```sh
-$ docker-compose up -d -V --remove-orphans --force-recreate
+//Auto-Instrumented Express
+const express = require('express')
+const app = express()
+
+app.get('/my_automatically_traced_endpoint', (req, res, next) => {
+  res.status(200).send()
+})
+
+app.listen(3000)
 ```
 
-#### Unit Tests
+For detailed information about configuration and usage, please see the [API documentation](./docs/API.md).
 
-To run the unit tests, use:
+## Supported Frameworks and Libraries
 
-```sh
-$ yarn test
-```
+**All instrumentations are currently in Beta**
 
-To run the unit tests continuously in watch mode while developing, use:
+* [amqp10 3+](https://github.com/noodlefrenzy/node-amqp10) - `use('amqp10')`
+* [amqplib 0.5+](http://www.squaremobius.net/amqp.node/) - `use('amqplib')`
+* [bluebird 2+](https://github.com/petkaantonov/bluebird) - `use('bluebird')`
+* [bunyan 1+](https://github.com/trentm/node-bunyan) - `use('bunyan')`
+* [dns](https://nodejs.org/api/dns.html) - `use('dns')`
+* [elasticsearch 10+](https://www.elastic.co/guide/en/elasticsearch/client/javascript-api/current/index.html) - `use('elasticsearch')`
+* [express 4+](http://expressjs.com/) - `use('express')`
+* [graphql 0.10+](https://github.com/graphql/graphql-js) - `use('graphql')`
+* [hapi 2+](https://hapijs.com/) - `use('hapi')`
+* [http/https](https://nodejs.org/api/http.html) - `use('http')`, `use('https')`
+* [ioredis 2+](https://github.com/luin/ioredis) - `use('ioredis')`
+* [koa 2+](https://koajs.com/) - `use('koa')`
+* [memcached 2.2+](https://github.com/3rd-Eden/memcached) - `use('memcached')`
+* [mongodb-core 2+](https://github.com/mongodb-js/mongodb-core) - `use('mongodb-core')`
+* [mysql 2+](https://github.com/mysqljs/mysql) - `use('mysql')`
+* [mysql2 1+](https://github.com/sidorares/node-mysql2) - `use('mysql2')`
+* [net](https://nodejs.org/api/net.html) - `use('net')`
+* [pg 4+](https://github.com/brianc/node-postgres) - `use('pg')`
+* [pino 2+](http://getpino.io/#/) - `use('pino')`
+* [q 1+](https://github.com/kriskowal/q) - `use('q')`
+* [redis 0.12+](https://github.com/NodeRedis/node_redis) - `use('redis')`
+* [restify 3+](http://restify.com/) - `use('restify')`
+* [when 3+](https://github.com/cujojs/when) - `use('when')`
+* [winston 1+](https://github.com/winstonjs/winston) - `use('winston')`
 
-```sh
-$ yarn tdd
-```
-
-#### Memory Leaks
-
-To run the memory leak tests, use:
-
-```sh
-$ yarn leak
-```
-
-Please note that memory leak tests only run on Node `>=8`.
-
-### Linting
-
-We use [ESLint](https://eslint.org) to make sure that new code is
-conform to our coding standards.
-
-To run the linter, use:
-
-```sh
-$ yarn lint
-```
-
-### Continuous Integration
-
-We rely on CircleCI 2.0 for our tests. If you want to test how the CI behaves
-locally, you can use the CircleCI Command Line Interface as described here:
-https://circleci.com/docs/2.0/local-jobs/
-
-After installing the `circleci` CLI, simply run one of the following:
-
-```sh
-$ circleci build --job lint
-$ circleci build --job node-leaks
-$ circleci build --job node-core-4
-$ circleci build --job node-core-6
-$ circleci build --job node-core-8
-$ circleci build --job node-core-10
-$ circleci build --job node-core-latest
-```
-
-### Benchmarks
-
-When two or more approaches must be compared, please write a benchmark
-in the `benchmark/index.js` module so that we can keep track of the
-most efficient algorithm. To run your benchmark, just:
-
-```sh
-$ yarn bench
-```
+#### About
+The SignalFx-Tracing Library for JavaScript is a fork of the DataDog APM JavaScript Tracer that has been modified to provide Zipkin v2 JSON formatting, B3 trace propagation functionality, and properly annotated trace data for handling by [SignalFx Microservices APM](https://docs.signalfx.com/en/latest/apm/apm-overview/index.html).

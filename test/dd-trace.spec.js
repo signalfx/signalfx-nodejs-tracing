@@ -22,7 +22,8 @@ describe('dd-trace', () => {
 
       tracer.init({
         service: 'test',
-        port: listener.address().port,
+        url: `http://localhost:${listener.address().port}`,
+        path: '/v0.4/traces',
         flushInterval: 0,
         plugins: false,
         zipkin: false

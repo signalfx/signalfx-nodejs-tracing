@@ -2,7 +2,7 @@
 
 const pick = require('lodash.pick')
 const Uint64BE = require('int64-buffer').Uint64BE
-const DatadogSpanContext = require('../span_context')
+const SignalFxSpanContext = require('../span_context')
 const log = require('../../log')
 
 const traceKey = 'x-datadog-trace-id'
@@ -28,7 +28,7 @@ class TextMapPropagator {
       return null
     }
 
-    const spanContext = new DatadogSpanContext({
+    const spanContext = new SignalFxSpanContext({
       traceId: new Uint64BE(carrier[traceKey], 10),
       spanId: new Uint64BE(carrier[spanKey], 10)
     })

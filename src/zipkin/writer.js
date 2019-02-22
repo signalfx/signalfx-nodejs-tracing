@@ -36,7 +36,7 @@ class ZipkinV2Writer extends Writer {
       protocol: this._url.protocol,
       hostname: this._url.hostname,
       port: this._url.port,
-      path: this._path,
+      path: this._url.pathname,
       method: 'POST',
       headers: Object.assign({ 'Content-Type': 'application/json' }, this._headers)
     }

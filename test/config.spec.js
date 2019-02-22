@@ -17,7 +17,7 @@ describe('Config', () => {
   it('should initialize with the correct defaults', () => {
     const config = new Config()
 
-    expect(config).to.have.property('service', 'node')
+    expect(config).to.have.property('service', 'unnamed-node-service')
     expect(config).to.have.property('enabled', true)
     expect(config).to.have.property('debug', false)
     expect(config).to.have.nested.property('url.protocol', 'http:')
@@ -40,8 +40,8 @@ describe('Config', () => {
   it('should initialize from environment variables', () => {
     platform.env.withArgs('SIGNALFX_TRACE_AGENT_HOSTNAME').returns('agent')
     platform.env.withArgs('SIGNALFX_TRACE_AGENT_PORT').returns('6218')
-    platform.env.withArgs('SIGNALFX_TRACE_ENABLED').returns('false')
-    platform.env.withArgs('SIGNALFX_TRACE_DEBUG').returns('true')
+    platform.env.withArgs('SIGNALFX_TRACING_ENABLED').returns('false')
+    platform.env.withArgs('SIGNALFX_TRACING_DEBUG').returns('true')
     platform.env.withArgs('SIGNALFX_SERVICE_NAME').returns('service')
     platform.env.withArgs('SIGNALFX_ENV').returns('test')
 
@@ -50,18 +50,18 @@ describe('Config', () => {
     expect(config).to.have.property('enabled', false)
     expect(config).to.have.property('debug', true)
     expect(config).to.have.nested.property('url.protocol', 'http:')
-    expect(config).to.have.nested.property('url.hostname', 'agent')
-    expect(config).to.have.nested.property('url.port', '6218')
+    expect(config).to.have.nested.property('url.hostname', 'localhost')
+    expect(config).to.have.nested.property('url.port', '9080')
     expect(config).to.have.property('service', 'service')
     expect(config).to.have.property('env', 'test')
   })
 
   it('should initialize from environment variables with url taking precedence', () => {
-    platform.env.withArgs('SIGNALFX_TRACE_AGENT_URL').returns('https://agent2:7777')
+    platform.env.withArgs('SIGNALFX_INGEST_URL').returns('https://agent2:7777')
     platform.env.withArgs('SIGNALFX_TRACE_AGENT_HOSTNAME').returns('agent')
     platform.env.withArgs('SIGNALFX_TRACE_AGENT_PORT').returns('6218')
-    platform.env.withArgs('SIGNALFX_TRACE_ENABLED').returns('false')
-    platform.env.withArgs('SIGNALFX_TRACE_DEBUG').returns('true')
+    platform.env.withArgs('SIGNALFX_TRACING_ENABLED').returns('false')
+    platform.env.withArgs('SIGNALFX_TRACING_DEBUG').returns('true')
     platform.env.withArgs('SIGNALFX_SERVICE_NAME').returns('service')
     platform.env.withArgs('SIGNALFX_ENV').returns('test')
 
@@ -90,14 +90,15 @@ describe('Config', () => {
       logger,
       tags,
       flushInterval: 5000,
-      plugins: false
+      plugins: false,
+      accessToken: 'MyToken'
     })
 
     expect(config).to.have.property('enabled', false)
     expect(config).to.have.property('debug', true)
     expect(config).to.have.nested.property('url.protocol', 'http:')
-    expect(config).to.have.nested.property('url.hostname', 'agent')
-    expect(config).to.have.nested.property('url.port', '6218')
+    expect(config).to.have.nested.property('url.hostname', 'localhost')
+    expect(config).to.have.nested.property('url.port', '9080')
     expect(config).to.have.property('service', 'service')
     expect(config).to.have.property('env', 'test')
     expect(config).to.have.property('sampleRate', 0.5)
@@ -105,6 +106,7 @@ describe('Config', () => {
     expect(config).to.have.deep.property('tags', tags)
     expect(config).to.have.property('flushInterval', 5000)
     expect(config).to.have.property('plugins', false)
+    expect(config.headers).to.have.property('x-sf-token', 'MyToken')
   })
 
   it('should initialize from the options with url taking precedence', () => {
@@ -145,15 +147,15 @@ describe('Config', () => {
 
     const config = new Config()
 
-    expect(config).to.have.nested.property('url.hostname', 'agent')
+    expect(config).to.have.nested.property('url.hostname', 'localhost')
   })
 
   it('should give priority to the options', () => {
-    platform.env.withArgs('SIGNALFX_TRACE_AGENT_URL').returns('https://agent2:6218')
+    platform.env.withArgs('SIGNALFX_INGEST_URL').returns('https://agent2:6218')
     platform.env.withArgs('SIGNALFX_TRACE_AGENT_HOSTNAME').returns('agent')
     platform.env.withArgs('SIGNALFX_TRACE_AGENT_PORT').returns('6218')
-    platform.env.withArgs('SIGNALFX_TRACE_ENABLED').returns('false')
-    platform.env.withArgs('SIGNALFX_TRACE_DEBUG').returns('true')
+    platform.env.withArgs('SIGNALFX_TRACING_ENABLED').returns('false')
+    platform.env.withArgs('SIGNALFX_TRACING_DEBUG').returns('true')
     platform.env.withArgs('SIGNALFX_SERVICE_NAME').returns('service')
     platform.env.withArgs('SIGNALFX_ENV').returns('test')
 
@@ -180,8 +182,8 @@ describe('Config', () => {
     platform.env.withArgs('SIGNALFX_TRACE_AGENT_URL').returns('http://agent2:6218')
     platform.env.withArgs('SIGNALFX_TRACE_AGENT_HOSTNAME').returns('agent')
     platform.env.withArgs('SIGNALFX_TRACE_AGENT_PORT').returns('6218')
-    platform.env.withArgs('SIGNALFX_TRACE_ENABLED').returns('false')
-    platform.env.withArgs('SIGNALFX_TRACE_DEBUG').returns('true')
+    platform.env.withArgs('SIGNALFX_TRACING_ENABLED').returns('false')
+    platform.env.withArgs('SIGNALFX_TRACING_DEBUG').returns('true')
     platform.env.withArgs('SIGNALFX_SERVICE_NAME').returns('service')
     platform.env.withArgs('SIGNALFX_ENV').returns('test')
 

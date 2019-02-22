@@ -2,7 +2,7 @@
 
 const Tracer = require('./opentracing/tracer')
 
-class DatadogTracer extends Tracer {
+class SignalFxTracer extends Tracer {
   constructor (config) {
     super(config)
 
@@ -52,4 +52,4 @@ class DatadogTracer extends Tracer {
   }
 }
 
-module.exports = DatadogTracer
+module.exports = SignalFxTracer

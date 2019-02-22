@@ -2,7 +2,7 @@
 
 const pick = require('lodash.pick')
 const Uint64BE = require('int64-buffer').Uint64BE
-const DatadogSpanContext = require('../span_context')
+const SignalFxSpanContext = require('../span_context')
 const log = require('../../log')
 const { idToHex } = require('../../utils')
 const { priority } = require('../../../ext')
@@ -54,7 +54,7 @@ class B3TextMapPropagator {
       return null
     }
 
-    const spanContext = new DatadogSpanContext({
+    const spanContext = new SignalFxSpanContext({
       traceId: new Uint64BE(traceId, 16),
       spanId: new Uint64BE(spanId, 16)
     })
