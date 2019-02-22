@@ -12,7 +12,7 @@ class DatadogTracer extends Tracer {
     let ScopeManager
     let Scope
 
-    if (process.env.DD_CONTEXT_PROPAGATION === 'false') {
+    if (process.env.SIGNALFX_CONTEXT_PROPAGATION === 'false') {
       ScopeManager = require('./scope/noop/scope_manager')
       Scope = require('./scope/new/base')
     } else {

@@ -68,10 +68,9 @@ describe('Plugin', () => {
               .use(traces => {
                 const span = traces[0][0]
 
-                expect(span).to.have.property('name', 'amqp.send')
-                expect(span).to.have.property('service', 'test-amqp')
-                expect(span).to.have.property('resource', 'send amq.topic')
-                expect(span).to.have.property('type', 'worker')
+                expect(span).to.have.property('name', 'send amq.topic')
+                expect(span).to.have.property('service', 'test')
+                expect(span.meta).to.have.property('component', 'amqp10')
                 expect(span.meta).to.have.property('span.kind', 'producer')
                 expect(span.meta).to.have.property('out.host', 'localhost')
                 expect(span.meta).to.have.property('out.port', '5673')
@@ -96,7 +95,7 @@ describe('Plugin', () => {
               .use(traces => {
                 const span = traces[0][0]
 
-                expect(span.error).to.equal(1)
+                expect(span.meta).to.have.property('error', true)
                 expect(span.meta).to.have.property('error.type', error.name)
                 expect(span.meta).to.have.property('error.msg', error.message)
                 expect(span.meta).to.have.property('error.stack', error.stack)
@@ -134,10 +133,9 @@ describe('Plugin', () => {
               .use(traces => {
                 const span = traces[0][0]
 
-                expect(span).to.have.property('name', 'amqp.receive')
-                expect(span).to.have.property('service', 'test-amqp')
-                expect(span).to.have.property('resource', 'receive amq.topic')
-                expect(span).to.have.property('type', 'worker')
+                expect(span).to.have.property('name', 'receive amq.topic')
+                expect(span).to.have.property('service', 'test')
+                expect(span.meta).to.have.property('component', 'amqp10')
                 expect(span.meta).to.have.property('span.kind', 'consumer')
                 expect(span.meta).to.have.property('amqp.connection.host', 'localhost')
                 expect(span.meta).to.have.property('amqp.connection.port', '5673')
@@ -154,7 +152,7 @@ describe('Plugin', () => {
           })
 
           it('should run the message event listener in the AMQP span scope', done => {
-            if (process.env.DD_CONTEXT_PROPAGATION === 'false') return done()
+            if (process.env.SIGNALFX_CONTEXT_PROPAGATION === 'false') return done()
 
             tracer.scope().activate(null, () => {
               receiver.on('message', message => {

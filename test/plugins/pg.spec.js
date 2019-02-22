@@ -41,9 +41,9 @@ describe('Plugin', () => {
 
         it('should do automatic instrumentation when using callbacks', done => {
           agent.use(traces => {
-            expect(traces[0][0]).to.have.property('service', 'test-postgres')
-            expect(traces[0][0]).to.have.property('resource', 'SELECT $1::text as message')
-            expect(traces[0][0]).to.have.property('type', 'sql')
+            expect(traces[0][0]).to.have.property('service', 'test')
+            expect(traces[0][0]).to.have.property('name', 'SELECT $1::text as message')
+            expect(traces[0][0].meta).to.have.property('component', 'pg')
             expect(traces[0][0].meta).to.have.property('db.name', 'postgres')
             expect(traces[0][0].meta).to.have.property('db.user', 'postgres')
             expect(traces[0][0].meta).to.have.property('db.type', 'postgres')
@@ -64,9 +64,9 @@ describe('Plugin', () => {
         if (semver.intersects(version, '>=5.1')) { // initial promise support
           it('should do automatic instrumentation when using promises', done => {
             agent.use(traces => {
-              expect(traces[0][0]).to.have.property('service', 'test-postgres')
-              expect(traces[0][0]).to.have.property('resource', 'SELECT $1::text as message')
-              expect(traces[0][0]).to.have.property('type', 'sql')
+              expect(traces[0][0]).to.have.property('service', 'test')
+              expect(traces[0][0]).to.have.property('name', 'SELECT $1::text as message')
+              expect(traces[0][0].meta).to.have.property('component', 'pg')
               expect(traces[0][0].meta).to.have.property('db.name', 'postgres')
               expect(traces[0][0].meta).to.have.property('db.user', 'postgres')
               expect(traces[0][0].meta).to.have.property('db.type', 'postgres')
@@ -100,7 +100,7 @@ describe('Plugin', () => {
         })
 
         it('should run the callback in the parent context', done => {
-          if (process.env.DD_CONTEXT_PROPAGATION === 'false') return done()
+          if (process.env.SIGNALFX_CONTEXT_PROPAGATION === 'false') return done()
 
           const span = {}
 
@@ -142,7 +142,7 @@ describe('Plugin', () => {
 
         it('should be configured with the correct values', done => {
           agent.use(traces => {
-            expect(traces[0][0]).to.have.property('service', 'custom')
+            expect(traces[0][0]).to.have.property('service', 'test')
 
             done()
           })

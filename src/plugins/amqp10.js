@@ -77,7 +77,7 @@ function addTags (tracer, config, span, link) {
 
   span.addTags({
     'service.name': config.service || `${tracer._service}-amqp`,
-    'span.type': 'worker',
+    'component': 'amqp10',
     'amqp.link.name': link.name,
     'amqp.link.handle': link.handle,
     'amqp.connection.host': address.host,

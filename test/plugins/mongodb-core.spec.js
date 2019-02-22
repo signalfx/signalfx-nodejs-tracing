@@ -58,10 +58,9 @@ describe('Plugin', () => {
                 const span = traces[0][0]
                 const resource = `insert test.${collection}`
 
-                expect(span).to.have.property('name', 'mongodb.query')
-                expect(span).to.have.property('service', 'test-mongodb')
-                expect(span).to.have.property('resource', resource)
-                expect(span).to.have.property('type', 'mongodb')
+                expect(span).to.have.property('service', 'test')
+                expect(span).to.have.property('name', resource)
+                expect(span.meta).to.have.property('component', 'mongodb')
                 expect(span.meta).to.have.property('db.name', `test.${collection}`)
                 expect(span.meta).to.have.property('out.host', 'localhost')
               })
@@ -77,7 +76,7 @@ describe('Plugin', () => {
                 const span = traces[0][0]
                 const resource = `planCacheListPlans test.${collection} {}`
 
-                expect(span).to.have.property('resource', resource)
+                expect(span).to.have.property('name', resource)
               })
               .then(done)
               .catch(done)
@@ -95,7 +94,7 @@ describe('Plugin', () => {
                 const query = '{"foo":"?","bar":{"baz":"?"}}'
                 const resource = `find test.${collection} ${query}`
 
-                expect(span).to.have.property('resource', resource)
+                expect(span).to.have.property('name', resource)
                 expect(span.meta).to.have.property('mongodb.query', query)
               })
               .then(done)
@@ -118,7 +117,7 @@ describe('Plugin', () => {
                 const span = traces[0][0]
                 const resource = `find test.${collection} {"_id":"?"}`
 
-                expect(span).to.have.property('resource', resource)
+                expect(span).to.have.property('name', resource)
               })
               .then(done)
               .catch(done)
@@ -139,7 +138,7 @@ describe('Plugin', () => {
                 const span = traces[0][0]
                 const resource = `find test.${collection} {"_id":"?"}`
 
-                expect(span).to.have.property('resource', resource)
+                expect(span).to.have.property('name', resource)
               })
               .then(done)
               .catch(done)
@@ -158,7 +157,7 @@ describe('Plugin', () => {
                 const span = traces[0][0]
                 const resource = `find test.${collection} {"_id":"?"}`
 
-                expect(span).to.have.property('resource', resource)
+                expect(span).to.have.property('name', resource)
               })
               .then(done)
               .catch(done)
@@ -173,7 +172,7 @@ describe('Plugin', () => {
           })
 
           it('should run the callback in the parent context', done => {
-            if (process.env.DD_CONTEXT_PROPAGATION === 'false') return done()
+            if (process.env.SIGNALFX_CONTEXT_PROPAGATION === 'false') return done()
 
             server.insert(`test.${collection}`, [{ a: 1 }], {}, () => {
               expect(tracer.scope().active()).to.be.null
@@ -206,9 +205,9 @@ describe('Plugin', () => {
               .use(traces => {
                 const span = traces[0][0]
 
-                expect(span).to.have.property('name', 'mongodb.query')
-                expect(span).to.have.property('service', 'test-mongodb')
-                expect(span).to.have.property('type', 'mongodb')
+                expect(span).to.have.property('name', `insert test.${collection}`)
+                expect(span).to.have.property('service', 'test')
+                expect(span.meta).to.have.property('component', 'mongodb')
                 expect(span.meta).to.have.property('db.name', `test.${collection}`)
                 expect(span.meta).to.have.property('out.host', 'localhost')
                 expect(span.meta).to.have.property('out.port', '27017')
@@ -259,7 +258,7 @@ describe('Plugin', () => {
                 const span = traces[0][0]
                 const resource = `find test.${collection} {"foo":"?","bar":{"baz":"?"}}`
 
-                expect(span).to.have.property('resource', resource)
+                expect(span).to.have.property('name', resource)
               })
               .then(done)
               .catch(done)
@@ -278,7 +277,7 @@ describe('Plugin', () => {
           })
 
           it('should run the callback in the parent context', done => {
-            if (process.env.DD_CONTEXT_PROPAGATION === 'false') return done()
+            if (process.env.SIGNALFX_CONTEXT_PROPAGATION === 'false') return done()
 
             const cursor = server.cursor(`test.${collection}`, {
               find: `test.${collection}`,
@@ -391,7 +390,7 @@ describe('Plugin', () => {
         it('should be configured with the correct values', done => {
           agent
             .use(traces => {
-              expect(traces[0][0]).to.have.property('service', 'custom')
+              expect(traces[0][0]).to.have.property('service', 'test')
             })
             .then(done)
             .catch(done)

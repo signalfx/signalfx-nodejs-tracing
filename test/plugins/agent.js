@@ -2,11 +2,10 @@
 
 const http = require('http')
 const bodyParser = require('body-parser')
-const msgpack = require('msgpack-lite')
-const codec = msgpack.createCodec({ int64: true })
 const getPort = require('get-port')
 const express = require('express')
 const path = require('path')
+const Int64BE = require('int64-buffer').Int64BE
 
 const handlers = new Set()
 let agent = null
@@ -14,20 +13,47 @@ let server = null
 let listener = null
 let tracer = null
 
+const zipkinV2toDD = trace => {
+  // Convert Zipkin v2 JSON to dd format to prevent unnecessary test updates
+  const zipkin = JSON.parse(trace)
+  let dd = []
+  for (let i = 0; i < zipkin.length; i++) {
+    const zipkinSpan = zipkin[i]
+    const ddSpan = {}
+
+    ddSpan.trace_id = zipkinSpan.traceId
+    ddSpan.span_id = zipkinSpan.id
+    ddSpan.name = zipkinSpan.name
+    ddSpan.service = zipkinSpan.localEndpoint.serviceName
+    ddSpan.meta = zipkinSpan.tags
+    if (zipkinSpan.kind) {
+      ddSpan.meta['span.kind'] = zipkinSpan.kind.toLowerCase()
+    }
+    if (zipkinSpan.parentId !== undefined) {
+      ddSpan.parent_id = zipkinSpan.parentId
+    }
+    ddSpan.start = new Int64BE(zipkinSpan.timestamp)
+    ddSpan.duration = new Int64BE(zipkinSpan.duration)
+
+    dd = dd.concat(ddSpan)
+  }
+  return [dd]
+}
+
 module.exports = {
-  // Load the plugin on the tracer with an optional config and start a mock agent.
+  // Load the plugin on the tracer with an optional config and start a mock Zipkin
   load (plugin, pluginName, config) {
     tracer = require('../..')
     agent = express()
-    agent.use(bodyParser.raw({ type: 'application/msgpack' }))
+    agent.use(bodyParser.raw({ type: 'application/json' }))
     agent.use((req, res, next) => {
       if (req.body.length === 0) return res.status(200).send()
-      req.body = msgpack.decode(req.body, { codec })
+      req.body = zipkinV2toDD(req.body)
       next()
     })
 
-    agent.put('/v0.4/traces', (req, res) => {
-      res.status(200).send({ rate_by_service: { 'service:,env:': 1 } })
+    agent.post('/api/v2/spans', (req, res) => {
+      res.status(200).send()
       handlers.forEach(handler => handler(req.body))
     })
 

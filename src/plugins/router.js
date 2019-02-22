@@ -111,6 +111,11 @@ function wrapDone (original, req) {
 
 function callHandle (layer, handle, req, args) {
   return web.wrapMiddleware(req, handle, 'express.middleware', () => {
+    const span = web.active(req)
+    if (span) {
+      span.setTag('component', 'express')
+    }
+
     try {
       return handle.apply(layer, args)
     } catch (e) {

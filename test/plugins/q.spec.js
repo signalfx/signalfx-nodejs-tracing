@@ -28,7 +28,7 @@ describe('Plugin', () => {
         })
 
         it('should run the then() callback in context where then() was called', () => {
-          if (process.env.DD_CONTEXT_PROPAGATION === 'false') return
+          if (process.env.SIGNALFX_CONTEXT_PROPAGATION === 'false') return
 
           const span = {}
           const deferred = Q.defer()
@@ -49,7 +49,7 @@ describe('Plugin', () => {
         })
 
         it('should run the catch() callback in context where catch() was called', () => {
-          if (process.env.DD_CONTEXT_PROPAGATION === 'false') return
+          if (process.env.SIGNALFX_CONTEXT_PROPAGATION === 'false') return
 
           const span = {}
           const deferred = Q.defer()

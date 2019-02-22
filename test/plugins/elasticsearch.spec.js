@@ -48,7 +48,7 @@ describe('Plugin', () => {
         it('should sanitize the resource name', done => {
           agent
             .use(traces => {
-              expect(traces[0][0]).to.have.property('resource', 'POST /logstash-?.?.?/_search')
+              expect(traces[0][0]).to.have.property('name', 'POST /logstash-?.?.?/_search')
             })
             .then(done)
             .catch(done)
@@ -96,9 +96,9 @@ describe('Plugin', () => {
           it('should do automatic instrumentation', done => {
             agent
               .use(traces => {
-                expect(traces[0][0]).to.have.property('service', 'test-elasticsearch')
-                expect(traces[0][0]).to.have.property('resource', 'HEAD /')
-                expect(traces[0][0]).to.have.property('type', 'elasticsearch')
+                expect(traces[0][0]).to.have.property('service', 'test')
+                expect(traces[0][0]).to.have.property('name', 'HEAD /')
+                expect(traces[0][0].meta).to.have.property('component', 'elasticsearch')
               })
               .then(done)
               .catch(done)
@@ -107,7 +107,7 @@ describe('Plugin', () => {
           })
 
           it('should propagate context', done => {
-            if (process.env.DD_CONTEXT_PROPAGATION === 'false') return done()
+            if (process.env.SIGNALFX_CONTEXT_PROPAGATION === 'false') return done()
 
             agent
               .use(traces => {
@@ -125,7 +125,7 @@ describe('Plugin', () => {
           })
 
           it('should run the callback in the parent context', done => {
-            if (process.env.DD_CONTEXT_PROPAGATION === 'false') return done()
+            if (process.env.SIGNALFX_CONTEXT_PROPAGATION === 'false') return done()
 
             client.ping(error => {
               expect(tracer.scope().active()).to.be.null
@@ -161,9 +161,9 @@ describe('Plugin', () => {
           it('should do automatic instrumentation', done => {
             agent
               .use(traces => {
-                expect(traces[0][0]).to.have.property('service', 'test-elasticsearch')
-                expect(traces[0][0]).to.have.property('resource', 'HEAD /')
-                expect(traces[0][0]).to.have.property('type', 'elasticsearch')
+                expect(traces[0][0]).to.have.property('service', 'test')
+                expect(traces[0][0]).to.have.property('name', 'HEAD /')
+                expect(traces[0][0].meta).to.have.property('component', 'elasticsearch')
               })
               .then(done)
               .catch(done)
@@ -172,7 +172,7 @@ describe('Plugin', () => {
           })
 
           it('should propagate context', done => {
-            if (process.env.DD_CONTEXT_PROPAGATION === 'false') return done()
+            if (process.env.SIGNALFX_CONTEXT_PROPAGATION === 'false') return done()
 
             agent
               .use(traces => {
@@ -192,7 +192,7 @@ describe('Plugin', () => {
           })
 
           it('should run resolved promises in the parent context', () => {
-            if (process.env.DD_CONTEXT_PROPAGATION === 'false') return
+            if (process.env.SIGNALFX_CONTEXT_PROPAGATION === 'false') return
 
             return client.ping()
               .then(() => {
@@ -201,7 +201,7 @@ describe('Plugin', () => {
           })
 
           it('should run rejected promises in the parent context', done => {
-            if (process.env.DD_CONTEXT_PROPAGATION === 'false') return done()
+            if (process.env.SIGNALFX_CONTEXT_PROPAGATION === 'false') return done()
 
             client.search({ index: 'invalid' })
               .catch(() => {

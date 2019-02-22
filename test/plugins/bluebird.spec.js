@@ -28,7 +28,7 @@ describe('Plugin', () => {
         })
 
         it('should run the then() callback in context where then() was called', () => {
-          if (process.env.DD_CONTEXT_PROPAGATION === 'false') return
+          if (process.env.SIGNALFX_CONTEXT_PROPAGATION === 'false') return
 
           const span = {}
           const promise = new Promise((resolve, reject) => {
@@ -48,7 +48,7 @@ describe('Plugin', () => {
         })
 
         it('should run the catch() callback in context where catch() was called', () => {
-          if (process.env.DD_CONTEXT_PROPAGATION === 'false') return
+          if (process.env.SIGNALFX_CONTEXT_PROPAGATION === 'false') return
 
           const span = {}
           const promise = new Promise((resolve, reject) => {
@@ -71,7 +71,7 @@ describe('Plugin', () => {
         })
 
         it('should allow to run without a scope if not available when calling then()', () => {
-          if (process.env.DD_CONTEXT_PROPAGATION === 'false') return
+          if (process.env.SIGNALFX_CONTEXT_PROPAGATION === 'false') return
 
           tracer.scope().activate(null, () => {
             const promise = new Promise((resolve, reject) => {

@@ -12,7 +12,7 @@ class NoopTracer extends Tracer {
 
     let ScopeManager
 
-    if (process.env.DD_CONTEXT_PROPAGATION === 'false') {
+    if (process.env.SIGNALFX_CONTEXT_PROPAGATION === 'false') {
       ScopeManager = require('../scope/noop/scope_manager')
     } else {
       ScopeManager = require('../scope/scope_manager')

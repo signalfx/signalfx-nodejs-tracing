@@ -41,10 +41,9 @@ describe('Plugin', () => {
 
           agent
             .use(traces => {
-              expect(traces[0][0]).to.have.property('name', 'koa.request')
               expect(traces[0][0]).to.have.property('service', 'test')
-              expect(traces[0][0]).to.have.property('type', 'http')
-              expect(traces[0][0]).to.have.property('resource', 'GET')
+              expect(traces[0][0]).to.have.property('name', 'GET')
+              expect(traces[0][0].meta).to.have.property('component', 'koa')
               expect(traces[0][0].meta).to.have.property('span.kind', 'server')
               expect(traces[0][0].meta).to.have.property('http.url', `http://localhost:${port}/user`)
               expect(traces[0][0].meta).to.have.property('http.method', 'GET')
@@ -70,10 +69,9 @@ describe('Plugin', () => {
 
           agent
             .use(traces => {
-              expect(traces[0][0]).to.have.property('name', 'koa.request')
               expect(traces[0][0]).to.have.property('service', 'test')
-              expect(traces[0][0]).to.have.property('type', 'http')
-              expect(traces[0][0]).to.have.property('resource', 'GET')
+              expect(traces[0][0]).to.have.property('name', 'GET')
+              expect(traces[0][0].meta).to.have.property('component', 'koa')
               expect(traces[0][0].meta).to.have.property('span.kind', 'server')
               expect(traces[0][0].meta).to.have.property('http.url', `http://localhost:${port}/user`)
               expect(traces[0][0].meta).to.have.property('http.method', 'GET')
@@ -90,7 +88,7 @@ describe('Plugin', () => {
         })
 
         it('should run middleware in the request scope', done => {
-          if (process.env.DD_CONTEXT_PROPAGATION === 'false') return done()
+          if (process.env.SIGNALFX_CONTEXT_PROPAGATION === 'false') return done()
 
           const app = new Koa()
 
@@ -115,7 +113,7 @@ describe('Plugin', () => {
         })
 
         it('should reactivate the request span in middleware scopes', done => {
-          if (process.env.DD_CONTEXT_PROPAGATION === 'false') return done()
+          if (process.env.SIGNALFX_CONTEXT_PROPAGATION === 'false') return done()
 
           const app = new Koa()
 
@@ -166,7 +164,7 @@ describe('Plugin', () => {
 
             agent
               .use(traces => {
-                expect(traces[0][0]).to.have.property('resource', 'GET /user/:id')
+                expect(traces[0][0]).to.have.property('name', 'GET /user/:id')
                 expect(traces[0][0].meta).to.have.property('http.url', `http://localhost:${port}/user/123`)
               })
               .then(done)
@@ -194,7 +192,7 @@ describe('Plugin', () => {
 
             agent
               .use(traces => {
-                expect(traces[0][0]).to.have.property('resource', 'GET /user/:id')
+                expect(traces[0][0]).to.have.property('name', 'GET /user/:id')
               })
               .then(done)
               .catch(done)
@@ -221,7 +219,7 @@ describe('Plugin', () => {
 
             agent
               .use(traces => {
-                expect(traces[0][0]).to.have.property('resource', 'GET /forums/:fid/posts/:pid')
+                expect(traces[0][0]).to.have.property('name', 'GET /forums/:fid/posts/:pid')
                 expect(traces[0][0].meta).to.have.property('http.url', `http://localhost:${port}/forums/123/posts/456`)
               })
               .then(done)
@@ -252,7 +250,7 @@ describe('Plugin', () => {
 
             agent
               .use(traces => {
-                expect(traces[0][0]).to.have.property('resource', 'GET /forums/:fid/posts/:pid')
+                expect(traces[0][0]).to.have.property('name', 'GET /forums/:fid/posts/:pid')
                 expect(traces[0][0].meta).to.have.property('http.url', `http://localhost:${port}/forums/123/posts/456`)
               })
               .then(done)
@@ -281,7 +279,7 @@ describe('Plugin', () => {
 
             agent
               .use(traces => {
-                expect(traces[0][0]).to.have.property('resource', 'GET /user/:id')
+                expect(traces[0][0]).to.have.property('name', 'GET /user/:id')
                 expect(traces[0][0].meta).to.have.property('http.url', `http://localhost:${port}/user/123`)
               })
               .then(done)
@@ -311,9 +309,9 @@ describe('Plugin', () => {
 
             agent
               .use(traces => {
-                expect(traces[0][0]).to.have.property('resource', 'GET /user/:id')
+                expect(traces[0][0]).to.have.property('name', 'GET /user/:id')
                 expect(traces[0][0].meta).to.have.property('http.url', `http://localhost:${port}/user/123`)
-                expect(traces[0][0].error).to.equal(1)
+                expect(traces[0][0].meta.error).to.equal(true)
               })
               .then(done)
               .catch(done)

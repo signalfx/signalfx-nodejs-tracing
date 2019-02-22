@@ -8,6 +8,10 @@ function createWrapGenerate (tracer, config) {
       const request = generate.apply(this, arguments)
 
       web.beforeEnd(req, () => {
+        const span = web.active(req)
+        if (span) {
+          span.setTag('component', 'hapi')
+        }
         web.enterRoute(req, request.route.path)
       })
 
@@ -41,6 +45,10 @@ function createWrapDispatch (tracer, config) {
 
       return function (req, res) {
         return web.instrument(tracer, config, req, res, 'hapi.request', () => {
+          const span = web.active(req)
+          if (span) {
+            span.setTag('component', 'hapi')
+          }
           return handler.apply(this, arguments)
         })
       }
