@@ -22,7 +22,7 @@ describe('Config', () => {
     expect(config).to.have.property('debug', false)
     expect(config).to.have.nested.property('url.protocol', 'http:')
     expect(config).to.have.nested.property('url.hostname', 'localhost')
-    expect(config).to.have.nested.property('url.port', '8126')
+    expect(config).to.have.nested.property('url.port', '9080')
     expect(config).to.have.property('flushInterval', 2000)
     expect(config).to.have.property('bufferSize', 100000)
     expect(config).to.have.property('sampleRate', 1)
@@ -38,12 +38,12 @@ describe('Config', () => {
   })
 
   it('should initialize from environment variables', () => {
-    platform.env.withArgs('DD_TRACE_AGENT_HOSTNAME').returns('agent')
-    platform.env.withArgs('DD_TRACE_AGENT_PORT').returns('6218')
-    platform.env.withArgs('DD_TRACE_ENABLED').returns('false')
-    platform.env.withArgs('DD_TRACE_DEBUG').returns('true')
-    platform.env.withArgs('DD_SERVICE_NAME').returns('service')
-    platform.env.withArgs('DD_ENV').returns('test')
+    platform.env.withArgs('SIGNALFX_TRACE_AGENT_HOSTNAME').returns('agent')
+    platform.env.withArgs('SIGNALFX_TRACE_AGENT_PORT').returns('6218')
+    platform.env.withArgs('SIGNALFX_TRACE_ENABLED').returns('false')
+    platform.env.withArgs('SIGNALFX_TRACE_DEBUG').returns('true')
+    platform.env.withArgs('SIGNALFX_SERVICE_NAME').returns('service')
+    platform.env.withArgs('SIGNALFX_ENV').returns('test')
 
     const config = new Config()
 
@@ -57,13 +57,13 @@ describe('Config', () => {
   })
 
   it('should initialize from environment variables with url taking precedence', () => {
-    platform.env.withArgs('DD_TRACE_AGENT_URL').returns('https://agent2:7777')
-    platform.env.withArgs('DD_TRACE_AGENT_HOSTNAME').returns('agent')
-    platform.env.withArgs('DD_TRACE_AGENT_PORT').returns('6218')
-    platform.env.withArgs('DD_TRACE_ENABLED').returns('false')
-    platform.env.withArgs('DD_TRACE_DEBUG').returns('true')
-    platform.env.withArgs('DD_SERVICE_NAME').returns('service')
-    platform.env.withArgs('DD_ENV').returns('test')
+    platform.env.withArgs('SIGNALFX_TRACE_AGENT_URL').returns('https://agent2:7777')
+    platform.env.withArgs('SIGNALFX_TRACE_AGENT_HOSTNAME').returns('agent')
+    platform.env.withArgs('SIGNALFX_TRACE_AGENT_PORT').returns('6218')
+    platform.env.withArgs('SIGNALFX_TRACE_ENABLED').returns('false')
+    platform.env.withArgs('SIGNALFX_TRACE_DEBUG').returns('true')
+    platform.env.withArgs('SIGNALFX_SERVICE_NAME').returns('service')
+    platform.env.withArgs('SIGNALFX_ENV').returns('test')
 
     const config = new Config()
 
@@ -140,8 +140,8 @@ describe('Config', () => {
   })
 
   it('should give priority to the common agent environment variable', () => {
-    platform.env.withArgs('DD_TRACE_AGENT_HOSTNAME').returns('trace-agent')
-    platform.env.withArgs('DD_AGENT_HOST').returns('agent')
+    platform.env.withArgs('SIGNALFX_TRACE_AGENT_HOSTNAME').returns('trace-agent')
+    platform.env.withArgs('SIGNALFX_AGENT_HOST').returns('agent')
 
     const config = new Config()
 
@@ -149,13 +149,13 @@ describe('Config', () => {
   })
 
   it('should give priority to the options', () => {
-    platform.env.withArgs('DD_TRACE_AGENT_URL').returns('https://agent2:6218')
-    platform.env.withArgs('DD_TRACE_AGENT_HOSTNAME').returns('agent')
-    platform.env.withArgs('DD_TRACE_AGENT_PORT').returns('6218')
-    platform.env.withArgs('DD_TRACE_ENABLED').returns('false')
-    platform.env.withArgs('DD_TRACE_DEBUG').returns('true')
-    platform.env.withArgs('DD_SERVICE_NAME').returns('service')
-    platform.env.withArgs('DD_ENV').returns('test')
+    platform.env.withArgs('SIGNALFX_TRACE_AGENT_URL').returns('https://agent2:6218')
+    platform.env.withArgs('SIGNALFX_TRACE_AGENT_HOSTNAME').returns('agent')
+    platform.env.withArgs('SIGNALFX_TRACE_AGENT_PORT').returns('6218')
+    platform.env.withArgs('SIGNALFX_TRACE_ENABLED').returns('false')
+    platform.env.withArgs('SIGNALFX_TRACE_DEBUG').returns('true')
+    platform.env.withArgs('SIGNALFX_SERVICE_NAME').returns('service')
+    platform.env.withArgs('SIGNALFX_ENV').returns('test')
 
     const config = new Config({
       enabled: true,
@@ -177,13 +177,13 @@ describe('Config', () => {
   })
 
   it('should give priority to the options especially url', () => {
-    platform.env.withArgs('DD_TRACE_AGENT_URL').returns('http://agent2:6218')
-    platform.env.withArgs('DD_TRACE_AGENT_HOSTNAME').returns('agent')
-    platform.env.withArgs('DD_TRACE_AGENT_PORT').returns('6218')
-    platform.env.withArgs('DD_TRACE_ENABLED').returns('false')
-    platform.env.withArgs('DD_TRACE_DEBUG').returns('true')
-    platform.env.withArgs('DD_SERVICE_NAME').returns('service')
-    platform.env.withArgs('DD_ENV').returns('test')
+    platform.env.withArgs('SIGNALFX_TRACE_AGENT_URL').returns('http://agent2:6218')
+    platform.env.withArgs('SIGNALFX_TRACE_AGENT_HOSTNAME').returns('agent')
+    platform.env.withArgs('SIGNALFX_TRACE_AGENT_PORT').returns('6218')
+    platform.env.withArgs('SIGNALFX_TRACE_ENABLED').returns('false')
+    platform.env.withArgs('SIGNALFX_TRACE_DEBUG').returns('true')
+    platform.env.withArgs('SIGNALFX_SERVICE_NAME').returns('service')
+    platform.env.withArgs('SIGNALFX_ENV').returns('test')
 
     const config = new Config({
       enabled: true,

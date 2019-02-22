@@ -46,6 +46,7 @@ class DatadogTracer extends Tracer {
       [formats.BINARY]: new BinaryPropagator(),
       [formats.LOG]: new LogPropagator()
     }
+
     if (config.zipkin) {
       this._propagators[formats.TEXT_MAP] = new B3TextMapPropagator()
       this._propagators[formats.HTTP_HEADERS] = new B3TextMapPropagator()

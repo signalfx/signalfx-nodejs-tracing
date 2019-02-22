@@ -99,7 +99,7 @@ function addTags (channel, tracer, config, span, method, fields) {
   span.addTags({
     'service.name': config.service || `${tracer._service}-amqp`,
     'resource.name': getResourceName(method, fields),
-    'span.type': 'worker'
+    'component': 'amqplib'
   })
 
   if (channel.connection && channel.connection.stream) {

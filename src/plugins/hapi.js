@@ -9,14 +9,14 @@ function createWrapGenerate (tracer, config) {
     return function generateWithTrace (server, req, res, options) {
       let request
 
-      web.instrument(tracer, config, req, res, 'hapi.request', () => {
+      const span = web.instrument(tracer, config, req, res, 'hapi.request', () => {
         request = generate.apply(this, arguments)
 
         web.beforeEnd(req, () => {
           web.enterRoute(req, request.route.path)
         })
       })
-
+      span.setTag('component', 'hapi')
       return request
     }
   }
@@ -32,14 +32,14 @@ function createWrapExecute (tracer, config) {
 
       let returnValue
 
-      web.instrument(tracer, config, req, res, 'hapi.request', () => {
+      const span = web.instrument(tracer, config, req, res, 'hapi.request', () => {
         returnValue = execute.apply(this, arguments)
 
         web.beforeEnd(req, () => {
           web.enterRoute(req, this.route.path)
         })
       })
-
+      span.setTag('component', 'hapi')
       return returnValue
     }
   }

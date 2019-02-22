@@ -63,9 +63,9 @@ describe('Plugin', () => {
           getPort().then(port => {
             agent
               .use(traces => {
-                expect(traces[0][0]).to.have.property('service', 'test-http-client')
-                expect(traces[0][0]).to.have.property('type', 'web')
-                expect(traces[0][0]).to.have.property('resource', 'GET')
+                expect(traces[0][0]).to.have.property('service', 'test')
+                expect(traces[0][0]).to.have.property('name', 'GET')
+                expect(traces[0][0].meta).to.have.property('component', 'http')
                 expect(traces[0][0].meta).to.have.property('span.kind', 'client')
                 expect(traces[0][0].meta).to.have.property('http.url', `${protocol}://localhost:${port}/user`)
                 expect(traces[0][0].meta).to.have.property('http.method', 'GET')
@@ -267,8 +267,8 @@ describe('Plugin', () => {
           const app = express()
 
           app.get('/user', (req, res) => {
-            expect(req.get('x-datadog-trace-id')).to.be.a('string')
-            expect(req.get('x-datadog-parent-id')).to.be.a('string')
+            expect(req.get('x-b3-traceid')).to.be.a('string')
+            expect(req.get('x-b3-spanid')).to.be.a('string')
 
             res.status(200).send()
           })
@@ -294,8 +294,8 @@ describe('Plugin', () => {
 
           app.get('/', (req, res) => {
             try {
-              expect(req.get('x-datadog-trace-id')).to.be.undefined
-              expect(req.get('x-datadog-parent-id')).to.be.undefined
+              expect(req.get('x-b3-traceid')).to.be.undefined
+              expect(req.get('x-b3-spanid')).to.be.undefined
 
               res.status(200).send()
 
@@ -408,7 +408,7 @@ describe('Plugin', () => {
         })
 
         it('should run the callback in the parent context', done => {
-          if (process.env.DD_CONTEXT_PROPAGATION === 'false') return done()
+          if (process.env.SIGNALFX_CONTEXT_PROPAGATION === 'false') return done()
 
           const app = express()
 
@@ -429,7 +429,7 @@ describe('Plugin', () => {
         })
 
         it('should run the event listeners in the parent context', done => {
-          if (process.env.DD_CONTEXT_PROPAGATION === 'false') return done()
+          if (process.env.SIGNALFX_CONTEXT_PROPAGATION === 'false') return done()
 
           const app = express()
 
@@ -456,6 +456,7 @@ describe('Plugin', () => {
           getPort().then(port => {
             agent
               .use(traces => {
+                expect(traces[0][0].meta).to.have.property('error', true)
                 expect(traces[0][0].meta).to.have.property('error.type', 'Error')
                 expect(traces[0][0].meta).to.have.property('error.msg', `connect ECONNREFUSED 127.0.0.1:${port}`)
                 expect(traces[0][0].meta).to.have.property('error.stack')
@@ -479,7 +480,7 @@ describe('Plugin', () => {
           getPort().then(port => {
             agent
               .use(traces => {
-                expect(traces[0][0]).to.have.property('error', 0)
+                expect(traces[0][0].meta).to.not.have.property('error')
               })
               .then(done)
               .catch(done)
@@ -504,7 +505,7 @@ describe('Plugin', () => {
           getPort().then(port => {
             agent
               .use(traces => {
-                expect(traces[0][0]).to.have.property('error', 1)
+                expect(traces[0][0].meta).to.have.property('error', true)
               })
               .then(done)
               .catch(done)
@@ -587,7 +588,7 @@ describe('Plugin', () => {
           getPort().then(port => {
             agent
               .use(traces => {
-                expect(traces[0][0]).to.have.property('service', 'custom')
+                expect(traces[0][0]).to.have.property('service', 'test')
               })
               .then(done)
               .catch(done)
@@ -628,7 +629,7 @@ describe('Plugin', () => {
           getPort().then(port => {
             agent
               .use(traces => {
-                expect(traces[0][0]).to.have.property('error', 1)
+                expect(traces[0][0].meta).to.have.property('error', true)
               })
               .then(done)
               .catch(done)
@@ -669,7 +670,7 @@ describe('Plugin', () => {
           getPort().then(port => {
             agent
               .use(traces => {
-                expect(traces[0][0]).to.have.property('service', `localhost:${port}`)
+                expect(traces[0][0]).to.have.property('service', 'test')
               })
               .then(done)
               .catch(done)

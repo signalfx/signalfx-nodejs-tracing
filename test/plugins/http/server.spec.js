@@ -54,10 +54,9 @@ describe('Plugin', () => {
       it('should do automatic instrumentation', done => {
         agent
           .use(traces => {
-            expect(traces[0][0]).to.have.property('name', 'http.request')
+            expect(traces[0][0]).to.have.property('name', 'GET')
             expect(traces[0][0]).to.have.property('service', 'test')
-            expect(traces[0][0]).to.have.property('type', 'http')
-            expect(traces[0][0]).to.have.property('resource', 'GET')
+            expect(traces[0][0].meta).to.have.property('component', 'http')
             expect(traces[0][0].meta).to.have.property('span.kind', 'server')
             expect(traces[0][0].meta).to.have.property('http.url', `http://localhost:${port}/user`)
             expect(traces[0][0].meta).to.have.property('http.method', 'GET')
@@ -70,7 +69,7 @@ describe('Plugin', () => {
       })
 
       it('should run the request listener in the request scope', done => {
-        if (process.env.DD_CONTEXT_PROPAGATION === 'false') return done()
+        if (process.env.SIGNALFX_CONTEXT_PROPAGATION === 'false') return done()
 
         app = (req, res) => {
           expect(tracer.scopeManager().active()).to.not.be.null

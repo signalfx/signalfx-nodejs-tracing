@@ -33,7 +33,7 @@ function patch (http, methodName, tracer, config) {
           [Tags.SPAN_KIND]: Tags.SPAN_KIND_RPC_CLIENT,
           'service.name': getServiceName(tracer, config, options),
           'resource.name': method,
-          'span.type': 'web',
+          'span.type': 'http',
           'http.method': method,
           'http.url': uri
         }

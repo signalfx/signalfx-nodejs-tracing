@@ -37,10 +37,9 @@ describe('Plugin', () => {
           getPort().then(port => {
             agent
               .use(traces => {
-                expect(traces[0][0]).to.have.property('name', 'restify.request')
                 expect(traces[0][0]).to.have.property('service', 'test')
-                expect(traces[0][0]).to.have.property('type', 'http')
-                expect(traces[0][0]).to.have.property('resource', 'GET')
+                expect(traces[0][0]).to.have.property('name', 'GET')
+                expect(traces[0][0].meta).to.have.property('component', 'restify')
                 expect(traces[0][0].meta).to.have.property('span.kind', 'server')
                 expect(traces[0][0].meta).to.have.property('http.url', `http://localhost:${port}/user`)
                 expect(traces[0][0].meta).to.have.property('http.method', 'GET')
@@ -68,7 +67,7 @@ describe('Plugin', () => {
           getPort().then(port => {
             agent
               .use(traces => {
-                expect(traces[0][0]).to.have.property('resource', 'GET /user/:id')
+                expect(traces[0][0]).to.have.property('name', 'GET /user/:id')
                 expect(traces[0][0].meta).to.have.property('http.url', `http://localhost:${port}/user/123`)
               })
               .then(done)
@@ -83,7 +82,7 @@ describe('Plugin', () => {
         })
 
         it('should run handlers in the request scope', done => {
-          if (process.env.DD_CONTEXT_PROPAGATION === 'false') return done()
+          if (process.env.SIGNALFX_CONTEXT_PROPAGATION === 'false') return done()
 
           const server = restify.createServer()
 
@@ -114,7 +113,7 @@ describe('Plugin', () => {
         })
 
         it('should reactivate the request span in middleware scopes', done => {
-          if (process.env.DD_CONTEXT_PROPAGATION === 'false') return done()
+          if (process.env.SIGNALFX_CONTEXT_PROPAGATION === 'false') return done()
 
           const server = restify.createServer()
 
