@@ -30,10 +30,9 @@ describe('Plugin', () => {
           agent.use(() => {}) // wait for initial info command
           agent
             .use(traces => {
-              expect(traces[0][0]).to.have.property('name', 'redis.command')
-              expect(traces[0][0]).to.have.property('service', 'test-redis')
-              expect(traces[0][0]).to.have.property('resource', 'get')
-              expect(traces[0][0]).to.have.property('type', 'redis')
+              expect(traces[0][0]).to.have.property('service', 'test')
+              expect(traces[0][0]).to.have.property('name', 'get')
+              expect(traces[0][0].meta).to.have.property('component', 'redis')
               expect(traces[0][0].meta).to.have.property('db.name', '0')
               expect(traces[0][0].meta).to.have.property('db.type', 'redis')
               expect(traces[0][0].meta).to.have.property('span.kind', 'client')
@@ -48,7 +47,7 @@ describe('Plugin', () => {
         })
 
         it('should run the callback in the parent context', () => {
-          if (process.env.DD_CONTEXT_PROPAGATION === 'false') return
+          if (process.env.SIGNALFX_CONTEXT_PROPAGATION === 'false') return
 
           const span = {}
 
@@ -69,7 +68,7 @@ describe('Plugin', () => {
           agent.use(() => {}) // wait for initial info command
           agent
             .use(traces => {
-              expect(traces[0][0]).to.have.property('error', 1)
+              expect(traces[0][0].meta).to.have.property('error', true)
               expect(traces[0][0].meta).to.have.property('error.type', error.name)
               expect(traces[0][0].meta).to.have.property('error.msg', error.message)
               expect(traces[0][0].meta).to.have.property('error.stack', error.stack)
@@ -91,7 +90,7 @@ describe('Plugin', () => {
         it('should be configured with the correct values', done => {
           agent
             .use(traces => {
-              expect(traces[0][0]).to.have.property('service', 'custom')
+              expect(traces[0][0]).to.have.property('service', 'test')
             })
             .then(done)
             .catch(done)

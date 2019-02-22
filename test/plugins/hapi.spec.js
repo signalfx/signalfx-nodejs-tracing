@@ -84,10 +84,9 @@ describe('Plugin', () => {
 
         agent
           .use(traces => {
-            expect(traces[0][0]).to.have.property('name', 'hapi.request')
             expect(traces[0][0]).to.have.property('service', 'test')
-            expect(traces[0][0]).to.have.property('type', 'http')
-            expect(traces[0][0]).to.have.property('resource', 'GET /user/{id}')
+            expect(traces[0][0]).to.have.property('name', 'GET /user/{id}')
+            expect(traces[0][0].meta).to.have.property('component', 'hapi')
             expect(traces[0][0].meta).to.have.property('span.kind', 'server')
             expect(traces[0][0].meta).to.have.property('http.url', `http://localhost:${port}/user/123`)
             expect(traces[0][0].meta).to.have.property('http.method', 'GET')
@@ -172,8 +171,8 @@ describe('Plugin', () => {
 
         agent
           .use(traces => {
-            expect(traces[0][0].trace_id.toString()).to.equal('1234')
-            expect(traces[0][0].parent_id.toString()).to.equal('5678')
+            expect(traces[0][0].trace_id.toString()).to.equal('0000000000001234')
+            expect(traces[0][0].parent_id.toString()).to.equal('0000000000005678')
           })
           .then(done)
           .catch(done)
@@ -181,8 +180,8 @@ describe('Plugin', () => {
         axios
           .get(`http://localhost:${port}/user/123`, {
             headers: {
-              'x-datadog-trace-id': '1234',
-              'x-datadog-parent-id': '5678',
+              'x-b3-traceid': '1234',
+              'x-b3-spanid': '5678',
               'ot-baggage-foo': 'bar'
             }
           })
@@ -192,7 +191,7 @@ describe('Plugin', () => {
       it('should instrument the default route handler', done => {
         agent
           .use(traces => {
-            expect(traces[0][0]).to.have.property('name', 'hapi.request')
+            expect(traces[0][0].meta).to.have.property('component', 'hapi')
           })
           .then(done)
           .catch(done)
@@ -219,7 +218,7 @@ describe('Plugin', () => {
 
         agent
           .use(traces => {
-            expect(traces[0][0]).to.have.property('error', 1)
+            expect(traces[0][0].meta).to.have.property('error', true)
           })
           .then(done)
           .catch(done)

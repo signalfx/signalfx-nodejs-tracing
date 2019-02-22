@@ -51,6 +51,10 @@ function formatTags (formatted, span) {
         }
         break
       case 'span.type':
+        if (formattedTags.component === undefined) {
+          formattedTags.component = String(tags[tag])
+        }
+        break
       case 'service.name':
         break // do not add to tags
       case 'resource.name':

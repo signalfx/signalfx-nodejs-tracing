@@ -8,19 +8,19 @@ class Config {
   constructor (service, options) {
     options = typeof service === 'object' ? service : options || {}
 
-    const enabled = coalesce(options.enabled, platform.env('DD_TRACE_ENABLED'), true)
-    const debug = coalesce(options.debug, platform.env('DD_TRACE_DEBUG'), false)
-    const logInjection = coalesce(options.logInjection, platform.env('DD_LOGS_INJECTION'), false)
-    const env = coalesce(options.env, platform.env('DD_ENV'))
-    const url = coalesce(options.url, platform.env('DD_TRACE_AGENT_URL'), null)
+    const enabled = coalesce(options.enabled, platform.env('SIGNALFX_TRACE_ENABLED'), true)
+    const debug = coalesce(options.debug, platform.env('SIGNALFX_TRACE_DEBUG'), false)
+    const logInjection = coalesce(options.logInjection, platform.env('SIGNALFX_LOGS_INJECTION'), false)
+    const env = coalesce(options.env, platform.env('SIGNALFX_ENV'))
+    const url = coalesce(options.url, platform.env('SIGNALFX_TRACE_AGENT_URL'), null)
     const protocol = 'http'
     const hostname = coalesce(
       options.hostname,
-      platform.env('DD_AGENT_HOST'),
-      platform.env('DD_TRACE_AGENT_HOSTNAME'),
+      platform.env('SIGNALFX_AGENT_HOST'),
+      platform.env('SIGNALFX_TRACE_AGENT_HOSTNAME'),
       'localhost'
     )
-    const port = coalesce(options.port, platform.env('DD_TRACE_AGENT_PORT'), 8126)
+    const port = coalesce(options.port, platform.env('SIGNALFX_TRACE_AGENT_PORT'), 9080)
     const zipkin = coalesce(options.zipkin, true)
     const path = coalesce(options.path, '/api/v2/spans')
     const headers = coalesce(options.headers, {})
@@ -42,7 +42,7 @@ class Config {
     this.sampleRate = sampleRate
     this.logger = options.logger
     this.plugins = !!plugins
-    this.service = coalesce(options.service, platform.env('DD_SERVICE_NAME'), service, 'node')
+    this.service = coalesce(options.service, platform.env('SIGNALFX_SERVICE_NAME'), service, 'node')
   }
 }
 

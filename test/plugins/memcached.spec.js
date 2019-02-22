@@ -30,10 +30,9 @@ describe('Plugin', () => {
 
           agent
             .use(traces => {
-              expect(traces[0][0]).to.have.property('name', 'memcached.command')
-              expect(traces[0][0]).to.have.property('service', 'test-memcached')
-              expect(traces[0][0]).to.have.property('resource', 'get')
-              expect(traces[0][0]).to.have.property('type', 'memcached')
+              expect(traces[0][0]).to.have.property('service', 'test')
+              expect(traces[0][0]).to.have.property('name', 'get')
+              expect(traces[0][0].meta).to.have.property('component', 'memcached')
               expect(traces[0][0].meta).to.have.property('span.kind', 'client')
               expect(traces[0][0].meta).to.have.property('out.host', 'localhost')
               expect(traces[0][0].meta).to.have.property('out.port', '11211')
@@ -46,7 +45,7 @@ describe('Plugin', () => {
         })
 
         it('should run the callback in the parent context', done => {
-          if (process.env.DD_CONTEXT_PROPAGATION === 'false') return done()
+          if (process.env.SIGNALFX_CONTEXT_PROPAGATION === 'false') return done()
 
           memcached = new Memcached('localhost:11211', { retries: 0 })
 
@@ -65,7 +64,7 @@ describe('Plugin', () => {
 
           agent
             .use(traces => {
-              expect(traces[0][0]).to.have.property('error', 1)
+              expect(traces[0][0].meta).to.have.property('error', true)
               expect(traces[0][0].meta).to.have.property('error.type', error.name)
               expect(traces[0][0].meta).to.have.property('error.msg', error.message)
               expect(traces[0][0].meta).to.have.property('error.stack', error.stack)
@@ -146,7 +145,7 @@ describe('Plugin', () => {
         it('should be configured with the correct values', done => {
           agent
             .use(traces => {
-              expect(traces[0][0]).to.have.property('service', 'custom')
+              expect(traces[0][0]).to.have.property('service', 'test')
             })
             .then(done)
             .catch(done)

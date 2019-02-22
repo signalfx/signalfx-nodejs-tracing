@@ -9,7 +9,8 @@ function createWrapSetupRequest (tracer, config) {
 
   return function wrapSetupRequest (setupRequest) {
     return function setupRequestWithTrace (req, res) {
-      web.instrument(tracer, config, req, res, 'restify.request')
+      const span = web.instrument(tracer, config, req, res, 'restify.request')
+      span.setTag('component', 'restify')
       web.beforeEnd(req, () => {
         if (req.route) {
           web.enterRoute(req, req.route.path)

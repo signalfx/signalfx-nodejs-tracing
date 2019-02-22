@@ -50,8 +50,8 @@ describe('Plugin', () => {
                 const spans = sort(traces[0])
 
                 expect(spans[0]).to.have.property('service', 'test')
-                expect(spans[0]).to.have.property('type', 'http')
-                expect(spans[0]).to.have.property('resource', 'GET /user')
+                expect(spans[0].meta).to.have.property('component', 'express')
+                expect(spans[0]).to.have.property('name', 'GET /user')
                 expect(spans[0].meta).to.have.property('span.kind', 'server')
                 expect(spans[0].meta).to.have.property('http.url', `http://localhost:${port}/user`)
                 expect(spans[0].meta).to.have.property('http.method', 'GET')
@@ -84,8 +84,8 @@ describe('Plugin', () => {
                 const spans = sort(traces[0])
 
                 expect(spans[0]).to.have.property('service', 'test')
-                expect(spans[0]).to.have.property('type', 'http')
-                expect(spans[0]).to.have.property('resource', 'GET /app/user/:id')
+                expect(spans[0].meta).to.have.property('component', 'express')
+                expect(spans[0]).to.have.property('name', 'GET /app/user/:id')
                 expect(spans[0].meta).to.have.property('span.kind', 'server')
                 expect(spans[0].meta).to.have.property('http.url', `http://localhost:${port}/app/user/1`)
                 expect(spans[0].meta).to.have.property('http.method', 'GET')
@@ -120,8 +120,8 @@ describe('Plugin', () => {
                 const spans = sort(traces[0])
 
                 expect(spans[0]).to.have.property('service', 'test')
-                expect(spans[0]).to.have.property('type', 'http')
-                expect(spans[0]).to.have.property('resource', 'GET /app/user/:id')
+                expect(spans[0].meta).to.have.property('component', 'express')
+                expect(spans[0]).to.have.property('name', 'GET /app/user/:id')
                 expect(spans[0].meta).to.have.property('span.kind', 'server')
                 expect(spans[0].meta).to.have.property('http.url', `http://localhost:${port}/app/user/1`)
                 expect(spans[0].meta).to.have.property('http.method', 'GET')
@@ -156,17 +156,17 @@ describe('Plugin', () => {
 
                 expect(spans).to.have.length(5)
 
-                expect(spans[0]).to.have.property('resource', 'GET /app/user/:id')
-                expect(spans[0]).to.have.property('name', 'express.request')
-                expect(spans[1]).to.have.property('resource', 'named')
-                expect(spans[1]).to.have.property('name', 'express.middleware')
+                expect(spans[0]).to.have.property('name', 'GET /app/user/:id')
+                expect(spans[0].meta).to.have.property('component', 'express')
+                expect(spans[1]).to.have.property('name', 'named')
+                expect(spans[1].meta).to.have.property('component', 'express')
                 expect(spans[1].parent_id.toString()).to.equal(spans[0].trace_id.toString())
-                expect(spans[2]).to.have.property('resource', 'router')
-                expect(spans[2]).to.have.property('name', 'express.middleware')
-                expect(spans[3].resource).to.match(/^bound\s.*$/)
-                expect(spans[3]).to.have.property('name', 'express.middleware')
-                expect(spans[4]).to.have.property('resource', '<anonymous>')
-                expect(spans[4]).to.have.property('name', 'express.middleware')
+                expect(spans[2]).to.have.property('name', 'router')
+                expect(spans[2].meta).to.have.property('component', 'express')
+                expect(spans[3].name).to.match(/^bound\s.*$/)
+                expect(spans[3].meta).to.have.property('component', 'express')
+                expect(spans[4]).to.have.property('name', '<anonymous>')
+                expect(spans[4].meta).to.have.property('component', 'express')
               })
               .then(done)
               .catch(done)
@@ -194,7 +194,7 @@ describe('Plugin', () => {
               .use(traces => {
                 const spans = sort(traces[0])
 
-                expect(spans[0]).to.have.property('resource', 'GET /app(/^\\/user\\/(\\d)$/)')
+                expect(spans[0]).to.have.property('name', 'GET /app(/^\\/user\\/(\\d)$/)')
               })
               .then(done)
               .catch(done)
@@ -222,7 +222,7 @@ describe('Plugin', () => {
               .use(traces => {
                 const spans = sort(traces[0])
 
-                expect(spans[0]).to.have.property('resource', 'GET /app/user/:id')
+                expect(spans[0]).to.have.property('name', 'GET /app/user/:id')
               })
               .then(done)
               .catch(done)
@@ -256,7 +256,7 @@ describe('Plugin', () => {
               .use(traces => {
                 const spans = sort(traces[0])
 
-                expect(spans[0]).to.have.property('resource', 'GET /foo/bar')
+                expect(spans[0]).to.have.property('name', 'GET /foo/bar')
               })
               .then(done)
               .catch(done)
@@ -284,7 +284,7 @@ describe('Plugin', () => {
               .use(traces => {
                 const spans = sort(traces[0])
 
-                expect(spans[0]).to.have.property('resource', 'GET /app/user/:id')
+                expect(spans[0]).to.have.property('name', 'GET /app/user/:id')
               })
               .then(done)
               .catch(done)
@@ -313,7 +313,7 @@ describe('Plugin', () => {
               .use(traces => {
                 const spans = sort(traces[0])
 
-                expect(spans[0]).to.have.property('resource', 'GET /app/user/:id')
+                expect(spans[0]).to.have.property('name', 'GET /app/user/:id')
               })
               .then(done)
               .catch(done)
@@ -341,8 +341,11 @@ describe('Plugin', () => {
               .use(traces => {
                 const spans = sort(traces[0])
 
-                expect(spans.filter(span => span.name === 'express.request')).to.have.length(1)
-                expect(spans[0]).to.have.property('resource', 'GET /parent/child')
+                expect(spans.filter(span => {
+                  return span.meta.component === 'express' &&
+                         span.meta['http.url']
+                })).to.have.length(1)
+                expect(spans[0]).to.have.property('name', 'GET /parent/child')
               })
               .then(done)
               .catch(done)
@@ -385,7 +388,7 @@ describe('Plugin', () => {
         })
 
         it('should not lose the current path when changing scope', done => {
-          if (process.env.DD_CONTEXT_PROPAGATION === 'false') return done()
+          if (process.env.SIGNALFX_CONTEXT_PROPAGATION === 'false') return done()
 
           const app = express()
           const router = express.Router()
@@ -414,7 +417,7 @@ describe('Plugin', () => {
               .use(traces => {
                 const spans = sort(traces[0])
 
-                expect(spans[0]).to.have.property('resource', 'GET /app/user/:id')
+                expect(spans[0]).to.have.property('name', 'GET /app/user/:id')
               })
               .then(done)
               .catch(done)
@@ -428,7 +431,7 @@ describe('Plugin', () => {
         })
 
         it('should not lose the current path without a scope', done => {
-          if (process.env.DD_CONTEXT_PROPAGATION === 'false') return done()
+          if (process.env.SIGNALFX_CONTEXT_PROPAGATION === 'false') return done()
 
           const app = express()
           const router = express.Router()
@@ -452,7 +455,7 @@ describe('Plugin', () => {
               .use(traces => {
                 const spans = sort(traces[0])
 
-                expect(spans[0]).to.have.property('resource', 'GET /app/user/:id')
+                expect(spans[0]).to.have.property('name', 'GET /app/user/:id')
               })
               .then(done)
               .catch(done)
@@ -481,7 +484,7 @@ describe('Plugin', () => {
               .use(traces => {
                 const spans = sort(traces[0])
 
-                expect(spans[0]).to.have.property('resource', 'GET /app')
+                expect(spans[0]).to.have.property('name', 'GET /app')
               })
               .then(done)
               .catch(done)
@@ -538,7 +541,7 @@ describe('Plugin', () => {
               .use(traces => {
                 const spans = sort(traces[0])
 
-                expect(spans[0]).to.have.property('resource', 'GET')
+                expect(spans[0]).to.have.property('name', 'GET')
               })
               .then(done)
               .catch(done)
@@ -552,7 +555,7 @@ describe('Plugin', () => {
         })
 
         it('should activate a scope per middleware', done => {
-          if (process.env.DD_CONTEXT_PROPAGATION === 'false') return done()
+          if (process.env.SIGNALFX_CONTEXT_PROPAGATION === 'false') return done()
 
           const app = express()
 
@@ -589,7 +592,7 @@ describe('Plugin', () => {
         })
 
         it('should activate a span for every middleware on a route', done => {
-          if (process.env.DD_CONTEXT_PROPAGATION === 'false') return done()
+          if (process.env.SIGNALFX_CONTEXT_PROPAGATION === 'false') return done()
 
           const app = express()
 
@@ -645,7 +648,7 @@ describe('Plugin', () => {
               .use(traces => {
                 const spans = sort(traces[0])
 
-                expect(spans[0]).to.have.property('resource', 'GET /app/user/:id')
+                expect(spans[0]).to.have.property('name', 'GET /app/user/:id')
               })
               .then(done)
               .catch(done)
@@ -668,8 +671,8 @@ describe('Plugin', () => {
             agent.use(traces => {
               const spans = sort(traces[0])
 
-              expect(spans[0].trace_id.toString()).to.equal('1234')
-              expect(spans[0].parent_id.toString()).to.equal('5678')
+              expect(spans[0].trace_id.toString()).to.equal('0000000000001234')
+              expect(spans[0].parent_id.toString()).to.equal('0000000000005678')
             })
               .then(done)
               .catch(done)
@@ -678,8 +681,8 @@ describe('Plugin', () => {
               axios
                 .get(`http://localhost:${port}/user`, {
                   headers: {
-                    'x-datadog-trace-id': '1234',
-                    'x-datadog-parent-id': '5678',
+                    'x-b3-traceid': '1234',
+                    'x-b3-spanid': '5678',
                     'ot-baggage-foo': 'bar'
                   }
                 })
@@ -703,8 +706,8 @@ describe('Plugin', () => {
             agent.use(traces => {
               const spans = sort(traces[0])
 
-              expect(spans[0]).to.have.property('error', 1)
-              expect(spans[0]).to.have.property('resource', 'GET /user')
+              expect(spans[0].meta).to.have.property('error', true)
+              expect(spans[0]).to.have.property('name', 'GET /user')
               expect(spans[0].meta).to.have.property('http.status_code', '500')
 
               done()
@@ -731,7 +734,7 @@ describe('Plugin', () => {
               .use(traces => {
                 const spans = sort(traces[0])
 
-                expect(spans[0]).to.have.property('error', 1)
+                expect(spans[0].meta).to.have.property('error', true)
                 expect(spans[0].meta).to.have.property('http.status_code', '500')
               })
               .then(done)
@@ -759,7 +762,7 @@ describe('Plugin', () => {
               .use(traces => {
                 const spans = sort(traces[0])
 
-                expect(spans[1]).to.have.property('error', 1)
+                expect(spans[1].meta).to.have.property('error', true)
                 expect(spans[1].meta).to.have.property('error.type', error.name)
                 expect(spans[1].meta).to.have.property('error.msg', error.message)
                 expect(spans[1].meta).to.have.property('error.stack', error.stack)
@@ -781,7 +784,6 @@ describe('Plugin', () => {
       describe('with configuration', () => {
         before(() => {
           return agent.load(plugin, 'express', {
-            service: 'custom',
             validateStatus: code => code < 400,
             headers: ['User-Agent']
           })
@@ -807,7 +809,7 @@ describe('Plugin', () => {
               .use(traces => {
                 const spans = sort(traces[0])
 
-                expect(spans[0]).to.have.property('service', 'custom')
+                expect(spans[0]).to.have.property('service', 'test')
               })
               .then(done)
               .catch(done)
@@ -832,7 +834,7 @@ describe('Plugin', () => {
               .use(traces => {
                 const spans = sort(traces[0])
 
-                expect(spans[0]).to.have.property('error', 1)
+                expect(spans[0].meta).to.have.property('error', true)
               })
               .then(done)
               .catch(done)
