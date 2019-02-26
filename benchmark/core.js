@@ -9,8 +9,8 @@ const node = require('../src/platform/node')
 platform.use(node)
 
 const Config = require('../src/config')
-const DatadogTracer = require('../src/tracer')
-const DatadogSpanContext = require('../src/opentracing/span_context')
+const SignalFxTracer = require('../src/tracer')
+const SignalFxSpanContext = require('../src/opentracing/span_context')
 const TextMapPropagator = require('../src/opentracing/propagation/text_map')
 const Writer = proxyquire('../src/writer', {
   './platform': { request: () => Promise.resolve() }
@@ -33,9 +33,9 @@ const traceStub = require('./stubs/trace')
 const spanStub = require('./stubs/span')
 
 suite
-  .add('DatadogTracer#startSpan', {
+  .add('SignalFxTracer#startSpan', {
     onStart () {
-      tracer = new DatadogTracer(config)
+      tracer = new SignalFxTracer(config)
     },
     fn () {
       tracer.startSpan()
@@ -45,7 +45,7 @@ suite
     onStart () {
       propagator = new TextMapPropagator()
       carrier = {}
-      spanContext = new DatadogSpanContext({
+      spanContext = new SignalFxSpanContext({
         traceId: new Uint64BE(0x12345678, 0x12345678),
         spanId: new Uint64BE(0x12345678, 0x12345678),
         baggageItems: { foo: 'bar' }

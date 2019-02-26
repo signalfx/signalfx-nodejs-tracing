@@ -52,7 +52,7 @@ module.exports = {
       next()
     })
 
-    agent.post('/api/v2/spans', (req, res) => {
+    agent.post('/v1/trace', (req, res) => {
       res.status(200).send()
       handlers.forEach(handler => handler(req.body))
     })
@@ -73,7 +73,7 @@ module.exports = {
 
         tracer.init({
           service: 'test',
-          port,
+          url: `http://localhost:${port}/v1/trace`,
           flushInterval: 0,
           plugins: false
         })

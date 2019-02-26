@@ -1,35 +1,53 @@
-<h1 id="home">Datadog JavaScript Tracer API</h1>
+# SignalFx-Tracing Library for JavaScript - API
 
-This is the API documentation for the Datadog JavaScript Tracer. If you are just looking to get started, check out the [tracing setup documentation](https://docs.datadoghq.com/tracing/setup/javascript/).
+The module exported by the `signalfx-tracing` library is an OpenTracing [Tracer](https://doc.esdoc.org/github.com/opentracing/opentracing-javascript/class/src/tracer.js~Tracer.html).  It has been modified to implement a [Scope Manager](https://github.com/opentracing/specification/blob/10497dfe0ffef806e97ccf3173ebbeba83f401be/rfc/scope_manager.md), which is not currently in the OpenTracing JavaScript reference API, but whose development is ongoing.
 
-<h2 id="overview">Overview</h2>
+### Auto-Instrumentation
 
-The module exported by this library is an instance of the [Tracer](./Tracer.html) class.
-
-<h2 id="manual-instrumentation">Manual Instrumentation</h2>
-
-If you aren’t using supported library instrumentation (see [Compatibility](#compatibility)), you may want to manually instrument your code.
-
-This can be done using the [OpenTracing API](#opentracing-api) and the [Scope Manager](#scope-manager).
-
-<h3 id="opentracing-api">OpenTracing API</h3>
-
-This library is OpenTracing compliant. Use the [OpenTracing API](https://doc.esdoc.org/github.com/opentracing/opentracing-javascript/) and the Datadog Tracer (dd-trace) library to measure execution times for specific pieces of code. In the following example, a Datadog Tracer is initialized and used as a global tracer:
+The SignalFx-Tracing Library for JavaScript provides auto-instrumentation for all its supported libraries and frameworks using [`require-in-the-middle`](https://www.npmjs.com/package/require-in-the-middle) and [`shimmer`](https://www.npmjs.com/package/shimmer).  To utilize this functionality, the tracer must be accessed and initialized before any target library or framework is imported:
 
 ```javascript
-const tracer = require('dd-trace').init()
+// init() invocation must occur before importing any traced library (e.g. Express)
+const tracer = require('signalfx-tracing').init(
+  service: 'my-traced-service',  // also via SIGNALFX_SERVICE_NAME environment variable
+  url: 'http://my_agent_or_gateway:9080/v1/trace',  // also via SIGNALFX_INGEST_URL environment variable
+  accessToken: 'myOptionalOrganizationAccessToken' // also via SIGNALFX_ACCESS_TOKEN environment variable
+)
+
+// auto-instrumented Express application
+const express = require('express') 
+const app = express()
+```
+
+### Manual Instrumentation
+
+Regardless if you are using a [supported library instrumentation](#instrumentations), you may want to manually instrument your code.  This can be done using the [OpenTracing API](#opentracing-api) and the [Scope Manager](#scope-manager).
+
+#### OpenTracing API
+
+You can use the [OpenTracing API](https://doc.esdoc.org/github.com/opentracing/opentracing-javascript/) and the `signalfx-tracing` library to track execution state and duration for specific pieces of code. In the following example, a tracer is initialized and used as an OpenTracing global tracer:
+
+```javascript
+const tracer = require('signalfx-tracing').init()
 const opentracing = require('opentracing')
 
 opentracing.initGlobalTracer(tracer)
+
+function myApplicationLogic() {
+  const globalTracer =  opentracing.globalTracer()
+  const span = globalTracer.startSpan('myApplicationLogic') 
+  span.setTag('MyTag', 'MyTagValue')
+  span.log({ event: 'Event Information' })
+
+  return myAdditionalApplicationLogic(result => {
+    span.setTag('MyResult', result)
+    span.finish()
+  })
+
+}
 ```
 
-The following tags are available to override Datadog specific options:
-
-* `service.name`: The service name to be used for this span. The service name from the tracer will be used if this is not provided.
-* `resource.name`: The resource name to be used for this span. The operation name will be used if this is not provided.
-* `span.type`: The span type to be used for this span. Will fallback to `custom` if not provided.
-
-<h3 id="scope-manager">Scope Manager</h3>
+##### Scope Manager
 
 In order to provide context propagation, this library includes a scope manager.
 A scope is basically a wrapper around a span that can cross both synchronous and
@@ -37,18 +55,18 @@ asynchronous contexts.
 
 The scope manager contains 3 APIs available on `tracer.scope()`:
 
-<h4>scope.active()</h4>
+###### scope.active()
 
 This method returns the active span from the current scope.
 
-<h4>scope.activate(span, fn)</h4>
+###### scope.activate(span, fn)
 
 This method activates the provided span in a new scope available in the
 provided function. Any asynchronous context created from whithin that function
 will also have the same scope.
 
 ```javascript
-const tracer = require('dd-trace').init()
+const tracer = require('signalfx-tracing').init()
 const scope = tracer.scope()
 const log = console.log
 
@@ -78,7 +96,7 @@ log(scope.active()) // null
 someFunction() // null because called outside the scope
 ```
 
-<h4>scope.bind(target, [span])</h4>
+###### scope.bind(target, [span])
 
 This method binds a target to the specified span, or to the active span if
 unspecified. It supports binding functions, promises and event emitters.
@@ -97,12 +115,12 @@ such as `.on()`
 **Note**: Native promises and promises from `bluebird`, `q` and `when` are
 already bound by default and don't need to be explicitly bound.
 
-<h5>Examples</h5>
+##### Examples
 
-<h6>Function binding</h6>
+###### Function binding
 
 ```javascript
-const tracer = require('dd-trace').init()
+const tracer = require('signalfx-tracing').init()
 const scope = tracer.scope()
 const log = console.log
 
@@ -124,10 +142,10 @@ scope.activate(outerSpan, () => {
 })
 ```
 
-<h6>Promise binding</h6>
+###### Promise binding
 
 ```javascript
-const tracer = require('dd-trace').init()
+const tracer = require('signalfx-tracing').init()
 const scope = tracer.scope()
 const log = console.log
 
@@ -155,10 +173,10 @@ scope.activate(outerSpan, () => {
 `await` was called. If binding `async/await` is needed, the promise must be
 wrapped by a function.
 
-<h6>Event emitter binding</h6>
+###### Event emitter binding
 
 ```javascript
-const tracer = require('dd-trace').init()
+const tracer = require('signalfx-tracing').init()
 const scope = tracer.scope()
 const log = console.log
 const EventEmitter = require('events').EventEmitter
@@ -186,125 +204,278 @@ innerEmitter.emit('request')
 outerEmitter.emit('request')
 ```
 
-See the [API documentation](./Scope.html) for more details.
+### Instrumentations
 
-<h2 id="integrations">Integrations</h2>
+SignalFx-Tracing provides out-of-the-box instrumentations for many popular frameworks and libraries by using a plugin system. By default all built-in plugins are enabled. This behavior can be changed by setting the `plugins` option to `false` in the [tracer settings](#tracer-settings).
 
-APM provides out-of-the-box instrumentation for many popular frameworks and libraries by using a plugin system. By default all built-in plugins are enabled. Disabling plugins can cause unexpected side effects, so it is highly recommended to leave them enabled.
-
-Built-in plugins can be configured individually:
+This method activates the provided span in a new scope available in the
+provided function. Any asynchronous context created from whithin that function
+will also have the same scope.
 
 ```javascript
-const tracer = require('dd-trace').init()
+const tracer = require('signalfx-tracing').init({ plugins: false })
 
-// enable and configure postgresql integration
-tracer.use('pg', {
-  service: 'pg-cluster'
-})
+// enable postgresql
+tracer.use('pg')
+// enable and configure express instrumentations
+tracer.use('express', { headers: ['x-my-tagged-header'] })
 ```
 
-<h5 id="amqplib"></h5>
-<h5 id="amqplib-tags"></h5>
-<h5 id="amqplib-config"></h5>
-<h5 id="bunyan"></h5>
-<h5 id="dns"></h5>
-<h5 id="elasticsearch"></h5>
-<h5 id="elasticsearch-tags"></h5>
-<h5 id="elasticsearch-config"></h5>
-<h5 id="express"></h5>
-<h5 id="express-tags"></h5>
-<h5 id="express-config"></h5>
-<h5 id="generic-pool"></h5>
-<h5 id="graphql"></h5>
-<h5 id="graphql-tags"></h5>
-<h5 id="graphql-config"></h5>
-<h5 id="hapi"></h5>
-<h5 id="hapi-tags"></h5>
-<h5 id="hapi-config"></h5>
-<h5 id="http"></h5>
-<h5 id="http-tags"></h5>
-<h5 id="http-config"></h5>
-<h5 id="ioredis"></h5>
-<h5 id="ioredis-tags"></h5>
-<h5 id="ioredis-config"></h5>
-<h5 id="koa"></h5>
-<h5 id="koa-tags"></h5>
-<h5 id="koa-config"></h5>
-<h5 id="memcached"></h5>
-<h5 id="memcached-tags"></h5>
-<h5 id="memcached-config"></h5>
-<h5 id="mongodb-core"></h5>
-<h5 id="mongodb-core-tags"></h5>
-<h5 id="mongodb-core-config"></h5>
-<h5 id="mysql"></h5>
-<h5 id="mysql-tags"></h5>
-<h5 id="mysql-config"></h5>
-<h5 id="mysql2"></h5>
-<h5 id="mysql2-tags"></h5>
-<h5 id="mysql2-config"></h5>
-<h5 id="net"></h5>
-<h5 id="pino"></h5>
-<h5 id="pg"></h5>
-<h5 id="pg-tags"></h5>
-<h5 id="pg-config"></h5>
-<h5 id="redis"></h5>
-<h5 id="redis-tags"></h5>
-<h5 id="redis-config"></h5>
-<h5 id="restify"></h5>
-<h5 id="restify-tags"></h5>
-<h5 id="restify-config"></h5>
-<h5 id="when"></h5>
-<h5 id="winston"></h5>
-<h3 id="integrations-list">Available Plugins</h3>
+Each integration also has its own list of default tags. These tags get automatically added to the span created by the integration.  Some have additional configuration settings to determine traced behavior.
 
-* [amqp10](./interfaces/plugins.amqp10.html)
-* [amqplib](./interfaces/plugins.amqplib.html)
-* [bluebird](./interfaces/plugins.bluebird.html)
-* [bunyan](./interfaces/plugins.bunyan.html)
-* [dns](./interfaces/plugins.dns.html)
-* [elasticsearch](./interfaces/plugins.elasticsearch.html)
-* [express](./interfaces/plugins.express.html)
-* [generic-pool](./interfaces/plugins.generic_pool.html)
-* [graphql](./interfaces/plugins.graphql.html)
-* [hapi](./interfaces/plugins.hapi.html)
-* [http](./interfaces/plugins.http.html)
-* [ioredis](./interfaces/plugins.ioredis.html)
-* [mongodb-core](./interfaces/plugins.mongodb_core.html)
-* [mysql](./interfaces/plugins.mysql.html)
-* [mysql2](./interfaces/plugins.mysql2.html)
-* [net](./interfaces/plugins.net.html)
-* [pino](./interfaces/plugins.pino.html)
-* [pg](./interfaces/plugins.pg.html)
-* [q](./interfaces/plugins.q.html)
-* [redis](./interfaces/plugins.redis.html)
-* [restify](./interfaces/plugins.restify.html)
-* [when](./interfaces/plugins.when.html)
-* [winston](./interfaces/plugins.winston.html)
+#### amqplib
 
-<h2 id="advanced-configuration">Advanced Configuration</h2>
+##### Tags
 
-<h3 id="tracer-settings">Tracer settings</h3>
+| Tag              | Description                                               |
+|------------------|-----------------------------------------------------------|
+| out.host         | The host of the AMQP server.                              |
+| out.port         | The port of the AMQP server.                              |
+| span.kind        | Set to either `producer` or `consumer` where it applies.  |
+| amqp.queue       | The queue targeted by the command (when available).       |
+| amqp.exchange    | The exchange targeted by the command (when available).    |
+| amqp.routingKey  | The routing key targeted by the command (when available). |
+| amqp.consumerTag | The consumer tag (when available).                        |
+| amqp.source      | The source exchange of the binding (when available).      |
+| amqp.destination | The destination exchange of the binding (when available). |
 
-Options can be configured as a parameter to the [init()](https://datadog.github.io/dd-trace-js/Tracer.html#init__anchor) method or as environment variables.
+#### elasticsearch
+
+##### Tags
+
+| Tag                  | Description                                           |
+|----------------------|-------------------------------------------------------|
+| db.type              | Always set to `elasticsearch`.                        |
+| out.host             | The host of the Elasticsearch server.                 |
+| out.port             | The port of the Elasticsearch server.                 |
+| span.kind            | Always set to `client`.                               |
+| elasticsearch.method | The underlying HTTP request verb.                     |
+| elasticsearch.url    | The underlying HTTP request URL path.                 |
+| elasticsearch.body   | The body of the query.                                |
+| elasticsearch.params | The parameters of the query.                          |
+
+#### express
+
+##### Tags
+
+| Tag              | Description                                               |
+|------------------|-----------------------------------------------------------|
+| http.url         | The complete URL of the request.                          |
+| http.method      | The HTTP method of the request.                           |
+| http.status_code | The HTTP status code of the response.                     |
+| http.headers.*   | A recorded HTTP header.                                   |
+
+##### Configuration Options
+
+| Option           | Default                   | Description                            |
+|------------------|---------------------------|----------------------------------------|
+| validateStatus   | `code => code < 500`      | Callback function to determine if there was an error. It should take a status code as its only parameter and return `true` for success or `false` for errors. |
+| headers          | `[]`                      | An array of headers to include in the span tags. |
+
+#### graphql
+
+If no query operation name is explicitly provided, the `graphql` span operation name will be just `query`, `mutation` or `subscription`.
+
+```graphql
+# good, the span operation name will be `query HelloWorld`
+query HelloWorld {
+  hello
+  world
+}
+
+# bad, the span operation name will be `query`
+{
+  hello
+  world
+}
+```
+
+##### Tags
+
+| Tag                 | Description                                               |
+|---------------------|-----------------------------------------------------------|
+| graphql.document    | The original GraphQL document.                            |
+| graphql.variables.* | The variables applied to the document.                    | 
+
+##### Configuration Options
+
+| Option          | Default                                          | Description                                                            |
+|-----------------|--------------------------------------------------|------------------------------------------------------------------------|
+| variables       | []                                               | An array of variable names to record. Can also be a callback that returns the key/value pairs to record. For example, using `variables => variables` would record all variables. |
+| depth           | -1                                               | The maximum depth of fields/resolvers to instrument. Set to `0` to only instrument the operation or to -1 to instrument all fields/resolvers. |
+| collapse        | true                                             | Whether to collapse list items into a single element. (i.e. single `users.*.name` span instead of `users.0.name`, `users.1.name`, etc) |
+
+#### hapi
+
+##### Tags
+
+| Tag              | Description                                               |
+|------------------|-----------------------------------------------------------|
+| http.url         | The complete URL of the request.                          |
+| http.method      | The HTTP method of the request.                           |
+| http.status_code | The HTTP status code of the response.                     |
+| http.headers.*   | A recorded HTTP header.                                   |
+
+##### Configuration Options
+
+| Option           | Default                   | Description                            |
+|------------------|---------------------------|----------------------------------------|
+| validateStatus   | `code => code < 500`      | Callback function to determine if there was an error. It should take a status code as its only parameter and return `true` for success or `false` for errors. |
+| headers          | `[]`                      | An array of headers to include in the span tags. |
+
+#### http / https
+
+##### Tags
+
+| Tag              | Description                                               |
+|------------------|-----------------------------------------------------------|
+| http.url         | The complete URL of the request.                          |
+| http.method      | The HTTP method of the request.                           |
+| http.status_code | The HTTP status code of the response.                     |
+
+##### Configuration Options
+
+| Option           | Default                               | Description       |
+|------------------|---------------------------------------|-------------------|
+| splitByDomain    | false                                 | Use the remote endpoint host as the service name instead of the default. |
+| validateStatus   | `code => code < 400 || code >= 500`   | Callback function to determine if an HTTP response should be recorded as an error. It should take a status code as its only parameter and return `true` for success or `false` for errors.
+| blacklist        | []                                    | List of URLs that should not be instrumented. Can be a string, RegExp, callback that takes the URL as a parameter, or an array of any of these.
+| whitelist        | /.*/                                  | List of URLs that should be instrumented. If this is set, other URLs will not be instrumented. Can be a string, RegExp, callback that takes the URL as a parameter, or an array of any of these.
+
+#### ioredis
+
+##### Tags
+
+| Tag              | Description                                               |
+|------------------|-----------------------------------------------------------|
+| db.name          | The index of the queried database.                        |
+| out.host         | The host of the Redis server.                             |
+| out.port         | The port of the Redis server.                             |
+
+#### koa
+
+##### Tags
+
+| Tag              | Description                                               |
+|------------------|-----------------------------------------------------------|
+| http.url         | The complete URL of the request.                          |
+| http.method      | The HTTP method of the request.                           |
+| http.status_code | The HTTP status code of the response.                     |
+| http.headers.*   | A recorded HTTP header.                                   |
+
+##### Configuration Options
+
+| Option           | Default                   | Description                            |
+|------------------|---------------------------|----------------------------------------|
+| validateStatus   | `code => code < 500`      | Callback function to determine if there was an error. It should take a status code as its only parameter and return `true` for success or `false` for errors. |
+| headers          | `[]`                      | An array of headers to include in the span tags. |
+
+#### memcached
+
+##### Tags
+
+| Tag              | Description                                               |
+|------------------|-----------------------------------------------------------|
+| memcached.query  | The query sent to the server.                             |
+| out.host         | The host of the Memcached server.                         |
+| out.port         | The port of the Memcached server.                         |
+
+#### mongodb-core
+
+##### Tags
+
+| Tag                  | Description                                           |
+|----------------------|-------------------------------------------------------|
+| db.name              | The qualified name of the queried collection.         |
+| out.host             | The host of the MongoDB server.                       |
+| out.port             | The port of the MongoDB server.                       |
+| mongodb.cursor.index | When using a cursor, the current index of the cursor. |
+
+#### mysql
+
+##### Tags
+
+| Tag              | Description                                               |
+|------------------|-----------------------------------------------------------|
+| db.name          | The name of the queried database.                         |
+| db.user          | The user who made the query.                              |
+| out.host         | The host of the MySQL server.                             |
+| out.port         | The port of the MySQL server.                             |
+
+mysql2
+
+##### Tags
+
+| Tag              | Description                                               |
+|------------------|-----------------------------------------------------------|
+| db.name          | The name of the queried database.                         |
+| db.user          | The user who made the query.                              |
+| out.host         | The host of the MySQL server.                             |
+| out.port         | The port of the MySQL server.                             |
+
+#### pg
+
+##### Tags
+
+| Tag              | Description                                               |
+|------------------|-----------------------------------------------------------|
+| db.name          | The name of the queried database.                         |
+| db.user          | The user who made the query.                              |
+| out.host         | The host of the PostgreSQL server.                        |
+| out.port         | The port of the PostgreSQL server.                        |
+
+#### redis
+
+##### Tags
+
+| Tag              | Description                                               |
+|------------------|-----------------------------------------------------------|
+| db.name          | The index of the queried database.                        |
+| out.host         | The host of the Redis server.                             |
+| out.port         | The port of the Redis server.                             |
+
+#### restify
+
+##### Tags
+
+| Tag              | Description                                               |
+|------------------|-----------------------------------------------------------|
+| http.url         | The complete URL of the request.                          |
+| http.method      | The HTTP method of the request.                           |
+| http.status_code | The HTTP status code of the response.                     |
+| http.headers.*   | A recorded HTTP header.                                   |
+
+##### Configuration Options
+
+| Option           | Default                   | Description                            |
+|------------------|---------------------------|----------------------------------------|
+| validateStatus   | `code => code < 500`      | Callback function to determine if there was an error. It should take a status code as its only parameter and return `true` for success or `false` for errors. |
+| headers          | `[]`                      | An array of headers to include in the span tags. |
+
+
+### Advanced Configuration
+
+#### Tracer settings
+
+Options can be configured as a parameter to the `init()` method or as environment variables.
 
 | Config        | Environment Variable         | Default   | Description |
 | ------------- | ---------------------------- | --------- | ----------- |
-| enabled       | SIGNALFX_TRACE_ENABLED             | true      | Whether to enable the tracer. |
-| debug         | SIGNALFX_TRACE_DEBUG               | false     | Enable debug logging in the tracer. |
-| service       | SIGNALFX_SERVICE_NAME              |           | The service name to be used for this program. |
-| url           | SIGNALFX_TRACE_AGENT_URL           |           | The url of the Agent or Gateway that the tracer will submit to. Takes priority over hostname and port, if set. |
-| hostname      | SIGNALFX_TRACE_AGENT_HOSTNAME      | localhost | The address of the Agent or Gateway that the tracer will submit to. |
-| port          | SIGNALFX_TRACE_AGENT_PORT          | 8126      | The port of the Agent or Gateway that the tracer will submit to. |
-| logInjection  | SIGNALFX_LOGS_INJECTION            | false     | Enable automatic injection of trace IDs in logs for supported logging libraries.
+| service       | SIGNALFX_SERVICE_NAME        | unnamed-node-service | The service name to be used for this program. |
+| url           | SIGNALFX_INGEST_URL          | http://localhost:9080/v1/trace | The url of the Agent or Gateway to which the tracer will submit traces.
+| accessToken   | SIGNALFX_ACCESS_TOKEN        |           | The optional organization access token for trace submission requests
+| enabled       | SIGNALFX_TRACING_ENABLED     | true      | Whether to enable the tracer. |
+| debug         | SIGNALFX_TRACING_DEBUG       | false     | Enable debug logging in the tracer. |
+| logInjection  | SIGNALFX_LOGS_INJECTION      | false     | Enable automatic injection of trace IDs in logs for supported logging libraries.
 | tags          |                              | {}        | Set global tags that should be applied to all spans. |
 | sampleRate    |                              | 1         | Percentage of spans to sample as a float between 0 and 1. |
 | flushInterval |                              | 2000      | Interval in milliseconds at which the tracer will submit traces to the agent. |
 | experimental  |                              | {}        | Experimental features can be enabled all at once using boolean `true` or individually using key/value pairs. There are currently no experimental features available. |
 | plugins       |                              | true      | Whether or not to enable automatic instrumentation of external libraries using the built-in plugins. |
 
-<h3 id="custom-logging">Custom Logging</h3>
+#### Custom Logging
 
-By default, logging from this library is disabled. In order to get debbuging information and errors sent to logs, the `debug` options should be set to `true` in the [init()](https://datadog.github.io/dd-trace-js/Tracer.html#init__anchor) method.
+By default, logging from this library is disabled. In order to get debbuging information and errors sent to logs, the `debug` options should be set to `true` in the `init()` method.
 
 The tracer will then log debug information to `console.log()` and errors to `console.error()`. This behavior can be changed by passing a custom logger to the tracer. The logger should contain a `debug()` and `error()` methods that can handle messages and errors, respectively.
 
@@ -313,11 +484,11 @@ For example:
 ```javascript
 const bunyan = require('bunyan')
 const logger = bunyan.createLogger({
-  name: 'dd-trace',
+  name: 'signalfx-tracing',
   level: 'trace'
 })
 
-const tracer = require('dd-trace').init({
+const tracer = require('signalfx-tracing').init({
   logger: {
     debug: message => logger.trace(message),
     error: err => logger.error(err)

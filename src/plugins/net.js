@@ -63,7 +63,14 @@ function wrapIpc (tracer, config, socket, options) {
 
 function startSpan (tracer, config, protocol, tags) {
   const childOf = tracer.scope().active()
-  const span = tracer.startSpan(`${protocol}.connect`, {
+
+  let operationName = `${protocol}.connect`
+  const resourceName = tags['resource.name']
+  if (resourceName) {
+    delete tags['resource.name']
+    operationName = `${operationName}: ${resourceName}`
+  }
+  const span = tracer.startSpan(operationName, {
     childOf,
     tags: Object.assign({
       'span.kind': 'client',

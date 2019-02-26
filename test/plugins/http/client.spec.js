@@ -584,7 +584,7 @@ describe('Plugin', () => {
           getPort().then(port => {
             agent
               .use(traces => {
-                expect(traces[0][0]).to.have.property('service', 'test-http-client')
+                expect(traces[0][0]).to.have.property('service', 'test')
               })
               .then(done)
               .catch(done)

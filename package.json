@@ -1,7 +1,7 @@
 {
-  "name": "dd-trace",
-  "version": "0.9.3",
-  "description": "Datadog APM tracing client for JavaScript",
+  "name": "signalfx-tracing",
+  "version": "0.0.1",
+  "description": "Provides auto-instrumentation for JavaScript libraries and frameworks",
   "main": "index.js",
   "typings": "docs/index.d.ts",
   "scripts": {
@@ -19,21 +19,23 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/DataDog/dd-trace-js.git"
+    "url": "https://github.com/signalfx/signalfx-nodejs-tracing.git"
   },
   "keywords": [
-    "datadog",
+    "signalfx",
     "trace",
     "tracing",
     "opentracing",
     "apm"
   ],
-  "author": "Datadog Inc. <info@datadoghq.com>",
+  "contributors": [
+    "SignalFx, Inc. <info@signalfx.com>"
+  ],
   "license": "BSD-3-Clause",
   "bugs": {
-    "url": "https://github.com/DataDog/dd-trace-js/issues"
+    "url": "https://github.com/signalfx/signalfx-nodejs-tracing/issues"
   },
-  "homepage": "https://github.com/DataDog/dd-trace-js#readme",
+  "homepage": "https://signalfx.com/microservices-apm/",
   "engines": {
     "node": "^4.7 || ^6.9 || >=8"
   },

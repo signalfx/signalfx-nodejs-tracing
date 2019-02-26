@@ -6,8 +6,11 @@ function createWrapUse (tracer, config) {
   config = web.normalizeConfig(config)
 
   function ddTrace (ctx, next) {
-    const span = web.instrument(tracer, config, ctx.req, ctx.res, 'koa.request')
-    span.setTag('component', 'koa')
+    web.instrument(tracer, config, ctx.req, ctx.res, 'koa.request')
+    const span = web.active(ctx.req)
+    if (span) {
+      span.setTag('component', 'koa')
+    }
 
     return next()
   }

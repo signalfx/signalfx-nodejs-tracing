@@ -3,7 +3,7 @@
 describe('TracerProxy', () => {
   let Proxy
   let proxy
-  let DatadogTracer
+  let SignalFxTracer
   let tracer
   let NoopTracer
   let noop
@@ -40,7 +40,7 @@ describe('TracerProxy', () => {
       use: sinon.spy()
     }
 
-    DatadogTracer = sinon.stub().returns(tracer)
+    SignalFxTracer = sinon.stub().returns(tracer)
     NoopTracer = sinon.stub().returns(noop)
     Instrumenter = sinon.stub().returns(instrumenter)
 
@@ -52,7 +52,7 @@ describe('TracerProxy', () => {
     }
 
     Proxy = proxyquire('../src/proxy', {
-      './tracer': DatadogTracer,
+      './tracer': SignalFxTracer,
       './noop/tracer': NoopTracer,
       './instrumenter': Instrumenter,
       './config': Config,
@@ -77,20 +77,20 @@ describe('TracerProxy', () => {
         expect(proxy.init()).to.equal(proxy)
       })
 
-      it('should initialize and configure an instance of DatadogTracer', () => {
+      it('should initialize and configure an instance of SignalFxTracer', () => {
         const options = {}
 
         proxy.init(options)
 
-        expect(Config).to.have.been.calledWith('dd-trace', options)
-        expect(DatadogTracer).to.have.been.calledWith(config)
+        expect(Config).to.have.been.calledWith('signalfx-tracing', options)
+        expect(SignalFxTracer).to.have.been.calledWith(config)
       })
 
       it('should not initialize twice', () => {
         proxy.init()
         proxy.init()
 
-        expect(DatadogTracer).to.have.been.calledOnce
+        expect(SignalFxTracer).to.have.been.calledOnce
       })
 
       it('should not initialize when disabled', () => {
@@ -98,7 +98,7 @@ describe('TracerProxy', () => {
 
         proxy.init()
 
-        expect(DatadogTracer).to.not.have.been.called
+        expect(SignalFxTracer).to.not.have.been.called
       })
 
       it('should set up automatic instrumentation', () => {
@@ -111,7 +111,7 @@ describe('TracerProxy', () => {
       it('should update the delegate before setting up instrumentation', () => {
         proxy.init()
 
-        expect(instrumenter.patch).to.have.been.calledAfter(DatadogTracer)
+        expect(instrumenter.patch).to.have.been.calledAfter(SignalFxTracer)
       })
     })
 
@@ -217,7 +217,7 @@ describe('TracerProxy', () => {
     })
 
     describe('trace', () => {
-      it('should call the underlying DatadogTracer', () => {
+      it('should call the underlying SignalFxTracer', () => {
         const returnValue = proxy.trace('a', 'b', 'c')
 
         expect(tracer.trace).to.have.been.calledWith('a', 'b', 'c')
@@ -258,7 +258,7 @@ describe('TracerProxy', () => {
     })
 
     describe('startSpan', () => {
-      it('should call the underlying DatadogTracer', () => {
+      it('should call the underlying SignalFxTracer', () => {
         const returnValue = proxy.startSpan('a', 'b', 'c')
 
         expect(tracer.startSpan).to.have.been.calledWith('a', 'b', 'c')
@@ -267,7 +267,7 @@ describe('TracerProxy', () => {
     })
 
     describe('inject', () => {
-      it('should call the underlying DatadogTracer', () => {
+      it('should call the underlying SignalFxTracer', () => {
         const returnValue = proxy.inject('a', 'b', 'c')
 
         expect(tracer.inject).to.have.been.calledWith('a', 'b', 'c')
@@ -276,7 +276,7 @@ describe('TracerProxy', () => {
     })
 
     describe('extract', () => {
-      it('should call the underlying DatadogTracer', () => {
+      it('should call the underlying SignalFxTracer', () => {
         const returnValue = proxy.extract('a', 'b', 'c')
 
         expect(tracer.extract).to.have.been.calledWith('a', 'b', 'c')
@@ -285,7 +285,7 @@ describe('TracerProxy', () => {
     })
 
     describe('currentSpan', () => {
-      it('should call the underlying DatadogTracer', () => {
+      it('should call the underlying SignalFxTracer', () => {
         const returnValue = proxy.currentSpan('a', 'b', 'c')
 
         expect(tracer.currentSpan).to.have.been.calledWith('a', 'b', 'c')
@@ -294,7 +294,7 @@ describe('TracerProxy', () => {
     })
 
     describe('scopeManager', () => {
-      it('should call the underlying DatadogTracer', () => {
+      it('should call the underlying SignalFxTracer', () => {
         const returnValue = proxy.scopeManager()
 
         expect(tracer.scopeManager).to.have.been.called

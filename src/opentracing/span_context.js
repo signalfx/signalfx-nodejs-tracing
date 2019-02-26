@@ -2,7 +2,7 @@
 
 const SpanContext = require('opentracing').SpanContext
 
-class DatadogSpanContext extends SpanContext {
+class SignalFxSpanContext extends SpanContext {
   constructor (props) {
     super()
 
@@ -33,4 +33,4 @@ class DatadogSpanContext extends SpanContext {
   }
 }
 
-module.exports = DatadogSpanContext
+module.exports = SignalFxSpanContext

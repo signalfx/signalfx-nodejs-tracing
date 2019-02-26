@@ -11,7 +11,7 @@ const ext = require('../../ext')
 
 const SAMPLE_RATE_METRIC_KEY = constants.SAMPLE_RATE_METRIC_KEY
 
-class DatadogSpan extends Span {
+class SignalFxSpan extends Span {
   constructor (tracer, recorder, sampler, prioritySampler, fields) {
     super()
 
@@ -142,4 +142,4 @@ class DatadogSpan extends Span {
   }
 }
 
-module.exports = DatadogSpan
+module.exports = SignalFxSpan

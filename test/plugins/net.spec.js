@@ -3,6 +3,7 @@
 const getPort = require('get-port')
 const agent = require('./agent')
 const plugin = require('../../src/plugins/net')
+const utils = require('../../src/utils')
 
 wrapIt()
 
@@ -59,15 +60,14 @@ describe('Plugin', () => {
       agent
         .use(traces => {
           expect(traces[0][0]).to.deep.include({
-            name: 'ipc.connect',
-            service: 'test-ipc',
-            resource: '/tmp/dd-trace.sock',
+            name: 'ipc.connect: /tmp/dd-trace.sock',
+            service: 'test',
             meta: {
               'span.kind': 'client',
               'ipc.path': '/tmp/dd-trace.sock'
             }
           })
-          expect(traces[0][0].parent_id.toString()).to.equal(parent.context().toSpanId())
+          expect(traces[0][0].parent_id.toString()).to.equal(utils.idToHex(parent.context()._spanId))
         })
         .then(done)
         .catch(done)
@@ -83,9 +83,8 @@ describe('Plugin', () => {
       agent
         .use(traces => {
           expect(traces[0][0]).to.deep.include({
-            name: 'tcp.connect',
-            service: 'test-tcp',
-            resource: `localhost:${port}`,
+            name: `tcp.connect: localhost:${port}`,
+            service: 'test',
             meta: {
               'span.kind': 'client',
               'tcp.family': 'IPv4',
@@ -98,7 +97,7 @@ describe('Plugin', () => {
               'out.port': `${port}`
             }
           })
-          expect(traces[0][0].parent_id.toString()).to.equal(parent.context().toSpanId())
+          expect(traces[0][0].parent_id.toString()).to.equal(utils.idToHex(parent.context()._spanId))
         })
         .then(done)
         .catch(done)
@@ -114,9 +113,8 @@ describe('Plugin', () => {
       agent
         .use(traces => {
           expect(traces[0][0]).to.deep.include({
-            name: 'tcp.connect',
-            service: 'test-tcp',
-            resource: `localhost:${port}`,
+            name: `tcp.connect: localhost:${port}`,
+            service: 'test',
             meta: {
               'span.kind': 'client',
               'tcp.family': 'IPv4',
@@ -129,7 +127,7 @@ describe('Plugin', () => {
               'out.port': `${port}`
             }
           })
-          expect(traces[0][0].parent_id.toString()).to.equal(parent.context().toSpanId())
+          expect(traces[0][0].parent_id.toString()).to.equal(utils.idToHex(parent.context()._spanId))
         })
         .then(done)
         .catch(done)
@@ -146,15 +144,14 @@ describe('Plugin', () => {
       agent
         .use(traces => {
           expect(traces[0][0]).to.deep.include({
-            name: 'ipc.connect',
-            service: 'test-ipc',
-            resource: '/tmp/dd-trace.sock',
+            name: 'ipc.connect: /tmp/dd-trace.sock',
+            service: 'test',
             meta: {
               'span.kind': 'client',
               'ipc.path': '/tmp/dd-trace.sock'
             }
           })
-          expect(traces[0][0].parent_id.toString()).to.equal(parent.context().toSpanId())
+          expect(traces[0][0].parent_id.toString()).to.equal(utils.idToHex(parent.context()._spanId))
         })
         .then(done)
         .catch(done)

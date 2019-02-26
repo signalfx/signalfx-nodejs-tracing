@@ -18,7 +18,7 @@ const LogPropagator = require('./propagation/log')
 const formats = require('../../ext/formats')
 const log = require('../log')
 
-class DatadogTracer extends Tracer {
+class SignalFxTracer extends Tracer {
   constructor (config) {
     super()
 
@@ -142,4 +142,4 @@ function getParent (references) {
   return parent
 }
 
-module.exports = DatadogTracer
+module.exports = SignalFxTracer

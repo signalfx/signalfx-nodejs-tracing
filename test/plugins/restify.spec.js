@@ -157,7 +157,7 @@ describe('Plugin', () => {
           getPort().then(port => {
             agent
               .use(traces => {
-                expect(traces[0][0]).to.have.property('resource', 'GET /user/:id')
+                expect(traces[0][0]).to.have.property('name', 'GET /user/:id')
                 expect(traces[0][0].meta).to.have.property('http.url', `http://localhost:${port}/user/123`)
               })
               .then(done)

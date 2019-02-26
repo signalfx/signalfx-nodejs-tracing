@@ -20,7 +20,7 @@ function createWrapLookup (tracer, config) {
   return function wrapLookup (lookup) {
     return function lookupWithTrace (hostname, options, callback) {
       const span = startSpan(tracer, config, 'dns.lookup', {
-        'resource.name': hostname,
+        'resource.name': `dns.lookup: ${hostname}`,
         'dns.hostname': hostname
       })
 
@@ -35,7 +35,7 @@ function createWrapLookupService (tracer, config) {
   return function wrapLookupService (lookupService) {
     return function lookupServiceWithTrace (address, port, callback) {
       const span = startSpan(tracer, config, 'dns.lookup_service', {
-        'resource.name': `${address}:${port}`,
+        'resource.name': `dns.lookup_service ${address}:${port}`,
         'dns.address': address,
         'dns.port': port
       })
@@ -75,7 +75,7 @@ function createWrapReverse (tracer, config) {
   return function wrapReverse (reverse) {
     return function reverseWithTrace (ip, callback) {
       const span = startSpan(tracer, config, 'dns.reverse', {
-        'resource.name': ip,
+        'resource.name': `dns.reverse: ${ip}`,
         'dns.ip': ip
       })
 
@@ -106,7 +106,7 @@ function wrapArgs (span, args) {
 function wrapResolver (tracer, config, rrtype, args) {
   const hostname = args[0]
   const span = startSpan(tracer, config, 'dns.resolve', {
-    'resource.name': `${rrtype} ${hostname}`,
+    'resource.name': `dns.resolve: ${rrtype} ${hostname}`,
     'dns.hostname': hostname,
     'dns.rrtype': rrtype
   })

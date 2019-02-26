@@ -8,8 +8,11 @@ function createWrapMethod (tracer, config) {
   config = web.normalizeConfig(config)
 
   function ddTrace (req, res, next) {
-    const span = web.instrument(tracer, config, req, res, 'express.request')
-    span.setTag('component', 'express')
+    web.instrument(tracer, config, req, res, 'express.request')
+    const span = web.active(req)
+    if (span) {
+      span.setTag('component', 'express')
+    }
 
     next()
   }

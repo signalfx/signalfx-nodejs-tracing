@@ -18,11 +18,10 @@ describe('zipkin-v2-json-dd-trace', () => {
 
       tracer.init({
         service: 'test',
-        port: listener.address().port,
+        url: `http://localhost:${listener.address().port}/my/collector/path`,
         flushInterval: 0,
         plugins: false,
-        path: '/my/collector/path',
-        headers: { Authorization: 'Bearer Token' }
+        accessToken: 'Token'
       })
     })
   })
@@ -33,10 +32,11 @@ describe('zipkin-v2-json-dd-trace', () => {
   })
 
   it('should record and send a trace to the agent', done => {
-    let span
-    const options = {
-      resource: '/hello/:name'
-    }
+    const span = tracer.startSpan('hello', {
+      tags: {
+        'resource.name': '/hello/:name'
+      }
+    })
 
     agent.use(bodyParser.raw({ type: 'application/json' }))
     agent.post('/my/collector/path', (req, res) => {
@@ -53,18 +53,15 @@ describe('zipkin-v2-json-dd-trace', () => {
       expect(zipkinSpan.timestamp.toString().length).to.be.equal(16)
       expect(zipkinSpan.duration).to.be.equal(Math.round(span._duration * 1000))
 
-      expect(req.headers.authorization).to.be.equal('Bearer Token')
+      expect(req.headers['x-sf-token']).to.be.equal('Token')
       res.status(200).send('OK')
 
       done()
     })
 
-    tracer.trace('hello', options, current => {
-      span = current
-      span._spanContext._traceId = 1
-      span._spanContext._parentId = 2
-      span._spanContext._spanId = 3
-      current.finish()
-    })
+    span._spanContext._traceId = 1
+    span._spanContext._parentId = 2
+    span._spanContext._spanId = 3
+    span.finish()
   })
 })
