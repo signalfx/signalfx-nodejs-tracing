@@ -1,6 +1,6 @@
 # SignalFx-Tracing Library for JavaScript
 
-[![npm (tag)](https://img.shields.io/npm/v/signalfx-tracing/dev.svg)](https://www.npmjs.com/package/signalfx-tracing/v/dev)
+[![npm (tag)](https://img.shields.io/npm/v/signalfx-tracing.svg)](https://www.npmjs.com/package/signalfx-tracing)
 
 This library provides an OpenTracing-compatible tracer and automatically configurable instrumentations for many popular JavaScript libraries and frameworks.  It supports Node.js versions 4.7+, 6.9+, and 8+.
 
