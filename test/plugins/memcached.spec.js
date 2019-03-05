@@ -66,7 +66,7 @@ describe('Plugin', () => {
 
           agent
             .use(traces => {
-              expect(traces[0][0].meta).to.have.property('error', true)
+              expect(traces[0][0].meta).to.have.property('error', 'true')
               expect(traces[0][0].meta).to.have.property('error.type', error.name)
               expect(traces[0][0].meta).to.have.property('error.msg', error.message)
               expect(traces[0][0].meta).to.have.property('error.stack', error.stack)

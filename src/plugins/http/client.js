@@ -68,7 +68,7 @@ function patch (http, methodName, tracer, config) {
             addResponseHeaders(res, span, config)
 
             if (!config.validateStatus(res.statusCode)) {
-              span.setTag('error', 1)
+              span.setTag('error', 'true')
             }
 
             res.on('end', () => finish(req, span, config))

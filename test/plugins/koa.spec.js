@@ -311,7 +311,7 @@ describe('Plugin', () => {
               .use(traces => {
                 expect(traces[0][0]).to.have.property('name', 'GET /user/:id')
                 expect(traces[0][0].meta).to.have.property('http.url', `http://localhost:${port}/user/123`)
-                expect(traces[0][0].meta.error).to.equal(true)
+                expect(traces[0][0].meta.error).to.equal('true')
               })
               .then(done)
               .catch(done)

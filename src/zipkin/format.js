@@ -63,13 +63,13 @@ function formatTags (formatted, span) {
         break
       case 'error':
         if (tags[tag]) {
-          formattedTags.error = true
+          formattedTags.error = String(tags[tag])
         }
         break
       case 'error.type':
       case 'error.msg':
       case 'error.stack':
-        formattedTags.error = true
+        formattedTags.error = 'true'
         formattedTags[tag] = String(tags[tag])
         break
       default:
