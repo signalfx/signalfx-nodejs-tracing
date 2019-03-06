@@ -19,8 +19,8 @@ This library provides an OpenTracing-compatible tracer and automatically configu
 // Configure OpenTracing tracer to report traces to Smart Agent or Gateway and initiate
 // auto-instrumentation.  Must occur before target library require statements.
 const tracer = require('signalfx-tracing').init({
-  service: 'my-traced-service', 
-  url: 'http://my_agent_or_gateway:9080/v1/trace'
+  // Service name also configurable via SIGNALFX_SERVICE_NAME environment variable
+  service: 'my-traced-service',
 })
 
 // Auto-Instrumented Express
