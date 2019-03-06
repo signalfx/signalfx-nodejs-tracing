@@ -216,7 +216,7 @@ function getStatusValidator (config) {
 
 function getFilter (tracer, config) {
   config = Object.assign({}, config, {
-    blacklist: [`${tracer._url.href}/v0.4/traces`].concat(config.blacklist || [])
+    blacklist: [`${tracer._url.href}`].concat(config.blacklist || [])
   })
 
   return urlFilter.getFilter(config)
