@@ -58,8 +58,9 @@ describe('Plugin', () => {
                 const span = traces[0][0]
                 const resource = `insert test.${collection}`
 
+                expect(span).to.have.property('name', 'mongo.insert')
                 expect(span).to.have.property('service', 'test')
-                expect(span).to.have.property('name', resource)
+                expect(span.meta).to.have.property('db.statement', resource)
                 expect(span.meta).to.have.property('component', 'mongodb')
                 expect(span.meta).to.have.property('db.name', `test.${collection}`)
                 expect(span.meta).to.have.property('out.host', 'localhost')
@@ -76,7 +77,8 @@ describe('Plugin', () => {
                 const span = traces[0][0]
                 const resource = `planCacheListPlans test.${collection} {}`
 
-                expect(span).to.have.property('name', resource)
+                expect(span).to.have.property('name', 'mongo.planCacheListPlans')
+                expect(span.meta).to.have.property('db.statement', resource)
               })
               .then(done)
               .catch(done)
@@ -94,8 +96,8 @@ describe('Plugin', () => {
                 const query = '{"foo":"?","bar":{"baz":"?"}}'
                 const resource = `find test.${collection} ${query}`
 
-                expect(span).to.have.property('name', resource)
-                expect(span.meta).to.have.property('mongodb.query', query)
+                expect(span).to.have.property('name', 'mongo.find')
+                expect(span.meta).to.have.property('db.statement', resource)
               })
               .then(done)
               .catch(done)
@@ -117,7 +119,8 @@ describe('Plugin', () => {
                 const span = traces[0][0]
                 const resource = `find test.${collection} {"_id":"?"}`
 
-                expect(span).to.have.property('name', resource)
+                expect(span).to.have.property('name', 'mongo.find')
+                expect(span.meta).to.have.property('db.statement', resource)
               })
               .then(done)
               .catch(done)
@@ -138,7 +141,8 @@ describe('Plugin', () => {
                 const span = traces[0][0]
                 const resource = `find test.${collection} {"_id":"?"}`
 
-                expect(span).to.have.property('name', resource)
+                expect(span).to.have.property('name', 'mongo.find')
+                expect(span.meta).to.have.property('db.statement', resource)
               })
               .then(done)
               .catch(done)
@@ -157,7 +161,8 @@ describe('Plugin', () => {
                 const span = traces[0][0]
                 const resource = `find test.${collection} {"_id":"?"}`
 
-                expect(span).to.have.property('name', resource)
+                expect(span).to.have.property('name', 'mongo.find')
+                expect(span.meta).to.have.property('db.statement', resource)
               })
               .then(done)
               .catch(done)
@@ -205,12 +210,13 @@ describe('Plugin', () => {
               .use(traces => {
                 const span = traces[0][0]
 
-                expect(span).to.have.property('name', `insert test.${collection}`)
+                expect(span).to.have.property('name', `mongo.insert`)
                 expect(span).to.have.property('service', 'test')
                 expect(span.meta).to.have.property('component', 'mongodb')
                 expect(span.meta).to.have.property('db.name', `test.${collection}`)
                 expect(span.meta).to.have.property('out.host', 'localhost')
                 expect(span.meta).to.have.property('out.port', '27017')
+                expect(span.meta).to.have.property('db.statement', `insert test.${collection}`)
               })
               .then(done)
               .catch(done)
@@ -258,7 +264,8 @@ describe('Plugin', () => {
                 const span = traces[0][0]
                 const resource = `find test.${collection} {"foo":"?","bar":{"baz":"?"}}`
 
-                expect(span).to.have.property('name', resource)
+                expect(span).to.have.property('name', 'mongo.find')
+                expect(span.meta).to.have.property('db.statement', resource)
               })
               .then(done)
               .catch(done)

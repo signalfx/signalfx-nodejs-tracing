@@ -45,19 +45,19 @@ function createWrapNext (tracer, config) {
 }
 
 function addTags (span, tracer, config, ns, cmd, topology, operationName) {
+  if (!operationName) {
+    operationName = Object.keys(cmd)[0]
+  }
+  span.setOperationName(`mongo.${operationName}`)
+
   const query = getQuery(cmd)
   const resource = getResource(ns, cmd, query, operationName)
-
   span.addTags({
     'service.name': config.service || `${tracer._service}-mongodb`,
-    'resource.name': resource,
     'span.type': 'mongodb',
-    'db.name': ns
+    'db.name': ns,
+    'db.statement': resource
   })
-
-  if (query) {
-    span.setTag('mongodb.query', query)
-  }
 
   addHost(span, topology)
 }
@@ -100,10 +100,6 @@ function getQuery (cmd) {
 }
 
 function getResource (ns, cmd, query, operationName) {
-  if (!operationName) {
-    operationName = Object.keys(cmd)[0]
-  }
-
   const parts = [operationName, ns]
 
   if (query) {
