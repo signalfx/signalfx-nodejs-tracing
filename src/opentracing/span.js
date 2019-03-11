@@ -137,7 +137,7 @@ class SignalFxSpan extends Span {
     this._spanContext._children
       .filter(child => !child.context()._isFinished)
       .forEach(child => {
-        log.error(`Parent span ${this} was finished before child span ${child}.`)
+        log.debug(`Parent span ${this} was finished before child span ${child}.`)
       })
   }
 }
