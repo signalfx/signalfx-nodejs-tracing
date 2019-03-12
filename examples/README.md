@@ -1,1 +1,2 @@
-Examples are available in the [trace-examples](https://github.com/DataDog/trace-examples/tree/master/javascript/node) repository.
+Examples for several supported libraries are available in the
+[tracing-examples](https://github.com/signalfx/tracing-examples/tree/master/signalfx-tracing/signalfx-nodejs-tracing) GitHub repository.

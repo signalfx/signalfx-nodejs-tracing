@@ -1,6 +1,6 @@
 {
   "name": "signalfx-tracing",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Provides auto-instrumentation for JavaScript libraries and frameworks",
   "main": "index.js",
   "typings": "docs/index.d.ts",
@@ -10,6 +10,7 @@
     "type:test": "cd docs && yarn && yarn test",
     "lint": "eslint . && node scripts/check_licenses.js",
     "services": "node ./scripts/install_plugin_modules && node test/setup/services",
+    "startContainers": "docker-compose up -d -V --remove-orphans --force-recreate",
     "tdd": "yarn services && NO_DEPRECATION=* mocha --watch 'test/setup/**/*.js'",
     "test": "yarn services && NO_DEPRECATION=* cov8 --include \"src/**/*.js\" -- mocha --exit 'test/setup/all.js' 'test/**/*.spec.js'",
     "test:core": "mocha --exit --exclude \"test/plugins/*.spec.js\" --exclude \"test/plugins/http/*.spec.js\" --file test/setup/core.js \"test/**/*.spec.js\"",

@@ -7,7 +7,7 @@ const routerPlugin = require('./router')
 function createWrapMethod (tracer, config) {
   config = web.normalizeConfig(config)
 
-  function ddTrace (req, res, next) {
+  function expressTrace (req, res, next) {
     web.instrument(tracer, config, req, res, 'express.request')
     const span = web.active(req)
     if (span) {
@@ -21,7 +21,7 @@ function createWrapMethod (tracer, config) {
     return function methodWithTrace () {
       if (!this._datadog_trace_patched && !this._router) {
         this._datadog_trace_patched = true
-        this.use(ddTrace)
+        this.use(expressTrace)
       }
       return original.apply(this, arguments)
     }

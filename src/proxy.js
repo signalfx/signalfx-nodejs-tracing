@@ -18,7 +18,8 @@ class Tracer extends BaseTracer {
     this._deprecate = method => log.deprecate(`tracer.${method}`, [
       `tracer.${method}() is deprecated.`,
       'Please use tracer.startSpan() and tracer.scope() instead.',
-      'See: https://datadog.github.io/dd-trace-js/#manual-instrumentation.'
+      'See: https://github.com/signalfx/signalfx-nodejs-tracing/blob/master/docs/API.md#manual-instrumentation.'
+
     ].join(' '))
   }
 
