@@ -10,7 +10,7 @@ The SignalFx-Tracing Library for JavaScript provides auto-instrumentation for al
 // init() invocation must occur before importing any traced library (e.g. Express)
 const tracer = require('signalfx-tracing').init(
   service: 'my-traced-service',  // also via SIGNALFX_SERVICE_NAME environment variable
-  url: 'http://my_agent_or_gateway:9080/v1/trace',  // also via SIGNALFX_INGEST_URL environment variable
+  url: 'http://my_agent_or_gateway:9080/v1/trace',  // also via SIGNALFX_ENDPOINT_URL environment variable
   accessToken: 'myOptionalOrganizationAccessToken' // also via SIGNALFX_ACCESS_TOKEN environment variable
 )
 
@@ -462,7 +462,7 @@ Options can be configured as a parameter to the `init()` method or as environmen
 | Config        | Environment Variable         | Default   | Description |
 | ------------- | ---------------------------- | --------- | ----------- |
 | service       | SIGNALFX_SERVICE_NAME        | unnamed-node-service | The service name to be used for this program. |
-| url           | SIGNALFX_INGEST_URL          | http://localhost:9080/v1/trace | The url of the Agent or Gateway to which the tracer will submit traces.
+| url           | SIGNALFX_ENDPOINT_URL          | http://localhost:9080/v1/trace | The url of the Agent or Gateway to which the tracer will submit traces.
 | accessToken   | SIGNALFX_ACCESS_TOKEN        |           | The optional organization access token for trace submission requests
 | enabled       | SIGNALFX_TRACING_ENABLED     | true      | Whether to enable the tracer. |
 | debug         | SIGNALFX_TRACING_DEBUG       | false     | Enable debug logging in the tracer. |

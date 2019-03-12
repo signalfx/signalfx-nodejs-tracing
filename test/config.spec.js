@@ -57,7 +57,7 @@ describe('Config', () => {
   })
 
   it('should initialize from environment variables with url taking precedence', () => {
-    platform.env.withArgs('SIGNALFX_INGEST_URL').returns('https://agent2:7777')
+    platform.env.withArgs('SIGNALFX_ENDPOINT_URL').returns('https://agent2:7777')
     platform.env.withArgs('SIGNALFX_TRACE_AGENT_HOSTNAME').returns('agent')
     platform.env.withArgs('SIGNALFX_TRACE_AGENT_PORT').returns('6218')
     platform.env.withArgs('SIGNALFX_TRACING_ENABLED').returns('false')
@@ -151,7 +151,7 @@ describe('Config', () => {
   })
 
   it('should give priority to the options', () => {
-    platform.env.withArgs('SIGNALFX_INGEST_URL').returns('https://agent2:6218')
+    platform.env.withArgs('SIGNALFX_ENDPOINT_URL').returns('https://agent2:6218')
     platform.env.withArgs('SIGNALFX_TRACE_AGENT_HOSTNAME').returns('agent')
     platform.env.withArgs('SIGNALFX_TRACE_AGENT_PORT').returns('6218')
     platform.env.withArgs('SIGNALFX_TRACING_ENABLED').returns('false')

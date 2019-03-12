@@ -12,7 +12,10 @@ class Config {
     const debug = coalesce(options.debug, platform.env('SIGNALFX_TRACING_DEBUG'), false)
     const logInjection = coalesce(options.logInjection, platform.env('SIGNALFX_LOGS_INJECTION'), false)
     const env = coalesce(options.env, platform.env('SIGNALFX_ENV'))
-    const url = coalesce(options.url, platform.env('SIGNALFX_INGEST_URL'), 'http://localhost:9080/v1/trace')
+    const url = coalesce(
+      options.url, platform.env('SIGNALFX_ENDPOINT_URL'),
+      platform.env('SIGNALFX_INGEST_URL'), 'http://localhost:9080/v1/trace'
+    )
     const accessToken = coalesce(options.accessToken, platform.env('SIGNALFX_ACCESS_TOKEN'))
     const protocol = 'http'
     const hostname = coalesce(
