@@ -1,4 +1,4 @@
-import ddTrace, { tracer, Tracer, TracerOptions, Span, SpanContext, SpanOptions, Scope } from '..';
+import sfxTrace, { tracer, Tracer, TracerOptions, Span, SpanContext, SpanOptions, Scope } from '..';
 import { HTTP_HEADERS } from '../ext/formats';
 import * as opentracing from 'opentracing';
 
@@ -9,7 +9,7 @@ let context: SpanContext;
 let traceId: string;
 let spanId: string;
 
-ddTrace.init();
+sfxTrace.init();
 tracer.init({
   debug: true,
   enabled: true,
@@ -26,7 +26,9 @@ tracer.init({
   service: 'test',
   tags: {
     foo: 'bar'
-  }
+  },
+  url: 'http://localhost:9080/v1/trace',
+  accessToken: 'MyAccessToken'
 });
 
 const httpOptions = {
