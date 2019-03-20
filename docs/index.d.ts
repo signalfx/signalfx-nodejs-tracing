@@ -108,9 +108,24 @@ export declare interface TracerOptions {
 
   /**
    * The service name to be used for this program. If not set, the service name
-   * will attempted to be inferred from package.json
+   * will attempted to be inferred from SIGNALFX_SERVICE_NAME environment variable
+   * or package.json
    */
   service?: string;
+
+  /**
+   * The optional SignalFx Organization Access Token.  Unnecessary if configured on
+   * Smart Agent and Gateway directly.  Also configurable via SIGNALFX_ACCESS_TOKEN
+   */
+  accessToken?: string;
+
+  /**
+   * The endpoint url for sending traces (Smart Agent or Gateway). Used over
+   * hostname and port if set.  Also configurable via SIGNALFX_ENDPOINT_URL
+   * environment variable
+   * @default 'http://localhost:9080/v1/trace'
+   */
+  url?: string;
 
   /**
    * The address of the trace agent that the tracer will submit to.
@@ -120,7 +135,7 @@ export declare interface TracerOptions {
 
   /**
    * The port of the trace agent that the tracer will submit to.
-   * @default 8126
+   * @default 9080
    */
   port?: number | string;
 

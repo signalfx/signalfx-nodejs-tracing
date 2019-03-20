@@ -6,7 +6,7 @@ module.exports = {
   excludeProtected: true,
   includeDeclarations: true,
   mode: 'file',
-  name: 'dd-trace',
+  name: 'signalfx-tracing',
   out: 'out',
   readme: 'API.md'
 }
