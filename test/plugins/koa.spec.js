@@ -368,4 +368,47 @@ describe('Plugin', () => {
       })
     })
   })
+
+  describe('with client and without configuration', () => {
+    before(() => agent.load(plugin, ['koa', 'http']))
+    after(() => agent.close())
+    return getPort().then(newPort => {
+        port = newPort
+      })
+
+    it('should propagate a client request to parent the server response', done => {
+      if (process.env.SIGNALFX_CONTEXT_PROPAGATION === 'false') return done()
+        const app = new Koa()
+
+        app.use((ctx) => {
+          ctx.body = ''
+        })
+  
+        agent
+        .use(traces => {
+          const spans = traces[0]
+
+          expect(spans).to.have.length(2)
+          expect(spans[0]).to.have.property('name', 'GET')
+          expect(spans[0].meta).to.have.property('component', 'http')
+          expect(spans[0].meta).to.have.property('span.kind', 'client')
+          expect(spans[1]).to.have.property('span.kind', 'server')
+          expect(spans[1].meta).to.have.property('component', 'koa')
+          expect(spans[1].parent_id.toString()).to.equal(spans[0].trace_id.toString())
+        })
+        .then(done)
+        .catch(done)
+
+      const http = require('http')
+      appListener = app.listen(port, 'localhost', () => {
+        const req = http.request(`http://localhost:${port}/user`, res => {
+              res.on('data', () => {})
+              res.on('end', () => {
+                done()
+              })
+            })
+      })
+    })
+  })
+    
 })
