@@ -1,6 +1,6 @@
 {
   "name": "signalfx-tracing",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "Provides auto-instrumentation for JavaScript libraries and frameworks",
   "main": "index.js",
   "typings": "docs/index.d.ts",
