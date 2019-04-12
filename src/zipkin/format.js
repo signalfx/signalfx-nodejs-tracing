@@ -1,6 +1,9 @@
 'use strict'
 
-const { idToHex, microTs } = require('../utils')
+const utils = require('../utils')
+
+const microTs = utils.microTs
+const idToHex = utils.idToHex
 
 function formatZipkinV2Json (span) {
   const formatted = {}

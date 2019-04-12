@@ -4,8 +4,8 @@ const pick = require('lodash.pick')
 const Uint64BE = require('int64-buffer').Uint64BE
 const SignalFxSpanContext = require('../span_context')
 const log = require('../../log')
-const { idToHex } = require('../../utils')
-const { priority } = require('../../../ext')
+const idToHex = require('../../utils').idToHex
+const priority = require('../../../ext').priority
 
 const traceIdKey = 'x-b3-traceid'
 const spanIdKey = 'x-b3-spanid'
