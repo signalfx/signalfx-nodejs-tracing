@@ -1,12 +1,13 @@
 'use strict'
 
-module.exports = {
+const tags = {
   // Common
   SERVICE_NAME: 'service.name',
   RESOURCE_NAME: 'resource.name',
   SPAN_TYPE: 'span.type',
   SPAN_KIND: 'span.kind',
   SAMPLING_PRIORITY: 'sampling.priority',
+  ANALYTICS: '_dd1.sr.eausr',
   ERROR: 'error',
 
   // HTTP
@@ -17,3 +18,8 @@ module.exports = {
   HTTP_REQUEST_HEADERS: 'http.request.headers',
   HTTP_RESPONSE_HEADERS: 'http.response.headers'
 }
+
+// Deprecated
+tags.ANALYTICS_SAMPLE_RATE = tags.ANALYTICS
+
+module.exports = tags

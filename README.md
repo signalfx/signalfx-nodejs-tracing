@@ -44,6 +44,7 @@ For detailed information about configuration and usage, please see the [API docu
 * [amqplib 0.5+](http://www.squaremobius.net/amqp.node/) - `use('amqplib')`
 * [bluebird 2+](https://github.com/petkaantonov/bluebird) - `use('bluebird')`
 * [bunyan 1+](https://github.com/trentm/node-bunyan) - `use('bunyan')`
+* [cassandra-driver](https://github.com/datastax/nodejs-driver) - `use('cassandra-driver')`
 * [dns](https://nodejs.org/api/dns.html) - `use('dns')`
 * [elasticsearch 10+](https://www.elastic.co/guide/en/elasticsearch/client/javascript-api/current/index.html) - `use('elasticsearch')`
 * [express 4+](http://expressjs.com/) - `use('express')`

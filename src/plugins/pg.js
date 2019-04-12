@@ -1,12 +1,13 @@
 'use strict'
 
 const Tags = require('opentracing').Tags
+const analyticsSampler = require('../analytics_sampler')
 
 const OPERATION_NAME = 'pg.query'
 
-function patch (pg, tracer, config) {
-  function queryWrap (query) {
-    return function queryTrace () {
+function createWrapQuery (tracer, config) {
+  return function wrapQuery (query) {
+    return function queryWithTrace () {
       const scope = tracer.scope()
       const childOf = scope.active()
       const span = tracer.startSpan(OPERATION_NAME, {
@@ -19,8 +20,12 @@ function patch (pg, tracer, config) {
         }
       })
 
+      analyticsSampler.sample(span, config.analytics)
+
       const retval = scope.bind(query, span).apply(this, arguments)
-      const pgQuery = this.queryQueue[this.queryQueue.length - 1] || this.activeQuery
+      const queryQueue = this.queryQueue || this._queryQueue
+      const activeQuery = this.activeQuery || this._activeQuery
+      const pgQuery = queryQueue[queryQueue.length - 1] || activeQuery
 
       if (!pgQuery) {
         return retval
@@ -60,17 +65,28 @@ function patch (pg, tracer, config) {
       return retval
     }
   }
-
-  this.wrap(pg.Client.prototype, 'query', queryWrap)
 }
 
-function unpatch (pg) {
-  this.unwrap(pg.Client.prototype, 'query')
-}
-
-module.exports = {
-  name: 'pg',
-  versions: ['>=4'],
-  patch,
-  unpatch
-}
+module.exports = [
+  {
+    name: 'pg',
+    versions: ['>=4'],
+    patch (pg, tracer, config) {
+      this.wrap(pg.Client.prototype, 'query', createWrapQuery(tracer, config))
+    },
+    unpatch (pg) {
+      this.unwrap(pg.Client.prototype, 'query')
+    }
+  },
+  {
+    name: 'pg',
+    versions: ['>=4'],
+    file: 'lib/native/index.js',
+    patch (Client, tracer, config) {
+      this.wrap(Client.prototype, 'query', createWrapQuery(tracer, config))
+    },
+    unpatch (Client) {
+      this.unwrap(Client.prototype, 'query')
+    }
+  }
+]

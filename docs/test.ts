@@ -8,11 +8,14 @@ let span: Span;
 let context: SpanContext;
 let traceId: string;
 let spanId: string;
+let promise: Promise<void>;
 
 sfxTrace.init();
 tracer.init({
   debug: true,
   enabled: true,
+  logInjection: true,
+  analytics: true,
   env: 'test',
   experimental: true,
   hostname: 'agent',
@@ -63,6 +66,7 @@ tracer.use('amqp10');
 tracer.use('amqplib');
 tracer.use('bluebird');
 tracer.use('bunyan');
+tracer.use('cassandra-driver');
 tracer.use('dns');
 tracer.use('elasticsearch');
 tracer.use('express');
@@ -96,6 +100,13 @@ tracer.use('router');
 tracer.use('when');
 tracer.use('winston');
 
+tracer.use('express', false)
+tracer.use('express', { enabled: false })
+tracer.use('express', { service: 'name' });
+tracer.use('express', { analytics: true });
+tracer.use('express', { analytics: { enabled: true, sampleRate: 0.5 } });
+tracer.use('express', { analytics: { sampleRates: { 'express.request': 0.5 } } });
+
 span = tracer.startSpan('test');
 span = tracer.startSpan('test', {});
 span = tracer.startSpan('test', {
@@ -106,6 +117,22 @@ span = tracer.startSpan('test', {
     foo: 'bar'
   }
 });
+
+tracer.trace('test', () => {})
+tracer.trace('test', { tags: { foo: 'bar' }}, () => {})
+tracer.trace('test', { service: 'foo', resource: 'bar', type: 'baz' }, () => {})
+tracer.trace('test', { analytics: true }, () => {})
+tracer.trace('test', { analytics: 0.5 }, () => {})
+tracer.trace('test', (span: Span) => {})
+tracer.trace('test', (span: Span, fn: () => void) => {})
+tracer.trace('test', (span: Span, fn: (err: Error) => string) => {})
+
+promise = tracer.trace('test', () => Promise.resolve())
+
+tracer.wrap('test', () => {})
+tracer.wrap('test', (foo: string) => 'test')
+
+promise = tracer.wrap('test', () => Promise.resolve())()
 
 const carrier = {}
 
@@ -119,12 +146,14 @@ const scope = tracer.scope()
 
 span = scope.active();
 
-scope.activate(span, () => {});
+const activateStringType: string = scope.activate(span, () => 'test');
+const activateVoidType: void = scope.activate(span, () => {});
 
-scope.bind((arg1: string, arg2: number): string => 'test');
-scope.bind((arg1: string, arg2: number): string => 'test', span);
+const bindFunctionStringType: (arg1: string, arg2: number) => string = scope.bind((arg1: string, arg2: number): string => 'test');
+const bindFunctionVoidType: (arg1: string, arg2: number) => void = scope.bind((arg1: string, arg2: number): void => {});
+const bindFunctionVoidTypeWithSpan: (arg1: string, arg2: number) => void = scope.bind((arg1: string, arg2: number): string => 'test', span);
 
-const promise = Promise.resolve();
+Promise.resolve();
 
 scope.bind(promise);
 scope.bind(promise, span);

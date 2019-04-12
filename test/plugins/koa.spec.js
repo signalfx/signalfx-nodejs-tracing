@@ -7,6 +7,8 @@ const plugin = require('../../src/plugins/koa')
 
 wrapIt()
 
+const sort = spans => spans.sort((a, b) => a.start.toString() >= b.start.toString() ? 1 : -1)
+
 describe('Plugin', () => {
   let tracer
   let Koa
@@ -35,19 +37,25 @@ describe('Plugin', () => {
         it('should do automatic instrumentation on 2.x middleware', done => {
           const app = new Koa()
 
-          app.use((ctx) => {
+          app.use(function handle (ctx) {
             ctx.body = ''
           })
 
           agent
             .use(traces => {
-              expect(traces[0][0]).to.have.property('service', 'test')
-              expect(traces[0][0]).to.have.property('name', 'GET')
-              expect(traces[0][0].meta).to.have.property('component', 'koa')
-              expect(traces[0][0].meta).to.have.property('span.kind', 'server')
-              expect(traces[0][0].meta).to.have.property('http.url', `http://localhost:${port}/user`)
-              expect(traces[0][0].meta).to.have.property('http.method', 'GET')
-              expect(traces[0][0].meta).to.have.property('http.status_code', '200')
+              const spans = sort(traces[0])
+
+              expect(spans[0]).to.have.property('service', 'test')
+              expect(spans[0]).to.have.property('name', 'GET')
+              expect(spans[0].meta).to.have.property('component', 'koa')
+              expect(spans[0].meta).to.have.property('span.kind', 'server')
+              expect(spans[0].meta).to.have.property('http.url', `http://localhost:${port}/user`)
+              expect(spans[0].meta).to.have.property('http.method', 'GET')
+              expect(spans[0].meta).to.have.property('http.status_code', '200')
+
+              expect(spans[1]).to.have.property('service', 'test')
+              expect(spans[1]).to.have.property('name', 'handle')
+              expect(spans[1].meta).to.have.property('component', 'koa')
             })
             .then(done)
             .catch(done)
@@ -62,20 +70,26 @@ describe('Plugin', () => {
         it('should do automatic instrumentation on 1.x middleware', done => {
           const app = new Koa()
 
-          app.use(function * (next) {
+          app.use(function * handle (next) {
             this.body = ''
             yield next
           })
 
           agent
             .use(traces => {
-              expect(traces[0][0]).to.have.property('service', 'test')
-              expect(traces[0][0]).to.have.property('name', 'GET')
-              expect(traces[0][0].meta).to.have.property('component', 'koa')
-              expect(traces[0][0].meta).to.have.property('span.kind', 'server')
-              expect(traces[0][0].meta).to.have.property('http.url', `http://localhost:${port}/user`)
-              expect(traces[0][0].meta).to.have.property('http.method', 'GET')
-              expect(traces[0][0].meta).to.have.property('http.status_code', '200')
+              const spans = sort(traces[0])
+
+              expect(spans[0]).to.have.property('service', 'test')
+              expect(spans[0]).to.have.property('name', 'GET')
+              expect(spans[0].meta).to.have.property('component', 'koa')
+              expect(spans[0].meta).to.have.property('span.kind', 'server')
+              expect(spans[0].meta).to.have.property('http.url', `http://localhost:${port}/user`)
+              expect(spans[0].meta).to.have.property('http.method', 'GET')
+              expect(spans[0].meta).to.have.property('http.status_code', '200')
+
+              expect(spans[1]).to.have.property('service', 'test')
+              expect(spans[1]).to.have.property('name', 'handle')
+              expect(spans[1].meta).to.have.property('component', 'koa')
             })
             .then(done)
             .catch(done)
@@ -112,23 +126,22 @@ describe('Plugin', () => {
           })
         })
 
-        it('should reactivate the request span in middleware scopes', done => {
+        it('should activate a scope per middleware', done => {
           if (process.env.SIGNALFX_CONTEXT_PROPAGATION === 'false') return done()
-
           const app = new Koa()
 
           let span
 
           app.use((ctx, next) => {
             span = tracer.scope().active()
-            tracer.scope().activate({}, () => next())
+            return tracer.scope().activate(null, () => next())
           })
 
-          app.use((ctx) => {
+          app.use(ctx => {
             ctx.body = ''
 
             try {
-              expect(tracer.scope().active()).to.equal(span)
+              expect(tracer.scope().active()).to.not.be.null.and.not.equal(span)
               done()
             } catch (e) {
               done(e)
@@ -138,6 +151,62 @@ describe('Plugin', () => {
           getPort().then(port => {
             appListener = app.listen(port, 'localhost', () => {
               axios.get(`http://localhost:${port}/user`)
+                .catch(done)
+            })
+          })
+        })
+
+        it('should finish middleware spans in the correct order', done => {
+          const app = new Koa()
+
+          let parentSpan
+          let childSpan
+
+          app.use((ctx, next) => {
+            parentSpan = tracer.scope().active()
+
+            sinon.spy(parentSpan, 'finish')
+
+            setImmediate(() => {
+              try {
+                expect(childSpan.finish).to.have.been.called
+                expect(parentSpan.finish).to.have.been.called
+                expect(parentSpan.finish).to.have.been.calledAfter(childSpan.finish)
+                expect(childSpan.context()._parentId.toString()).to.equal(parentSpan.context().toSpanId())
+                expect(parentSpan.context()._parentId).to.not.be.null
+                done()
+              } catch (e) {
+                done(e)
+              }
+            })
+
+            return next()
+          })
+
+          app.use((ctx, next) => {
+            childSpan = tracer.scope().active()
+
+            sinon.spy(childSpan, 'finish')
+
+            ctx.body = ''
+
+            setImmediate(() => {
+              try {
+                expect(childSpan.finish).to.have.been.called
+              } catch (e) {
+                done(e)
+              }
+            })
+
+            expect(parentSpan.finish).to.not.have.been.called
+
+            return next()
+          })
+
+          getPort().then(port => {
+            appListener = app.listen(port, 'localhost', () => {
+              axios
+                .get(`http://localhost:${port}/app/user/1`)
                 .catch(done)
             })
           })
@@ -154,7 +223,7 @@ describe('Plugin', () => {
             const app = new Koa()
             const router = new Router()
 
-            router.get('/user/:id', (ctx, next) => {
+            router.get('user', '/user/:id', function handle (ctx, next) {
               ctx.body = ''
             })
 
@@ -164,8 +233,14 @@ describe('Plugin', () => {
 
             agent
               .use(traces => {
-                expect(traces[0][0]).to.have.property('name', 'GET /user/:id')
-                expect(traces[0][0].meta).to.have.property('http.url', `http://localhost:${port}/user/123`)
+                const spans = sort(traces[0])
+
+                expect(spans[0]).to.have.property('name', 'GET /user/:id')
+                expect(spans[0].meta).to.have.property('http.url', `http://localhost:${port}/user/123`)
+
+                expect(spans[1]).to.have.property('name', 'dispatch')
+
+                expect(spans[2]).to.have.property('name', 'handle')
               })
               .then(done)
               .catch(done)
@@ -192,7 +267,9 @@ describe('Plugin', () => {
 
             agent
               .use(traces => {
-                expect(traces[0][0]).to.have.property('name', 'GET /user/:id')
+                const spans = sort(traces[0])
+
+                expect(spans[0]).to.have.property('name', 'GET /user/:id')
               })
               .then(done)
               .catch(done)
@@ -219,8 +296,10 @@ describe('Plugin', () => {
 
             agent
               .use(traces => {
-                expect(traces[0][0]).to.have.property('name', 'GET /forums/:fid/posts/:pid')
-                expect(traces[0][0].meta).to.have.property('http.url', `http://localhost:${port}/forums/123/posts/456`)
+                const spans = sort(traces[0])
+
+                expect(spans[0]).to.have.property('name', 'GET /forums/:fid/posts/:pid')
+                expect(spans[0].meta).to.have.property('http.url', `http://localhost:${port}/forums/123/posts/456`)
               })
               .then(done)
               .catch(done)
@@ -250,8 +329,10 @@ describe('Plugin', () => {
 
             agent
               .use(traces => {
-                expect(traces[0][0]).to.have.property('name', 'GET /forums/:fid/posts/:pid')
-                expect(traces[0][0].meta).to.have.property('http.url', `http://localhost:${port}/forums/123/posts/456`)
+                const spans = sort(traces[0])
+
+                expect(spans[0]).to.have.property('name', 'GET /forums/:fid/posts/:pid')
+                expect(spans[0].meta).to.have.property('http.url', `http://localhost:${port}/forums/123/posts/456`)
               })
               .then(done)
               .catch(done)
@@ -279,8 +360,10 @@ describe('Plugin', () => {
 
             agent
               .use(traces => {
-                expect(traces[0][0]).to.have.property('name', 'GET /user/:id')
-                expect(traces[0][0].meta).to.have.property('http.url', `http://localhost:${port}/user/123`)
+                const spans = sort(traces[0])
+
+                expect(spans[0]).to.have.property('name', 'GET /user/:id')
+                expect(spans[0].meta).to.have.property('http.url', `http://localhost:${port}/user/123`)
               })
               .then(done)
               .catch(done)
@@ -292,14 +375,15 @@ describe('Plugin', () => {
             })
           })
 
-          it('should handle errors', done => {
+          it('should handle request errors', done => {
+            const error = new Error('boom')
             const app = new Koa()
             const router = new Router({
               prefix: '/user'
             })
 
             router.get('/:id', (ctx, next) => {
-              throw new Error()
+              throw error
             })
 
             app.silent = true
@@ -309,9 +393,17 @@ describe('Plugin', () => {
 
             agent
               .use(traces => {
-                expect(traces[0][0]).to.have.property('name', 'GET /user/:id')
-                expect(traces[0][0].meta).to.have.property('http.url', `http://localhost:${port}/user/123`)
-                expect(traces[0][0].meta.error).to.equal('true')
+                const spans = sort(traces[0])
+
+                expect(spans[0]).to.have.property('name', 'GET /user/:id')
+                expect(spans[0].meta).to.have.property('http.url', `http://localhost:${port}/user/123`)
+                expect(spans[0].meta.error).to.equal('true')
+
+                expect(spans[1]).to.have.property('name', 'dispatch')
+                expect(spans[1].meta).to.include({
+                  'error.type': error.name
+                })
+                expect(spans[0].meta.error).to.equal('true')
               })
               .then(done)
               .catch(done)
@@ -381,18 +473,18 @@ describe('Plugin', () => {
           const spans = []
           agent
             .use(traces => {
-              spans.push(traces[0][0])
+              spans.push(...sort(traces[0]))
             }).then(() => {
               agent.use(t => {
                 spans.push(t[0][0])
-                expect(spans).to.have.length(2)
+                expect(spans).to.have.length(3)
                 expect(spans[0]).to.have.property('name', 'GET')
                 expect(spans[0].meta).to.have.property('component', 'koa')
                 expect(spans[0].meta).to.have.property('span.kind', 'server')
-                expect(spans[0].parent_id.toString()).to.equal(spans[1].trace_id.toString())
+                expect(spans[0].parent_id.toString()).to.equal(spans[2].trace_id.toString())
 
-                expect(spans[1].meta).to.have.property('span.kind', 'client')
-                expect(spans[1].meta).to.have.property('component', 'http')
+                expect(spans[2].meta).to.have.property('span.kind', 'client')
+                expect(spans[2].meta).to.have.property('component', 'http')
               }).then(done).catch(done)
             })
 

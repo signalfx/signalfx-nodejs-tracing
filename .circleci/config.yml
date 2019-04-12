@@ -155,7 +155,6 @@ jobs:
     docker:
       - image: node:8
         environment:
-          - SERVICES=
           - PLUGINS=bluebird
 
   node-bunyan:
@@ -163,15 +162,24 @@ jobs:
     docker:
       - image: node:8
         environment:
-          - SERVICES=
           - PLUGINS=bunyan
+
+  node-cassandra:
+    <<: *node-plugin-base
+    docker:
+      - image: node:8
+        environment:
+          - SERVICES=cassandra
+          - PLUGINS=cassandra-driver
+      - image: spotify/cassandra
+        environment:
+          - CASSANDRA_TOKEN=-9223372036854775808
 
   node-dns:
     <<: *node-plugin-base
     docker:
       - image: node:8
         environment:
-          - SERVICES=
           - PLUGINS=dns
 
   node-elasticsearch:
@@ -191,7 +199,6 @@ jobs:
     docker:
       - image: node:8
         environment:
-          - SERVICES=
           - PLUGINS=express
 
   node-generic-pool:
@@ -199,7 +206,6 @@ jobs:
     docker:
       - image: node:8
         environment:
-          - SERVICES=
           - PLUGINS=generic-pool
 
   node-graphql:
@@ -207,7 +213,6 @@ jobs:
     docker:
       - image: node:8
         environment:
-          - SERVICES=
           - PLUGINS=graphql
 
   node-hapi:
@@ -215,7 +220,6 @@ jobs:
     docker:
       - image: node:8
         environment:
-          - SERVICES=
           - PLUGINS=hapi
 
   node-http:
@@ -223,7 +227,6 @@ jobs:
     docker:
       - image: node:8
         environment:
-          - SERVICES=
           - PLUGINS=http
 
   node-koa:
@@ -231,7 +234,6 @@ jobs:
     docker:
       - image: node:8
         environment:
-          - SERVICES=
           - PLUGINS=koa
 
   node-memcached:
@@ -272,7 +274,6 @@ jobs:
     docker:
       - image: node:8
         environment:
-          - SERVICES=
           - PLUGINS=net
 
   node-pino:
@@ -280,7 +281,6 @@ jobs:
     docker:
       - image: node:8
         environment:
-          - SERVICES=
           - PLUGINS=pino
 
   node-postgres:
@@ -290,6 +290,7 @@ jobs:
         environment:
           - SERVICES=postgres
           - PLUGINS=pg
+          - PG_TEST_NATIVE=true
       - image: postgres:9.5
 
   node-q:
@@ -297,7 +298,6 @@ jobs:
     docker:
       - image: node:8
         environment:
-          - SERVICES=
           - PLUGINS=q
 
   node-redis:
@@ -314,7 +314,6 @@ jobs:
     docker:
       - image: node:8
         environment:
-          - SERVICES=
           - PLUGINS=restify
 
   node-router:
@@ -322,7 +321,6 @@ jobs:
     docker:
       - image: node:8
         environment:
-          - SERVICES=
           - PLUGINS=router
 
   node-when:
@@ -330,7 +328,6 @@ jobs:
     docker:
       - image: node:8
         environment:
-          - SERVICES=
           - PLUGINS=when
 
   node-winston:
@@ -338,7 +335,6 @@ jobs:
     docker:
       - image: node:8
         environment:
-          - SERVICES=
           - PLUGINS=winston
 
   typescript:
@@ -388,6 +384,7 @@ workflows:
       - node-amqp10
       - node-bluebird
       - node-bunyan
+      - node-cassandra
       - node-dns
       - node-elasticsearch
       - node-express
@@ -425,6 +422,7 @@ workflows:
       - node-amqp10
       - node-bluebird
       - node-bunyan
+      - node-cassandra
       - node-dns
       - node-elasticsearch
       - node-express
