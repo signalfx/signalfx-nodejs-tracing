@@ -319,7 +319,7 @@ describe('Plugin', () => {
             appListener = app.listen(port, 'localhost', () => {
               axios
                 .get(`http://localhost:${port}/user/123`)
-                .catch(() => {})
+                .catch(() => { })
             })
           })
 
@@ -343,7 +343,7 @@ describe('Plugin', () => {
 
               router.all('/message', (ctx, next) => {
                 ctx.websocket.send('pong')
-                ctx.websocket.on('message', message => {})
+                ctx.websocket.on('message', message => { })
               })
 
               app.ws
@@ -366,49 +366,45 @@ describe('Plugin', () => {
           })
         })
       })
-    })
-  })
+      describe('with client and without configuration', () => {
+        before(() => agent.load(plugin, ['koa', 'http/client']))
+        after(() => agent.close())
 
-  describe('with client and without configuration', () => {
-    before(() => agent.load(plugin, ['koa', 'http']))
-    after(() => agent.close())
-    return getPort().then(newPort => {
-        port = newPort
-      })
+        it('should propagate a client request to parent the server response', done => {
+          if (process.env.SIGNALFX_CONTEXT_PROPAGATION === 'false') return done()
+          const app = new Koa()
 
-    it('should propagate a client request to parent the server response', done => {
-      if (process.env.SIGNALFX_CONTEXT_PROPAGATION === 'false') return done()
-        const app = new Koa()
+          app.use((ctx) => {
+            ctx.body = ''
+          })
 
-        app.use((ctx) => {
-          ctx.body = ''
-        })
-  
-        agent
-        .use(traces => {
-          const spans = traces[0]
+          const spans = []
+          agent
+            .use(traces => {
+              spans.push(traces[0][0])
+            }).then(() => {
+              agent.use(t => {
+                spans.push(t[0][0])
+                expect(spans).to.have.length(2)
+                expect(spans[0]).to.have.property('name', 'GET')
+                expect(spans[0].meta).to.have.property('component', 'koa')
+                expect(spans[0].meta).to.have.property('span.kind', 'server')
+                expect(spans[0].parent_id.toString()).to.equal(spans[1].trace_id.toString())
 
-          expect(spans).to.have.length(2)
-          expect(spans[0]).to.have.property('name', 'GET')
-          expect(spans[0].meta).to.have.property('component', 'http')
-          expect(spans[0].meta).to.have.property('span.kind', 'client')
-          expect(spans[1]).to.have.property('span.kind', 'server')
-          expect(spans[1].meta).to.have.property('component', 'koa')
-          expect(spans[1].parent_id.toString()).to.equal(spans[0].trace_id.toString())
-        })
-        .then(done)
-        .catch(done)
-
-      const http = require('http')
-      appListener = app.listen(port, 'localhost', () => {
-        const req = http.request(`http://localhost:${port}/user`, res => {
-              res.on('data', () => {})
-              res.on('end', () => {
-                done()
-              })
+                expect(spans[1].meta).to.have.property('span.kind', 'client')
+                expect(spans[1].meta).to.have.property('component', 'http')
+              }).then(done).catch(done)
             })
+
+          const http = require('http')
+          appListener = app.listen(port, 'localhost', () => {
+            const req = http.request(`http://localhost:${port}/user`, res => {
+              res.on('data', () => { })
+            })
+            req.end()
+          })
+        })
       })
     })
   })
-    
 })
