@@ -9,7 +9,7 @@ function createWrapHandle (tracer, config) {
     return function handleWithTracer (req, res, done) {
       web.patch(req)
 
-      return handle.call(this, req, res, wrapDone(done, req))
+      return handle.apply(this, arguments)
     }
   }
 }
@@ -24,7 +24,7 @@ function createWrapProcessParams (tracer, config) {
       if (web.active(req) && matchers) {
         // Try to guess which path actually matched
         for (let i = 0; i < matchers.length; i++) {
-          if (matchers[i].test(layer.path)) {
+          if (matchers[i].test(layer)) {
             web.enterRoute(req, matchers[i].path)
 
             break
@@ -87,25 +87,13 @@ function wrapNext (layer, req, next) {
   const originalNext = next
 
   return function (error) {
-    if (!error && layer.path && !isFastStar(layer)) {
+    if (!error && layer.path && !isFastStar(layer) && !isFastSlash(layer)) {
       web.exitRoute(req)
     }
 
-    addError(web.active(req), error)
-
-    web.finish(req)
+    web.finish(req, error)
 
     originalNext.apply(null, arguments)
-  }
-}
-
-function wrapDone (original, req) {
-  return function done (error) {
-    const span = web.root(req)
-
-    addError(span, error)
-
-    return original.apply(this, arguments)
   }
 }
 
@@ -115,12 +103,7 @@ function callHandle (layer, handle, req, args) {
     if (span) {
       span.setTag('component', 'express')
     }
-
-    try {
-      return handle.apply(layer, args)
-    } catch (e) {
-      throw addError(web.active(req), e)
-    }
+    return handle.apply(layer, args)
   })
 }
 
@@ -133,7 +116,7 @@ function extractMatchers (fn) {
 
   return arg.map(pattern => ({
     path: pattern instanceof RegExp ? `(${pattern})` : pattern,
-    test: path => pathToRegExp(pattern).test(path)
+    test: layer => !isFastStar(layer) && !isFastSlash(layer) && pathToRegExp(pattern).test(layer.path)
   }))
 }
 
@@ -145,20 +128,16 @@ function isFastStar (layer) {
   return layer._datadog_matchers.some(matcher => matcher.path === '*')
 }
 
-function flatten (arr) {
-  return arr.reduce((acc, val) => Array.isArray(val) ? acc.concat(flatten(val)) : acc.concat(val), [])
-}
-
-function addError (span, error) {
-  if (error) {
-    span.addTags({
-      'error.type': error.name,
-      'error.msg': error.message,
-      'error.stack': error.stack
-    })
+function isFastSlash (layer) {
+  if (layer.regexp.fast_slash !== undefined) {
+    return layer.regexp.fast_slash
   }
 
-  return error
+  return layer._datadog_matchers.some(matcher => matcher.path === '/')
+}
+
+function flatten (arr) {
+  return arr.reduce((acc, val) => Array.isArray(val) ? acc.concat(flatten(val)) : acc.concat(val), [])
 }
 
 module.exports = {

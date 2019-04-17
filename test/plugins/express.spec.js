@@ -84,8 +84,8 @@ describe('Plugin', () => {
                 const spans = sort(traces[0])
 
                 expect(spans[0]).to.have.property('service', 'test')
-                expect(spans[0].meta).to.have.property('component', 'express')
                 expect(spans[0]).to.have.property('name', 'GET /app/user/:id')
+                expect(spans[0].meta).to.have.property('component', 'express')
                 expect(spans[0].meta).to.have.property('span.kind', 'server')
                 expect(spans[0].meta).to.have.property('http.url', `http://localhost:${port}/app/user/1`)
                 expect(spans[0].meta).to.have.property('http.method', 'GET')
@@ -120,8 +120,8 @@ describe('Plugin', () => {
                 const spans = sort(traces[0])
 
                 expect(spans[0]).to.have.property('service', 'test')
-                expect(spans[0].meta).to.have.property('component', 'express')
                 expect(spans[0]).to.have.property('name', 'GET /app/user/:id')
+                expect(spans[0].meta).to.have.property('component', 'express')
                 expect(spans[0].meta).to.have.property('span.kind', 'server')
                 expect(spans[0].meta).to.have.property('http.url', `http://localhost:${port}/app/user/1`)
                 expect(spans[0].meta).to.have.property('http.method', 'GET')
@@ -704,6 +704,39 @@ describe('Plugin', () => {
           })
         })
 
+        it('should only handle errors for configured status codes', done => {
+          const app = express()
+
+          app.use((req, res, next) => {
+            next()
+          })
+
+          app.get('/user', (req, res) => {
+            res.statusCode = 400
+            throw new Error('boom')
+          })
+
+          getPort().then(port => {
+            agent.use(traces => {
+              const spans = sort(traces[0])
+
+              expect(spans[0].meta).to.not.have.property('error')
+              expect(spans[0]).to.have.property('name', 'GET /user')
+              expect(spans[0].meta).to.have.property('http.status_code', '400')
+
+              done()
+            })
+
+            appListener = app.listen(port, 'localhost', () => {
+              axios
+                .get(`http://localhost:${port}/user`, {
+                  validateStatus: status => status === 400
+                })
+                .catch(done)
+            })
+          })
+        })
+
         it('should handle request errors', done => {
           const app = express()
           const error = new Error('boom')
@@ -756,6 +789,32 @@ describe('Plugin', () => {
                 .get(`http://localhost:${port}/user`, {
                   validateStatus: status => status === 500
                 })
+                .catch(done)
+            })
+          })
+        })
+
+        it('should support capturing groups in routes', done => {
+          const app = express()
+
+          app.get('/:path(*)', (req, res) => {
+            res.status(200).send()
+          })
+
+          getPort().then(port => {
+            agent
+              .use(traces => {
+                const spans = sort(traces[0])
+
+                expect(spans[0]).to.have.property('name', 'GET /:path(*)')
+                expect(spans[0].meta).to.have.property('http.url', `http://localhost:${port}/user`)
+              })
+              .then(done)
+              .catch(done)
+
+            appListener = app.listen(port, 'localhost', () => {
+              axios
+                .get(`http://localhost:${port}/user`)
                 .catch(done)
             })
           })

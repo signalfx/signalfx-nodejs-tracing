@@ -224,6 +224,20 @@ describe('plugins/util/web', () => {
           })
         })
       })
+
+      it('should remove the query string from the URL', () => {
+        req.method = 'GET'
+        req.url = '/user/123?foo=bar'
+        res.statusCode = '200'
+
+        web.instrument(tracer, config, req, res, 'test.request', span => {
+          res.end()
+
+          expect(span.context()._tags).to.include({
+            [HTTP_URL]: 'http://localhost/user/123'
+          })
+        })
+      })
     })
 
     describe('on request end', () => {
@@ -300,7 +314,7 @@ describe('plugins/util/web', () => {
         res.end()
 
         expect(span.context()._tags).to.include({
-          [ERROR]: 'true'
+          [ERROR]: true
         })
       })
 
@@ -310,7 +324,7 @@ describe('plugins/util/web', () => {
         res.end()
 
         expect(span.context()._tags).to.include({
-          [ERROR]: 'true'
+          [ERROR]: true
         })
       })
 
@@ -432,6 +446,24 @@ describe('plugins/util/web', () => {
         web.finish(req, fn, 'middleware')
 
         expect(span.finish).to.have.been.called
+
+        done()
+      }
+
+      web.wrapMiddleware(req, fn, 'middleware', () => fn(req, res))
+    })
+
+    it('should add an error if provided', (done) => {
+      const fn = () => {
+        const span = tracer.scope().active()
+        const error = new Error('boom')
+
+        sinon.spy(span, 'finish')
+        web.finish(req, error)
+
+        expect(span.context()._tags['error.type']).to.equal(error.name)
+        expect(span.context()._tags['error.msg']).to.equal(error.message)
+        expect(span.context()._tags['error.stack']).to.equal(error.stack)
 
         done()
       }

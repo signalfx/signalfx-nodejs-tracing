@@ -42,6 +42,7 @@ describe('Config', () => {
     platform.env.withArgs('SIGNALFX_TRACE_AGENT_PORT').returns('6218')
     platform.env.withArgs('SIGNALFX_TRACING_ENABLED').returns('false')
     platform.env.withArgs('SIGNALFX_TRACING_DEBUG').returns('true')
+    platform.env.withArgs('SIGNALFX_TRACE_ANALYTICS').returns('true')
     platform.env.withArgs('SIGNALFX_SERVICE_NAME').returns('service')
     platform.env.withArgs('SIGNALFX_ENV').returns('test')
 
@@ -49,6 +50,7 @@ describe('Config', () => {
 
     expect(config).to.have.property('enabled', false)
     expect(config).to.have.property('debug', true)
+    expect(config).to.have.property('analytics', true)
     expect(config).to.have.nested.property('url.protocol', 'http:')
     expect(config).to.have.nested.property('url.hostname', 'localhost')
     expect(config).to.have.nested.property('url.port', '9080')
@@ -82,6 +84,7 @@ describe('Config', () => {
     const config = new Config({
       enabled: false,
       debug: true,
+      analytics: true,
       hostname: 'agent',
       port: 6218,
       service: 'service',
@@ -96,6 +99,7 @@ describe('Config', () => {
 
     expect(config).to.have.property('enabled', false)
     expect(config).to.have.property('debug', true)
+    expect(config).to.have.property('analytics', true)
     expect(config).to.have.nested.property('url.protocol', 'http:')
     expect(config).to.have.nested.property('url.hostname', 'localhost')
     expect(config).to.have.nested.property('url.port', '9080')
@@ -156,12 +160,14 @@ describe('Config', () => {
     platform.env.withArgs('SIGNALFX_TRACE_AGENT_PORT').returns('6218')
     platform.env.withArgs('SIGNALFX_TRACING_ENABLED').returns('false')
     platform.env.withArgs('SIGNALFX_TRACING_DEBUG').returns('true')
+    platform.env.withArgs('SIGNALFX_TRACE_ANALYTICS').returns('true')
     platform.env.withArgs('SIGNALFX_SERVICE_NAME').returns('service')
     platform.env.withArgs('SIGNALFX_ENV').returns('test')
 
     const config = new Config({
       enabled: true,
       debug: false,
+      analytics: false,
       protocol: 'https',
       hostname: 'server',
       port: 7777,
@@ -171,6 +177,7 @@ describe('Config', () => {
 
     expect(config).to.have.property('enabled', true)
     expect(config).to.have.property('debug', false)
+    expect(config).to.have.property('analytics', false)
     expect(config).to.have.nested.property('url.protocol', 'https:')
     expect(config).to.have.nested.property('url.hostname', 'agent2')
     expect(config).to.have.nested.property('url.port', '6218')

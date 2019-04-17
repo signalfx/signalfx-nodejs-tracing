@@ -61,7 +61,8 @@ describe('Span', () => {
       _baggageItems: { foo: 'bar' },
       _trace: {
         started: ['span'],
-        finished: []
+        finished: [],
+        origin: 'synthetics'
       }
     }
 
@@ -71,6 +72,7 @@ describe('Span', () => {
     expect(span.context()._parentId).to.deep.equal(new Uint64BE(456, 456))
     expect(span.context()._baggageItems).to.deep.equal({ foo: 'bar' })
     expect(span.context()._trace.started).to.deep.equal(['span', span])
+    expect(span.context()._trace.origin).to.equal('synthetics')
   })
 
   it('should start a new trace if the parent trace is finished', () => {
@@ -81,13 +83,15 @@ describe('Span', () => {
       _baggageItems: { foo: 'bar' },
       _trace: {
         started: ['span'],
-        finished: ['span']
+        finished: ['span'],
+        origin: 'synthetics'
       }
     }
 
     span = new Span(tracer, recorder, sampler, prioritySampler, { operationName: 'operation', parent })
 
     expect(span.context()._trace.started).to.deep.equal([span])
+    expect(span.context()._trace.origin).to.equal('synthetics')
   })
 
   it('should set the sample rate metric from the sampler', () => {
@@ -156,13 +160,6 @@ describe('Span', () => {
       span.addTags({ foo: 'bar' })
 
       expect(span.context()._tags).to.have.property('foo', 'bar')
-    })
-
-    it('should ensure tags are strings', () => {
-      span = new Span(tracer, recorder, sampler, prioritySampler, { operationName: 'operation' })
-      span.addTags({ foo: 123 })
-
-      expect(span.context()._tags).to.have.property('foo', '123')
     })
 
     it('should handle errors', () => {

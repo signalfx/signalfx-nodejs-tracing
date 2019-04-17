@@ -31,6 +31,11 @@ class Config {
     const sampleRate = coalesce(Math.min(Math.max(options.sampleRate, 0), 1), 1)
     const flushInterval = coalesce(parseInt(options.flushInterval, 10), 2000)
     const plugins = coalesce(options.plugins, true)
+    const analytics = coalesce(
+      options.analytics,
+      platform.env('SIGNALFX_TRACE_ANALYTICS_ENABLED'),
+      platform.env('SIGNALFX_TRACE_ANALYTICS')
+    )
 
     this.enabled = String(enabled) === 'true'
     this.debug = String(debug) === 'true'
@@ -51,6 +56,7 @@ class Config {
     this.logger = options.logger
     this.plugins = !!plugins
     this.service = coalesce(options.service, platform.env('SIGNALFX_SERVICE_NAME'), service, 'unnamed-node-service')
+    this.analytics = String(analytics) === 'true'
   }
 }
 

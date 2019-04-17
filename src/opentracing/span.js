@@ -54,6 +54,9 @@ class SignalFxSpan extends Span {
     let spanContext
 
     if (parent) {
+      const trace = parent._trace
+      const finished = trace.started.length === trace.finished.length
+
       spanContext = new SpanContext({
         traceId: parent._traceId,
         spanId: platform.id(),
@@ -61,7 +64,11 @@ class SignalFxSpan extends Span {
         sampled: parent._sampled,
         sampling: parent._sampling,
         baggageItems: parent._baggageItems,
-        trace: parent._trace.started.length !== parent._trace.finished.length ? parent._trace : null
+        trace: {
+          started: finished ? [] : trace.started,
+          finished: finished ? [] : trace.finished,
+          origin: trace.origin
+        }
       })
     } else {
       const spanId = platform.id()
@@ -100,7 +107,7 @@ class SignalFxSpan extends Span {
   _addTags (keyValuePairs) {
     try {
       Object.keys(keyValuePairs).forEach(key => {
-        this._spanContext._tags[key] = String(keyValuePairs[key])
+        this._spanContext._tags[key] = keyValuePairs[key]
       })
     } catch (e) {
       log.error(e)
