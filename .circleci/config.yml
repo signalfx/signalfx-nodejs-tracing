@@ -340,7 +340,7 @@ jobs:
   typescript:
     docker:
       - image: node:8
-    working_directory: ~/dd-trace-js
+    working_directory: ~/signalfx-nodejs-tracing
     resource_class: small
     steps:
       - checkout
