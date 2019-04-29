@@ -1,6 +1,6 @@
 'use strict'
 
-const tracer = require('..').init()
+const tracer = require('..').init({ zipkin: false })
 const benchmark = require('./benchmark')
 
 const suite = benchmark('dd-trace')

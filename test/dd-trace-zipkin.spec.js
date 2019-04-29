@@ -2,7 +2,6 @@
 
 const express = require('express')
 const bodyParser = require('body-parser')
-const getPort = require('get-port')
 
 describe('zipkin-v2-json-dd-trace', () => {
   let tracer
@@ -11,18 +10,15 @@ describe('zipkin-v2-json-dd-trace', () => {
 
   beforeEach(() => {
     tracer = require('../')
+    agent = express()
+    listener = agent.listen()
 
-    return getPort().then(port => {
-      agent = express()
-      listener = agent.listen()
-
-      tracer.init({
-        service: 'test',
-        url: `http://localhost:${listener.address().port}/my/collector/path`,
-        flushInterval: 0,
-        plugins: false,
-        accessToken: 'Token'
-      })
+    tracer.init({
+      service: 'test',
+      url: `http://localhost:${listener.address().port}/my/collector/path`,
+      flushInterval: 0,
+      plugins: false,
+      accessToken: 'Token'
     })
   })
 
