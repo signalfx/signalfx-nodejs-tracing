@@ -21,15 +21,14 @@ function createWrapQuery (tracer, config) {
         }
       })
 
-      if (this.config.database) {
-        span.setTag('db.name', this.config.database)
-      }
+      span.setTag('db.instance', this.config.database || 'sql')
 
       analyticsSampler.sample(span, config.analytics)
 
       const sequence = scope.bind(query, span).call(this, sql, values, cb)
 
-      span.setTag('resource.name', sequence.sql)
+      span.setTag('resource.name', sequence.sql.split(' ')[0])
+      span.setTag('db.statement', sequence.sql)
 
       if (sequence._callback) {
         sequence._callback = wrapCallback(tracer, span, childOf, sequence._callback)

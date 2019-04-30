@@ -81,9 +81,10 @@ describe('Plugin', () => {
           agent
             .use(traces => {
               expect(traces[0][0]).to.have.property('service', 'test')
-              expect(traces[0][0]).to.have.property('name', 'SELECT 1 + 1 AS solution')
+              expect(traces[0][0]).to.have.property('name', 'SELECT')
               expect(traces[0][0].meta).to.have.property('component', 'mysql2')
-              expect(traces[0][0].meta).to.have.property('db.name', 'db')
+              expect(traces[0][0].meta).to.have.property('db.instance', 'db')
+              expect(traces[0][0].meta).to.have.property('db.statement', 'SELECT 1 + 1 AS solution')
               expect(traces[0][0].meta).to.have.property('db.user', 'root')
               expect(traces[0][0].meta).to.have.property('db.type', 'mysql')
               expect(traces[0][0].meta).to.have.property('span.kind', 'client')
@@ -190,9 +191,12 @@ describe('Plugin', () => {
         it('should do automatic instrumentation', done => {
           agent
             .use(traces => {
+              // debugger
               expect(traces[0][0]).to.have.property('service', 'test')
-              expect(traces[0][0]).to.have.property('name', 'SELECT 1 + 1 AS solution')
+              expect(traces[0][0]).to.have.property('name', 'SELECT')
               expect(traces[0][0].meta).to.have.property('component', 'mysql2')
+              expect(traces[0][0].meta).to.have.property('db.instance', 'sql')
+              expect(traces[0][0].meta).to.have.property('db.statement', 'SELECT 1 + 1 AS solution')
               expect(traces[0][0].meta).to.have.property('db.user', 'root')
               expect(traces[0][0].meta).to.have.property('db.type', 'mysql')
               expect(traces[0][0].meta).to.have.property('span.kind', 'client')
