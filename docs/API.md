@@ -267,10 +267,11 @@ Each integration also has its own list of default tags. These tags get automatic
 
 ##### Configuration Options
 
-| Option           | Default                   | Description                            |
-|------------------|---------------------------|----------------------------------------|
-| validateStatus   | `code => code < 500`      | Callback function to determine if there was an error. It should take a status code as its only parameter and return `true` for success or `false` for errors. |
-| headers          | `[]`                      | An array of headers to include in the span tags. |
+| Option                    | Default                   | Description                            |
+|-------------------------|---------------------------|----------------------------------------|
+| validateStatus          | `code => code < 500`      | Callback function to determine if there was an error. It should take a status code as its only parameter and return `true` for success or `false` for errors. |
+| headers                 | `[]`                      | An array of headers to include in the span tags. |
+| expandRouteParameters | `{}`                      | An object of the form `{ '/exact/path/:paramOne/:paramTwo': { 'paramOne': true } }` that will expand parameter values for operation names for each request to that path.  Be sure to only use for low-cardinality parameters.  Omitted parameters default to `false`. |
 
 #### graphql
 

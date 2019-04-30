@@ -70,6 +70,7 @@ describe('plugins/util/web', () => {
       expect(config.hooks).to.be.an('object')
       expect(config.hooks).to.have.property('request')
       expect(config.hooks.request).to.be.a('function')
+      expect(config.expandRouteParameters).to.be.an('object')
     })
 
     it('should use the shared config if set', () => {
@@ -78,13 +79,15 @@ describe('plugins/util/web', () => {
         validateStatus: code => false,
         hooks: {
           request: () => 'test'
-        }
+        },
+        expandRouteParameters: { '/path': { 'thing': true } }
       })
 
       expect(config.headers).to.include('test')
       expect(config.validateStatus(200)).to.equal(false)
       expect(config).to.have.property('hooks')
       expect(config.hooks.request()).to.equal('test')
+      expect(config.expandRouteParameters).to.deep.equal({ '/path': { 'thing': true } })
     })
 
     it('should use the server config if set', () => {
@@ -94,7 +97,8 @@ describe('plugins/util/web', () => {
           validateStatus: code => false,
           hooks: {
             request: () => 'test'
-          }
+          },
+          expandRouteParameters: { '/path': { 'thing': true } }
         }
       })
 
@@ -102,6 +106,7 @@ describe('plugins/util/web', () => {
       expect(config.validateStatus(200)).to.equal(false)
       expect(config).to.have.property('hooks')
       expect(config.hooks.request()).to.equal('test')
+      expect(config.expandRouteParameters).to.deep.equal({ '/path': { 'thing': true } })
     })
 
     it('should prioritize the server config over the shared config', () => {

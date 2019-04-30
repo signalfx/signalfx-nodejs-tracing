@@ -822,10 +822,30 @@ describe('Plugin', () => {
       })
 
       describe('with configuration', () => {
+        const pathOne = '/a/:one/:two/:three'
+        // for router registration at /some/prefix
+        const pathTwo = '/some/prefix/b/:four/:five/:six/some'
+        // no expandRouteParameters directive provided
+        const pathThree = '/c/:seven/thing/:eight/:nine/something'
+        const pathFour = '/:ten(\\d+)-:eleven(\\w+)/a/[a-z]{0,}/:twelve(\\d+)....:thirteen(\\d{2})/[a-z]+'
+        const pathFive = ('/athing/:fourteen(\\D+|\\W)---:fifteen([0-4]+|[^9])/([^0]+)/[a-z]{0,}/' +
+          ':sixteen(\\d\\d\\S\\S):seventeen(\\d{2})/([a-z]+)')
+        const pathSix = ('/bthing/:eighteen(\\D+|\\W)---:nineteen([0-4]+|[^9])/([^0]+)/[a-z]{0,}/' +
+          ':twenty(\\d\\d\\S\\S):twentyone(\\d{2})/([a-z]+)')
+        const paths = [pathOne, pathThree, pathFour, pathFive, pathSix]
+
+        const expandRouteParameters = {}
+        expandRouteParameters[pathOne] = { 'two': true }
+        expandRouteParameters[pathTwo] = { 'four': true, 'six': true }
+        expandRouteParameters[pathFour] = { 'ten': true, 'thirteen': true }
+        expandRouteParameters[pathFive] = { 'fourteen': true, 'fifteen': true, 'sixteen': true, 'seventeen': true }
+        expandRouteParameters[pathSix] = { 'eighteen': true, 'twenty': true }
+
         before(() => {
           return agent.load(plugin, 'express', {
             validateStatus: code => code < 400,
-            headers: ['User-Agent']
+            headers: ['User-Agent'],
+            expandRouteParameters
           })
         })
 
@@ -912,6 +932,53 @@ describe('Plugin', () => {
                   headers: { 'User-Agent': 'test' }
                 })
                 .catch(done)
+            })
+          })
+        });
+
+        [['base', '/a/myOne/myTwo/myThree', '/a/:one/myTwo/:three'],
+          ['prefix', '/some/prefix/b/myFour/myFive/mySix/some?a=query&parameter=123',
+            '/some/prefix/b/myFour/:five/mySix/some'],
+          ['no rule', '/c/mySeven/thing/myEight/myNine/something', '/c/:seven/thing/:eight/:nine/something'],
+          ['regex1', '/101010-eleven/a/thisisathing/12121212....13/thing?another=queryParemeter',
+            '/101010-:eleven(\\w+)/a/[a-z]{0,}/:twelve(\\d+)....13/[a-z]+'],
+          ['regex2', '/athing/myFourteen---123/notZero/abcdefg/22bb44/zz',
+            '/athing/myFourteen---123/([^0]+)/[a-z]{0,}/22bb44/([a-z]+)'],
+          ['regex3', '/bthing/myEighteen---123/notZero/abcdefg/22bb44/zz?someOther=queryParameter',
+            '/bthing/myEighteen---:nineteen([0-4]+|[^9])/([^0]+)/[a-z]{0,}/22bb:twentyone(\\d{2})/([a-z]+)']
+        ].forEach(function (params) {
+          const name = params[0]
+          const path = params[1]
+          const expected = params[2]
+          it(`should expand specified route parameters (${name})`, done => {
+            const app = express()
+
+            paths.forEach(path => {
+              app.get(path, (req, res) => {
+                res.status(200).send()
+              })
+            })
+
+            const router = express.Router()
+            router.get('/b/:four/:five/:six/some', (req, res) => {
+              res.status(200).send()
+            })
+            app.use('/some/prefix', router)
+
+            getPort().then(port => {
+              agent
+                .use(traces => {
+                  const spans = sort(traces[0])
+                  expect(spans[0]).to.have.property('name', `GET ${expected}`)
+                })
+                .then(done)
+                .catch(done)
+
+              appListener = app.listen(port, 'localhost', () => {
+                axios
+                  .get(`http://localhost:${port}${path}`, {})
+                  .catch(done)
+              })
             })
           })
         })
