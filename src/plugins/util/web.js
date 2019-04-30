@@ -1,5 +1,7 @@
 'use strict'
 
+const pathToRegexp = require('path-to-regexp')
+const xregexp = require('xregexp')
 const analyticsSampler = require('../../analytics_sampler')
 const FORMAT_HTTP_HEADERS = require('opentracing').FORMAT_HTTP_HEADERS
 const log = require('../../log')
@@ -31,12 +33,14 @@ const web = {
     const validateStatus = getStatusValidator(config)
     const hooks = getHooks(config)
     const filter = urlFilter.getFilter(config)
+    const expandRouteParameters = getExpandRouteParameters(config)
 
     return Object.assign({}, config, {
       headers,
       validateStatus,
       hooks,
-      filter
+      filter,
+      expandRouteParameters
     })
   },
 
@@ -269,12 +273,61 @@ function addResourceTag (req) {
 
   if (tags['resource.name']) return
 
+  const path = expandRouteParameters(tags[HTTP_ROUTE], req)
   const resource = [req.method]
-    .concat(tags[HTTP_ROUTE])
+    .concat(path)
     .filter(val => val)
     .join(' ')
 
   span.setTag(RESOURCE_NAME, resource)
+}
+
+// Allows :routeParameters to be expanded by their request path value
+function expandRouteParameters (httpRoute, req) {
+  let expandedPath = httpRoute // default w/o expansion
+  const expansionRules = req._datadog.config.expandRouteParameters[httpRoute]
+  if (expansionRules === undefined) {
+    return expandedPath
+  }
+
+  const keys = []
+  const re = pathToRegexp(httpRoute, keys)
+  // Account for routing-reduced paths
+  const path = req.originalUrl.substring(0, req.originalUrl.indexOf(req.path) + req.path.length)
+  const matches = re.exec(path)
+  if (matches === null) {
+    return expandedPath
+  }
+
+  const hits = matches.slice(1, keys.length + 1)
+  for (let i = 0; i < keys.length; i++) {
+    const key = keys[i]
+    if (expansionRules[key.name] === true) {
+      const replacePattern = `:${key.name}`
+      const patternIndex = expandedPath.indexOf(replacePattern)
+      // get substrings before and after :key.name
+      const before = expandedPath.substring(0, patternIndex)
+      let after = expandedPath.substring(patternIndex + replacePattern.length)
+      // remove immediate capture group from after substring
+      let capGroupMatches
+      try {
+        capGroupMatches = xregexp.matchRecursive(after, '\\(', '\\)')
+      } catch (err) { // will throw if unbalanced parens in data (nothing we can do)
+        capGroupMatches = []
+      }
+      if (capGroupMatches.length >= 1) {
+        // replace stripped outer parens from recursive match and remove from after substring
+        const replacedGroup = `(${capGroupMatches[0]})`
+        const replacedGroupIndex = after.indexOf(replacedGroup)
+        after = after.substring(replacedGroupIndex + replacedGroup.length)
+      }
+      // recreate expanded path with truncated substring
+      // set expandedPath to be replaced :key.name w/ value
+      expandedPath = before + hits[i] + after
+    }
+  }
+
+  return expandedPath
 }
 
 function addHeaders (req) {
@@ -327,6 +380,15 @@ function getHooks (config) {
   const request = (config.hooks && config.hooks.request) || noop
 
   return { request }
+}
+
+function getExpandRouteParameters (config) {
+  if (typeof config.expandRouteParameters === 'object') {
+    return config.expandRouteParameters
+  } else if (config.hasOwnProperty('expandRouteParameters')) {
+    log.error('Expected `expandRouteParameters` to be an object of paths to expansion rules')
+  }
+  return {}
 }
 
 module.exports = web
