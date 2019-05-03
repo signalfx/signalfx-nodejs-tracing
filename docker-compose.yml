@@ -16,10 +16,13 @@ services:
     ports:
       - "127.0.0.1:6379:6379"
   mongo:
-    image: bitnami/mongodb:3.6.12
-    environment:
-      - MONGODB_REPLICA_SET_MODE=primary
-      - MONGODB_ADVERTISED_HOSTNAME=localhost
+    image: mongo
+    command: >
+      bash -c 'echo "rs.initiate({_id: \"replicaset\", members: [{_id: 0, host: \"localhost:27017\"}]})" > ~/rs.js &&
+               mongod --bind_ip 0.0.0.0 --replSet replicaset &
+               sleep 3 &&
+               mongo ~/rs.js &&
+               wait'
     ports:
       - "127.0.0.1:27017:27017"
   elasticsearch:
