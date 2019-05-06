@@ -21,9 +21,15 @@ function createWrapRequest (tracer, config) {
         }
       })
 
-      if (JSON.stringify(params.body)) {
-        span.setTag('elasticsearch.body', JSON.stringify(params.body))
+      const indexPath = JSON.stringify(params.path).split('/')[1]
+
+      if (indexPath.substring(0, 1) !== '_') {
+        span.setTag('elasticsearch.index', indexPath)
       }
+      if (JSON.stringify(params.body)) {
+        span.setTag('db.statement', JSON.stringify(params.body).substring(0, 1024))
+      }
+      span.setTag('db.instance', 'elasticsearch')
 
       analyticsSampler.sample(span, config.analytics)
 
