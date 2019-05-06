@@ -20,7 +20,7 @@ global.sinon = sinon
 global.expect = chai.expect
 global.proxyquire = proxyquire
 global.nock = nock
-global.wrapIt = wrapIt
+global.wrapIt = wrapHooks
 global.withVersions = withVersions
 
 platform.use(node)
@@ -28,6 +28,14 @@ platform.use(node)
 afterEach(() => {
   agent.reset()
 })
+
+function wrapHooks () {
+  wrapIt()
+  wrapHook('before')
+  wrapHook('beforeEach')
+  wrapHook('after')
+  wrapHook('afterEach')
+}
 
 function wrapIt () {
   const it = global.it
@@ -43,6 +51,24 @@ function wrapIt () {
       })
     } else {
       return it.call(this, title, scope.bind(fn, null))
+    }
+  }
+}
+
+function wrapHook (hook) {
+  const handle = global[hook]
+
+  global[hook] = function (fn) {
+    if (!fn) {
+      return after.apply(this, arguments)
+    }
+
+    if (fn.length > 0) {
+      return handle.call(this, function (done) {
+        return scope.bind(fn, null).call(this, scope.bind(done, null))
+      })
+    } else {
+      return handle.call(this, scope.bind(fn, null))
     }
   }
 }
