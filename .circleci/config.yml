@@ -7,13 +7,15 @@ node-core-base: &node-core-base
   resource_class: small
   steps:
     - checkout
-    - run:
+    - &run-yarn-versions
+      run:
         name: Versions
         command: yarn versions
     - &restore-yarn-cache
       restore_cache:
         key: yarn-{{ .Environment.CIRCLE_JOB }}-{{ checksum "package.json" }}
-    - run:
+    - &run-yarn-install
+      run:
         name: Install dependencies
         command: yarn install --ignore-engines
     - &save-yarn-cache
@@ -22,10 +24,12 @@ node-core-base: &node-core-base
         paths:
           - ./node_modules
           - ./yarn.lock
-    - run:
+    - &run-unit-tests
+      run:
         name: Unit tests
         command: yarn test:core
-    - run:
+    - &run-benchmark
+      run:
         name: Benchmark
         command: yarn bench
 
@@ -96,16 +100,46 @@ jobs:
     <<: *node-core-base
     docker:
       - image: node:8
+    steps:
+      - checkout
+      - *run-yarn-versions
+      - *restore-yarn-cache
+      - *run-yarn-install
+      - *save-yarn-cache
+      - *run-unit-tests
+      - *run-benchmark
+      - &run-async-tests
+        run:
+          name: Async scope tests
+          command: yarn test:async
 
   node-core-10:
     <<: *node-core-base
     docker:
       - image: node:10
+    steps:
+      - checkout
+      - *run-yarn-versions
+      - *restore-yarn-cache
+      - *run-yarn-install
+      - *save-yarn-cache
+      - *run-unit-tests
+      - *run-benchmark
+      - *run-async-tests
 
   node-core-latest:
     <<: *node-core-base
     docker:
       - image: node
+    steps:
+      - checkout
+      - *run-yarn-versions
+      - *restore-yarn-cache
+      - *run-yarn-install
+      - *save-yarn-cache
+      - *run-unit-tests
+      - *run-benchmark
+      - *run-async-tests
 
   node-leaks:
     docker:
