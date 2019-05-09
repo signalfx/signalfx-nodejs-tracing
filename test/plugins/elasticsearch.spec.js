@@ -56,6 +56,26 @@ describe('Plugin', () => {
           client.search({ index: 'logstash-2000.01.01' }, () => {})
         })
 
+        it('should sanitize ID and query parameter containing request', done => {
+          agent
+            .use(traces => {
+              expect(traces[0][0]).to.have.property('name', 'POST /docs/test/?')
+              expect(traces[0][0].meta).to.have.property('elasticsearch.url', `/docs/test/${randId}`)
+            })
+            .then(done)
+            .catch(done)
+
+          const randId = Math.ceil(Math.random())
+          client.index({
+            index: 'docs',
+            id: randId,
+            type: 'test',
+            opType: 'create',
+            query: 'query',
+            body: {}
+          }, () => {})
+        })
+
         it('should set the correct tags', done => {
           agent
             .use(traces => {
@@ -63,8 +83,10 @@ describe('Plugin', () => {
               expect(traces[0][0].meta).to.have.property('span.kind', 'client')
               expect(traces[0][0].meta).to.have.property('elasticsearch.method', 'POST')
               expect(traces[0][0].meta).to.have.property('elasticsearch.url', '/docs/_search')
-              expect(traces[0][0].meta).to.have.property('elasticsearch.body', '{"query":{"match_all":{}}}')
+              expect(traces[0][0].meta).to.have.property('db.statement', '{"query":{"match_all":{}}}')
+              expect(traces[0][0].meta).to.have.property('elasticsearch.index', 'docs')
               expect(traces[0][0].meta).to.have.property('elasticsearch.params', '{"sort":"name","size":100}')
+              expect(traces[0][0].meta).to.have.property('db.instance', 'elasticsearch')
             })
             .then(done)
             .catch(done)
@@ -84,7 +106,7 @@ describe('Plugin', () => {
         it('should skip tags for unavailable fields', done => {
           agent
             .use(traces => {
-              expect(traces[0][0].meta).to.not.have.property('elasticsearch.body')
+              expect(traces[0][0].meta).to.not.have.property('db.statement')
             })
             .then(done)
             .catch(done)
