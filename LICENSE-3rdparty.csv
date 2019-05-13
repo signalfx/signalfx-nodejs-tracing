@@ -45,5 +45,6 @@ dev,retry,MIT,Copyright 2011 Tim Koschützki Felix Geisendörfer
 dev,semver,ISC,Copyright Isaac Z. Schlueter and Contributors
 dev,sinon,BSD-3-Clause,Copyright 2010-2017 Christian Johansen
 dev,sinon-chai,WTFPL and BSD-2-Clause,Copyright 2004 Sam Hocevar 2012–2017 Domenic Denicola
+dev,socket.io-client,MIT,2014 Guillermo Rauch
 dev,tape,MIT,Copyright James Halliday
 dev,v8-coverage,ISC,Copyright Eywek

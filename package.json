@@ -90,6 +90,7 @@
     "retry": "^0.10.1",
     "sinon": "^4.2.1",
     "sinon-chai": "^2.14.0",
+    "socket.io-client": "^1.2.0",
     "tape": "^4.9.1",
     "v8-coverage": "^1.0.8"
   }
