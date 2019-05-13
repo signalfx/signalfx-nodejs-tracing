@@ -8,6 +8,7 @@ const platform = require('../platform')
 const log = require('../log')
 const constants = require('../constants')
 const ext = require('../../ext')
+const utils = require('../utils')
 
 const SAMPLE_RATE_METRIC_KEY = constants.SAMPLE_RATE_METRIC_KEY
 
@@ -39,9 +40,9 @@ class SignalFxSpan extends Span {
   toString () {
     const spanContext = this.context()
     const json = JSON.stringify({
-      traceId: spanContext._traceId,
-      spanId: spanContext._spanId,
-      parentId: spanContext._parentId,
+      traceId: utils.idToHex(spanContext._traceId),
+      spanId: utils.idToHex(spanContext._spanId),
+      parentId: utils.idToHex(spanContext._parentId),
       service: spanContext._tags['service.name'],
       name: spanContext._name,
       resource: truncate(spanContext._tags['resource.name'], { length: 100 })

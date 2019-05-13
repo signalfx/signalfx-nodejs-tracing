@@ -1,6 +1,9 @@
 'use strict'
 
 function idToHex (id) {
+  if (id === null || id === undefined) {
+    return undefined
+  }
   const padded = '0000000000000000' + id.toString(16)
   return padded.slice(-16)
 }
