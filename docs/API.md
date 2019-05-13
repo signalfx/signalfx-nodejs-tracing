@@ -245,13 +245,16 @@ Each integration also has its own list of default tags. These tags get automatic
 
 | Tag                  | Description                                           |
 |----------------------|-------------------------------------------------------|
+| component            | Always set to `elasticsearch`.                        |
 | db.type              | Always set to `elasticsearch`.                        |
+| db.instance          | Always set to `elasticsearch`.                        |
+| db.statement         | The body of the statement to elasticsearch.           |
 | out.host             | The host of the Elasticsearch server.                 |
 | out.port             | The port of the Elasticsearch server.                 |
 | span.kind            | Always set to `client`.                               |
 | elasticsearch.method | The underlying HTTP request verb.                     |
 | elasticsearch.url    | The underlying HTTP request URL path.                 |
-| elasticsearch.body   | The body of the query.                                |
+| elasticsearch.index  | The name of the index being queried                   |
 | elasticsearch.params | The parameters of the query.                          |
 
 #### express
@@ -396,23 +399,29 @@ query HelloWorld {
 
 ##### Tags
 
-| Tag              | Description                                               |
-|------------------|-----------------------------------------------------------|
-| db.name          | The name of the queried database.                         |
-| db.user          | The user who made the query.                              |
-| out.host         | The host of the MySQL server.                             |
-| out.port         | The port of the MySQL server.                             |
+| Tag              | Description                                                                        |
+|------------------|------------------------------------------------------------------------------------|
+| component        | The name of the database library/module/package (always set to `mysql`).          |
+| db.type          | The type of the queried database.                                                  |
+| db.user          | The user who made the query.                                                       |
+| db.instance      | The name of the queried database instance.                                         |
+| db.statement     | The database statement for the queried database.                                   |
+| out.host         | The host of the MySQL server.                                                      |
+| out.port         | The port of the MySQL server.                                                      |
 
 mysql2
 
 ##### Tags
 
-| Tag              | Description                                               |
-|------------------|-----------------------------------------------------------|
-| db.name          | The name of the queried database.                         |
-| db.user          | The user who made the query.                              |
-| out.host         | The host of the MySQL server.                             |
-| out.port         | The port of the MySQL server.                             |
+| Tag              | Description                                                                        |
+|------------------|------------------------------------------------------------------------------------|
+| component        | The name of the database library/module/package (always set to `mysql2`).         |
+| db.type          | The type of the queried database.                                                  |
+| db.user          | The user who made the query.                                                       |
+| db.instance      | The name of the queried database instance.                                         |
+| db.statement     | The database statement for the queried database.                                   |
+| out.host         | The host of the MySQL server.                                                      |
+| out.port         | The port of the MySQL server.                                                      |
 
 #### pg
 
