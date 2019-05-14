@@ -53,11 +53,12 @@ describe('Plugin', () => {
           it('should do automatic instrumentation when using callbacks', done => {
             agent.use(traces => {
               expect(traces[0][0]).to.have.property('service', 'test')
-              expect(traces[0][0]).to.have.property('name', 'SELECT $1::text as message')
+              expect(traces[0][0]).to.have.property('name', 'SELECT')
               expect(traces[0][0].meta).to.have.property('component', 'pg')
-              expect(traces[0][0].meta).to.have.property('db.name', 'postgres')
+              expect(traces[0][0].meta).to.have.property('db.instance', 'postgres')
               expect(traces[0][0].meta).to.have.property('db.user', 'postgres')
               expect(traces[0][0].meta).to.have.property('db.type', 'postgres')
+              expect(traces[0][0].meta).to.have.property('db.statement', 'SELECT $1::text as message')
               expect(traces[0][0].meta).to.have.property('span.kind', 'client')
 
               done()
@@ -76,11 +77,12 @@ describe('Plugin', () => {
             it('should do automatic instrumentation when using promises', done => {
               agent.use(traces => {
                 expect(traces[0][0]).to.have.property('service', 'test')
-                expect(traces[0][0]).to.have.property('name', 'SELECT $1::text as message')
+                expect(traces[0][0]).to.have.property('name', 'SELECT')
                 expect(traces[0][0].meta).to.have.property('component', 'pg')
-                expect(traces[0][0].meta).to.have.property('db.name', 'postgres')
+                expect(traces[0][0].meta).to.have.property('db.instance', 'postgres')
                 expect(traces[0][0].meta).to.have.property('db.user', 'postgres')
                 expect(traces[0][0].meta).to.have.property('db.type', 'postgres')
+                expect(traces[0][0].meta).to.have.property('db.statement', 'SELECT $1::text as message')
                 expect(traces[0][0].meta).to.have.property('span.kind', 'client')
 
                 done()

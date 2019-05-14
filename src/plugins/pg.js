@@ -35,11 +35,12 @@ function createWrapQuery (tracer, config) {
       const statement = pgQuery.text
       const params = this.connectionParameters
 
-      span.setTag('resource.name', statement)
+      span.setTag('resource.name', statement.split(' ')[0])
+      span.setTag('db.statement', statement)
 
       if (params) {
         span.addTags({
-          'db.name': params.database,
+          'db.instance': params.database,
           'db.user': params.user,
           'out.host': params.host,
           'out.port': params.port
