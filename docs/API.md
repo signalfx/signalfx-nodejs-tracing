@@ -399,40 +399,43 @@ query HelloWorld {
 
 ##### Tags
 
-| Tag              | Description                                                                        |
-|------------------|------------------------------------------------------------------------------------|
-| component        | The name of the database library/module/package (always set to `mysql`).          |
-| db.type          | The type of the queried database.                                                  |
-| db.user          | The user who made the query.                                                       |
-| db.instance      | The name of the queried database instance.                                         |
-| db.statement     | The database statement for the queried database.                                   |
-| out.host         | The host of the MySQL server.                                                      |
-| out.port         | The port of the MySQL server.                                                      |
+| Tag              | Description                                                       |
+|------------------|-------------------------------------------------------------------|
+| component        | Always set to `mysql`.                                            |
+| db.type          | The type of the queried database.                                 |
+| db.user          | The user who made the query.                                      |
+| db.instance      | The name of the queried database instance.                        |
+| db.statement     | The database statement for the queried database.                  |
+| out.host         | The host of the MySQL server.                                     |
+| out.port         | The port of the MySQL serve                                       |
 
 mysql2
 
 ##### Tags
 
-| Tag              | Description                                                                        |
-|------------------|------------------------------------------------------------------------------------|
-| component        | The name of the database library/module/package (always set to `mysql2`).         |
-| db.type          | The type of the queried database.                                                  |
-| db.user          | The user who made the query.                                                       |
-| db.instance      | The name of the queried database instance.                                         |
-| db.statement     | The database statement for the queried database.                                   |
-| out.host         | The host of the MySQL server.                                                      |
-| out.port         | The port of the MySQL server.                                                      |
+| Tag              | Description                                                         |
+|------------------|---------------------------------------------------------------------|
+| component        | Always set to `mysql2`.                                             |
+| db.type          | The type of the queried database.                                   |
+| db.user          | The user who made the query.                                        |
+| db.instance      | The name of the queried database instance.                          |
+| db.statement     | The database statement for the queried database.                    |
+| out.host         | The host of the MySQL server.                                       |
+| out.port         | The port of the MySQL server.                                       |
 
 #### pg
 
 ##### Tags
 
-| Tag              | Description                                               |
-|------------------|-----------------------------------------------------------|
-| db.name          | The name of the queried database.                         |
-| db.user          | The user who made the query.                              |
-| out.host         | The host of the PostgreSQL server.                        |
-| out.port         | The port of the PostgreSQL server.                        |
+| Tag              | Description                                                          |
+|------------------|----------------------------------------------------------------------|
+| component        | Always set to `postgres`.                                            |
+| db.type          | The type of the queried database.                                    |
+| db.user          | The user who made the query.                                         |
+| db.instance      | The name of the queried database.                                    |
+| db.statement     | The database statement for the queried database.                     |
+| out.host         | The host of the PostgreSQL server.                                   |
+| out.port         | The port of the PostgreSQL server.                                   |
 
 #### redis
 
