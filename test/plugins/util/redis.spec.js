@@ -20,12 +20,10 @@ describe('plugins/util/redis', () => {
         'span.kind': 'client',
         'service.name': 'test-redis',
         'resource.name': 'set',
-        'span.type': 'redis',
+        'component': 'redis',
         'db.type': 'redis',
-        'db.name': '1',
-        'out.host': '127.0.0.1',
-        'out.port': '6379',
-        'redis.raw_command': 'SET foo bar'
+        'db.instance': '1',
+        'db.statement': 'SET foo bar'
       })
     })
 
@@ -50,7 +48,7 @@ describe('plugins/util/redis', () => {
 
       span = redis.instrument(tracer, config, '1', 'get', [key])
 
-      const rawCommand = span.context()._tags['redis.raw_command']
+      const rawCommand = span.context()._tags['db.statement']
 
       expect(rawCommand).to.have.length(104)
       expect(rawCommand.substr(0, 10)).to.equal('GET aaaaaa')
@@ -72,7 +70,7 @@ describe('plugins/util/redis', () => {
 
       span = redis.instrument(tracer, config, '1', 'get', values)
 
-      const rawCommand = span.context()._tags['redis.raw_command']
+      const rawCommand = span.context()._tags['db.statement']
 
       expect(rawCommand).to.have.length(1000)
       expect(rawCommand.substr(0, 10)).to.equal('GET aaaaaa')

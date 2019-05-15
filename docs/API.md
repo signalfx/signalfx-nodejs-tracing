@@ -350,11 +350,14 @@ query HelloWorld {
 
 ##### Tags
 
-| Tag              | Description                                               |
-|------------------|-----------------------------------------------------------|
-| db.name          | The index of the queried database.                        |
-| out.host         | The host of the Redis server.                             |
-| out.port         | The port of the Redis server.                             |
+| Tag          | Description                               |
+|--------------|-------------------------------------------|
+| component    | `mysql`                                   |
+| db.type      | `mysql`                                   |
+| db.instance  | The index of the queried database.        |
+| db.statement | The statement used to query the database. |
+| out.host     | The host of the Redis server.             |
+| out.port     | The port of the Redis server.             |
 
 #### koa
 
@@ -438,11 +441,14 @@ mysql2
 
 ##### Tags
 
-| Tag              | Description                                               |
-|------------------|-----------------------------------------------------------|
-| db.name          | The index of the queried database.                        |
-| out.host         | The host of the Redis server.                             |
-| out.port         | The port of the Redis server.                             |
+| Tag          | Description                               |
+|--------------|-------------------------------------------|
+| component    | `mysql`                                   |
+| db.type      | `mysql`                                   |
+| db.instance  | The index of the queried database.        |
+| db.statement | The statement used to query the database. |
+| out.host     | The host of the Redis server.             |
+| out.port     | The port of the Redis server.             |
 
 #### restify
 
