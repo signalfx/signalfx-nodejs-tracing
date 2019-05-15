@@ -8,6 +8,7 @@ const semver = require('semver')
 const exec = require('./helpers/exec')
 const plugins = requireDir('../src/plugins')
 const externals = require('../test/plugins/externals')
+const mkdirp = require('mkdirp')
 
 const workspaces = new Set()
 
@@ -65,11 +66,11 @@ function assertModules (name, version) {
 
 function assertFolder (name, version) {
   if (!fs.existsSync(folder())) {
-    fs.mkdirSync(folder())
+    mkdirp.sync(folder())
   }
 
   if (!fs.existsSync(folder(name, version))) {
-    fs.mkdirSync(folder(name, version))
+    mkdirp.sync(folder(name, version))
   }
 }
 
