@@ -453,6 +453,10 @@ mysql2
 | validateStatus   | `code => code < 500`      | Callback function to determine if there was an error. It should take a status code as its only parameter and return `true` for success or `false` for errors. |
 | headers          | `[]`                      | An array of headers to include in the span tags. |
 
+#### Sails
+
+This instrumentation only adds traces for Sails actions registered by your app.
+The router and request handling is done by Express instrumentation.
 
 ### Advanced Configuration
 

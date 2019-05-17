@@ -64,6 +64,7 @@ For detailed information about configuration and usage, please see the [API docu
 * [q 1+](https://github.com/kriskowal/q) - `use('q')`
 * [redis 0.12+](https://github.com/NodeRedis/node_redis) - `use('redis')`
 * [restify 3+](http://restify.com/) - `use('restify')`
+* [sails 1+](https://sailsjs.com) - `use('sails')`
 * [when 3+](https://github.com/cujojs/when) - `use('when')`
 * [winston 1+](https://github.com/winstonjs/winston) - `use('winston')`
 

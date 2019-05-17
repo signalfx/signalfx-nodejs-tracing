@@ -326,6 +326,13 @@ jobs:
         environment:
           - PLUGINS=router
 
+  node-sails:
+    <<: *node-plugin-base
+    docker:
+      - image: node:8
+        environment:
+          - PLUGINS=sails
+
   node-when:
     <<: *node-plugin-base
     docker:
@@ -405,6 +412,7 @@ workflows:
       - node-q
       - node-redis
       - node-restify
+      - node-sails
       - node-when
       - node-winston
   nightly:
@@ -443,5 +451,6 @@ workflows:
       - node-q
       - node-redis
       - node-restify
+      - node-sails
       - node-when
       - node-winston
