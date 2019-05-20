@@ -9,9 +9,15 @@ The SignalFx-Tracing Library for JavaScript provides auto-instrumentation for al
 ```javascript
 // init() invocation must occur before importing any traced library (e.g. Express)
 const tracer = require('signalfx-tracing').init(
-  service: 'my-traced-service',  // also via SIGNALFX_SERVICE_NAME environment variable
-  url: 'http://my_agent_or_gateway:9080/v1/trace',  // also via SIGNALFX_ENDPOINT_URL environment variable
-  accessToken: 'myOptionalOrganizationAccessToken' // also via SIGNALFX_ACCESS_TOKEN environment variable
+  // service name, also configurable via
+  // SIGNALFX_SERVICE_NAME environment variable
+  service: 'my-traced-service',
+  // Smart Agent or Gateway endpoint, also configurable via
+  // SIGNALFX_ENDPOINT_URL environment variable
+  url: 'http://my_agent_or_gateway:9080/v1/trace', // http://localhost:9080/v1/trace by default
+  // optional organization access token, also configurable via
+  // SIGNALFX_ACCESS_TOKEN environment variable
+  accessToken: 'myOptionalOrganizationAccessToken'
 )
 
 // auto-instrumented Express application
@@ -19,9 +25,9 @@ const express = require('express')
 const app = express()
 ```
 
-### Manual Instrumentation
+### Custom Instrumentation
 
-Regardless if you are using a [supported library instrumentation](#instrumentations), you may want to manually instrument your code.  This can be done using the [OpenTracing API](#opentracing-api) and the [Scope Manager](#scope-manager).
+Regardless if you are using a [supported library instrumentation](#instrumentations), you may want to add custom instrumentation to your code.  This can be done using the [OpenTracing API](#opentracing-api) and [Scope](#scope) utility.
 
 #### OpenTracing API
 
@@ -39,6 +45,7 @@ function myApplicationLogic() {
   span.setTag('MyTag', 'MyTagValue')
   span.log({ event: 'Event Information' })
 
+  // callback that will finish the current span upon completion
   return myAdditionalApplicationLogic(result => {
     span.setTag('MyResult', result)
     span.finish()
@@ -47,73 +54,135 @@ function myApplicationLogic() {
 }
 ```
 
-##### Scope Manager
+##### Scope
 
-In order to provide context propagation, this library includes a scope manager.
-A scope is basically a wrapper around a span that can cross both synchronous and
-asynchronous contexts.
+In order to provide span context propagation within a Node.js application, this library
+includes a scope manager. A scope manager is a utility for registering and providing a span
+that can cross both synchronous and asynchronous contexts.  The span it provides has been
+registered as active and can be used for noting an accessor's execution state and for parenting
+child spans. This is helpful for being able to reference an existing span in a particular
+section of traced functionality without having been explicitly passed the span as an argument.
 
-The scope manager contains 3 APIs available on `tracer.scope()`:
+```javascript
+// explicit span reference as parameter
+function myApplicationLogic (argOne, activeSpan) {
+  activeSpan.setTag('MyArg', argOne)
+
+  return myAdditionalApplicationLogic(result => {
+    span.setTag('MyResult', result)
+    span.finish()
+  })
+}
+```
+
+```javascript
+// automatic context propagation via the scope manager
+function myApplicationLogic (argOne) {
+  activeSpan = opentracing.globalTracer().scope().active()
+  activeSpan.setTag('MyArg', argOne)
+
+  return myAdditionalApplicationLogic(result => {
+    span.setTag('MyResult', result)
+    span.finish()
+  })
+}
+```
+
+Scope management is made possible by the [Async Hooks](https://nodejs.org/api/async_hooks.html)
+or, if that's unavailable, the [AsyncWrap](http://blog.trevnorris.com/2015/02/asyncwrap-tutorial-introduction.html)
+API.  These features provide the ability to register listeners for various lifetime events
+associated with asynchronous resources.  There are potential performance implications
+of enabling these internal features, so we strongly recommend using as recent a version of
+Node.js as possible to ensure the most recent improvements from the Node community.  If you
+do not want to enable this feature you can set the `SIGNALFX_CONTEXT_PROPAGATION` environment
+variable to `false`.
+
+**Note**: Disabling the scope manager will result in more division among trace contexts and require manual span management via modified function signatures or other custom mechanisms.
+
+The scope manager is available via `tracer.scope()`, whose return value can be used
+in a global context.  It has three methods that are useful for active span management:
 
 ###### scope.active()
 
-This method returns the active span from the current scope.
+This method returns the active span for the current function if one has been earlier
+activated in some outer or local context.  Returns `null` otherwise.
 
 ###### scope.activate(span, fn)
 
-This method activates the provided span in a new scope available in the
-provided function. Any asynchronous context created from whithin that function
-will also have the same scope.
+This method activates the provided span in the tracer's scope for availability in
+the context of the provided function, which is immediately invoked.  Any asynchronous
+context stemming from the provided function will also have access to the span by calls
+to `scope.active()`. The return value of `activate()` is that of the provided function.
 
 ```javascript
 const tracer = require('signalfx-tracing').init()
 const scope = tracer.scope()
-const log = console.log
 
 const requestSpan = tracer.startSpan('web.request')
 const promise = Promise.resolve()
 
-scope.activate(requestSpan, () => {
-  log(scope.active()) // requestSpan because in new scope
+function someFunction () {
+  // Logs the current active span
+  console.log(scope.active())
+}
 
-  someFunction() // requestSpan because called in scope
+scope.activate(requestSpan, () => {
+  console.log(scope.active()) // requestSpan because called in activated context
+
+  someFunction() // requestSpan because called in activated context
 
   setTimeout(() => {
-    log(scope.active()) // requestSpan because setTimeout called in scope
+    setTimeout(() => {
+      console.log(scope.active()) // requestSpan because setTimeout calls stem from activated context
+    })
   })
 
   promise.then(() => {
-    log(scope.active()) // requestSpan because then() called in scope
+    console.log(scope.active()) // requestSpan because then() called in activated context
   })
 })
 
-function someFunction () {
-  log(scope.active())
-}
-
-log(scope.active()) // null
-
-someFunction() // null because called outside the scope
+someFunction() // null because called in an unactivated context
+console.log(scope.active()) // null
 ```
 
 ###### scope.bind(target, [span])
 
-This method binds a target to the specified span, or to the active span if
-unspecified. It supports binding functions, promises and event emitters.
+This method binds a target to the specified span, or to an active span if absent.
+It supports binding functions, promises, and event emitters.  When a span is provided,
+the target is always bound to that span. If a span isn't specified, the bound active
+span will depend on the type of the provided target (detailed below).
 
-When a span is provided, the target is always bound to that span. Explicitly
-passing `null` as the span will actually bind to `null` or no span. When a span
-is not provided, the binding uses the following rules:
+Explicitly passing `null` as the span value will actually bind to `null` or no span.
+This can be useful if isolated trace content is desired without modifying the active
+span of the current trace context.
 
-* Functions are bound to the span that is active when `scope.bind(fn)` is called.
-* Promise handlers are bound to the active span in the scope where `.then()` was
-called. This also applies to any equivalent method such as `.catch()`.
+The return value of binding a function will be a traced wrapper of that function.  It's
+important to note that the returned function is not the same function in terms of identity
+and comparisons, but it can be treated as if it were otherwise.
+
+The return value of binding a promise is the target promise, but its `then` and `catch`
+methods are traced equivalents.  As with wrapped functions, these methods are not
+the same as they were before `bind()` but can be treated as such outside of direct
+comparison.
+
+The return value of binding an event emitter is the target emitter but it will have had
+its relevant listener registration and handling methods replaced with traced equivalents.
+
+When a span is not provided to `bind()`, the binding uses the following rules for determining
+the active span that will be bound:
+
+* Functions are bound to the span that was active when `scope.bind(fn)` was called.
+* Promise handlers are bound to the active span in the scope where `.then()` is
+called. This also applies to any equivalent method such as `.catch()`.  This is the case
+because implicit promises are created by these methods that assume the active span from the
+current scope.
 * Event emitter listeners are bound to the active span in the scope where
-`.addEventListener()` was called. This also applies to any equivalent method
+`.addEventListener()` is called. This also applies to any equivalent method
 such as `.on()`
 
-**Note**: Native promises and promises from `bluebird`, `q` and `when` are
-already bound by default and don't need to be explicitly bound.
+**Note**: Native promises and promises from `bluebird`, `q` and `when` are, by default,
+already bound to the active span in activated contexts and don't need to be explicitly bound.
 
 ##### Examples
 
@@ -122,7 +191,6 @@ already bound by default and don't need to be explicitly bound.
 ```javascript
 const tracer = require('signalfx-tracing').init()
 const scope = tracer.scope()
-const log = console.log
 
 const outerSpan = tracer.startSpan('web.request')
 
@@ -130,11 +198,11 @@ scope.activate(outerSpan, () => {
   const innerSpan = tracer.startSpan('web.middleware')
 
   const boundToInner = scope.bind(() => {
-    log(scope.active())
+    console.log(scope.active())
   }, innerSpan)
 
   const boundToOuter = scope.bind(() => {
-    log(scope.active())
+    console.log(scope.active())
   })
 
   boundToInner() // innerSpan because explicitly bound
@@ -147,7 +215,6 @@ scope.activate(outerSpan, () => {
 ```javascript
 const tracer = require('signalfx-tracing').init()
 const scope = tracer.scope()
-const log = console.log
 
 const outerSpan = tracer.startSpan('web.request')
 const innerPromise = Promise.resolve()
@@ -160,11 +227,11 @@ scope.activate(outerSpan, () => {
   scope.bind(outerPromise)
 
   innerPromise.then(() => {
-    log(scope.active()) // innerSpan because explicitly bound
+    console.log(scope.active()) // innerSpan because it was explicitly bound
   })
 
   outerPromise.then(() => {
-    log(scope.active()) // outerSpan because implicitly bound on `then()` call
+    console.log(scope.active()) // outerSpan because implicitly bound on `then()` call
   })
 })
 ```
@@ -178,7 +245,6 @@ wrapped by a function.
 ```javascript
 const tracer = require('signalfx-tracing').init()
 const scope = tracer.scope()
-const log = console.log
 const EventEmitter = require('events').EventEmitter
 
 const outerSpan = tracer.startSpan('web.request')
@@ -192,11 +258,11 @@ scope.activate(outerSpan, async () => {
   scope.bind(outerEmitter)
 
   innerEmitter.on('request', () => {
-    log(scope.active()) // innerSpan because explicitly bound
+    console.log(scope.active()) // innerSpan because it was explicitly bound
   })
 
   outerEmitter.on('request', () => {
-    log(scope.active()) // outerSpan because implicitly bound on `then()` call
+    console.log(scope.active()) // outerSpan because implicitly bound on `on()` call
   })
 })
 
@@ -208,10 +274,6 @@ outerEmitter.emit('request')
 
 SignalFx-Tracing provides out-of-the-box instrumentations for many popular frameworks and libraries by using a plugin system. By default all built-in plugins are enabled. This behavior can be changed by setting the `plugins` option to `false` in the [tracer settings](#tracer-settings).
 
-This method activates the provided span in a new scope available in the
-provided function. Any asynchronous context created from whithin that function
-will also have the same scope.
-
 ```javascript
 const tracer = require('signalfx-tracing').init({ plugins: false })
 
@@ -221,7 +283,53 @@ tracer.use('pg')
 tracer.use('express', { headers: ['x-my-tagged-header'] })
 ```
 
-Each integration also has its own list of default tags. These tags get automatically added to the span created by the integration.  Some have additional configuration settings to determine traced behavior.
+* [amqp10 3+](#amqp10) - `use('amqp10')`
+* [amqplib 0.5+](#amqplib) - `use('amqplib')`
+* [Bluebird 2+](#Bluebird) - `use('bluebird')`
+* [Bunyan 1+](#Bunyan) - `use('bunyan')`
+* [cassandra-driver](#cassandra-driver) - `use('cassandra-driver')`
+* [DNS](#DNS) - `use('dns')`
+* [elasticsearch 10+](#elasticsearch) - `use('elasticsearch')`
+* [Express 4+](#Express) - `use('express')`
+* [GraphQL 0.10+](#GraphQL) - `use('graphql')`
+* [hapi 2+](#hapi) - `use('hapi')`
+* [http/https](#httphttps) - `use('http')`, `use('https')`
+* [ioredis 2+](#ioredis) - `use('ioredis')`
+* [Koa 2+](#Koa) - `use('koa')`
+* [Memcached 2.2+](#Memcached) - `use('memcached')`
+* [MongoDB-Core 2+](#MongoDB-Core) - `use('mongodb-core')`
+* [mysql 2+](#mysql) - `use('mysql')`
+* [MySQL2 1+](#MySQL2) - `use('mysql2')`
+* [Net](#Net) - `use('net')`
+* [node-postgres 4+](#node-postgres) - `use('pg')`
+* [Pino 2+](#pino) - `use('pino')`
+* [Q 1+](#Q) - `use('q')`
+* [Redis 0.12+](#Redis) - `use('redis')`
+* [restify 3+](#restify) - `use('restify')`
+* [Sails 1+](#Sails) - `use('sails')`
+* [Socket.IO 1+](#SocketIO) - `use('socket.io')`
+* [when.js 3+](#whenjs) - `use('when')`
+* [winston 1+](#winston) - `use('winston')`
+
+Each integration also has its own list of default tags. These tags get automatically added to the span created by the integration.  Some have additional configuration settings to determine traced behavior.  These are configured by providing an object of the form `{ optionOneName: optionOneValue, optionTwoName: optionsTwoValue }`.
+
+#### amqp10
+
+##### Tags
+
+| Tag                      | Description                                              |
+|--------------------------|----------------------------------------------------------|
+| out.host                 | The host of the AMQP server.                             |
+| out.port                 | The port of the AMQP server.                             |
+| span.kind                | Set to either `producer` or `consumer` where it applies. |
+| amqp.connection.host     | The host of the AMQP peer.                               |
+| amqp.connection.port     | The port of the AMQP peer.                               |
+| amqp.connection.user     | The connected user                                       |
+| amqp.link.handle         | The link's numeric handle                                |
+| amqp.link.name           | The link's unique name                                   | 
+| amqp.link.role           | The client's operational role (`sender` or `receiver`)   |
+| amqp.link.source.address | The topic sourced from the command (when available).     |
+| amqp.link.target.address | The topic targeted by the command (when available).      |
 
 #### amqplib
 
@@ -238,6 +346,41 @@ Each integration also has its own list of default tags. These tags get automatic
 | amqp.consumerTag | The consumer tag (when available).                        |
 | amqp.source      | The source exchange of the binding (when available).      |
 | amqp.destination | The destination exchange of the binding (when available). |
+
+#### Bluebird
+
+Bluebird promises will automatically be instrumented to propagate active span context across
+`.then()` callbacks.  Please note this does not mean each promise will automagically result in
+traced execution, but instead adds to ease of custom instrumentation and enhanced
+instrumentation compatibility.
+
+#### Bunyan
+
+The Bunyan instrumentation will automatically add fields for the current `trace_id` and active `span_id`, if applicable, for each logged statement.
+
+#### cassandra-driver
+
+##### Tags
+
+| Tag                  | Description                                             |
+|----------------------|---------------------------------------------------------|
+| cassandra.keyspace   | The top-level namespace, if available                   |
+| db.type              | Always set to `cassandra`.                              |
+| db.statement         | The executed command or query (truncated to 1024 chars) |
+| span.kind            | Always set to `client`.                                 |
+
+#### DNS
+
+##### Tags
+
+| Tag                  | Description                          |
+|----------------------|--------------------------------------|
+| dns.address          | The address being looked up          |
+| dns.hostname         | The looked up or resolved hostname   |
+| dns.ip               | The ip address for a reverse loopkup |
+| dns.port             | The port being looked up             |
+| dns.rrtype           | The resolution resource record type  |
+| span.kind            | Always set to `client`.              |
 
 #### elasticsearch
 
@@ -257,7 +400,7 @@ Each integration also has its own list of default tags. These tags get automatic
 | elasticsearch.index  | The name of the index being queried                   |
 | elasticsearch.params | The parameters of the query.                          |
 
-#### express
+#### Express
 
 ##### Tags
 
@@ -276,7 +419,7 @@ Each integration also has its own list of default tags. These tags get automatic
 | headers                 | `[]`                      | An array of headers to include in the span tags. |
 | expandRouteParameters | `{}`                      | An object of the form `{ '/exact/path/:paramOne/:paramTwo': { 'paramOne': true } }` that will expand parameter values for operation names for each request to that path.  Be sure to only use for low-cardinality parameters.  Omitted parameters default to `false`. |
 
-#### graphql
+#### GraphQL
 
 If no query operation name is explicitly provided, the `graphql` span operation name will be just `query`, `mutation` or `subscription`.
 
@@ -327,7 +470,7 @@ query HelloWorld {
 | validateStatus   | `code => code < 500`      | Callback function to determine if there was an error. It should take a status code as its only parameter and return `true` for success or `false` for errors. |
 | headers          | `[]`                      | An array of headers to include in the span tags. |
 
-#### http / https
+#### http/https
 
 ##### Tags
 
@@ -352,14 +495,14 @@ query HelloWorld {
 
 | Tag          | Description                               |
 |--------------|-------------------------------------------|
-| component    | `mysql`                                   |
-| db.type      | `mysql`                                   |
+| component    | `redis`                                   |
+| db.type      | `reids`                                   |
 | db.instance  | The index of the queried database.        |
 | db.statement | The statement used to query the database. |
 | out.host     | The host of the Redis server.             |
 | out.port     | The port of the Redis server.             |
 
-#### koa
+#### Koa
 
 ##### Tags
 
@@ -377,7 +520,7 @@ query HelloWorld {
 | validateStatus   | `code => code < 500`      | Callback function to determine if there was an error. It should take a status code as its only parameter and return `true` for success or `false` for errors. |
 | headers          | `[]`                      | An array of headers to include in the span tags. |
 
-#### memcached
+#### Memcached
 
 ##### Tags
 
@@ -387,7 +530,7 @@ query HelloWorld {
 | out.host         | The host of the Memcached server.                         |
 | out.port         | The port of the Memcached server.                         |
 
-#### mongodb-core
+#### MongoDB-Core
 
 ##### Tags
 
@@ -412,7 +555,7 @@ query HelloWorld {
 | out.host         | The host of the MySQL server.                                     |
 | out.port         | The port of the MySQL serve                                       |
 
-mysql2
+#### MySQL2
 
 ##### Tags
 
@@ -426,7 +569,23 @@ mysql2
 | out.host         | The host of the MySQL server.                                       |
 | out.port         | The port of the MySQL server.                                       |
 
-#### pg
+#### Net
+
+##### Tags
+
+| Tag                | Description                                   |
+|--------------------|-----------------------------------------------|
+| ipc.path           | the IPC connection pathname                   |
+| out.host           | Always set to `postgres`.                     |
+| out.port           | Always set to `postgres`.                     |
+| tcp.family         | Always set to `postgres`.                     |
+| tcp.local.address  | Local address socket connected with           |
+| tcp.local.port     | Local port socket connected to                |
+| tcp.remote.address | Remote IP address attempting to connect with  |
+| tcp.remote.host    | Remote hostname attempting to connection with |
+| tcp.remote.port    | Remote port attempting to connect to          |
+
+#### node-postgres
 
 ##### Tags
 
@@ -440,14 +599,25 @@ mysql2
 | out.host         | The host of the PostgreSQL server.                                   |
 | out.port         | The port of the PostgreSQL server.                                   |
 
-#### redis
+#### Pino
+
+The Pino instrumentation will automatically add fields for the current `trace_id` and active `span_id`, if applicable, for each logged statement.
+
+#### Q
+
+Q promises will automatically be instrumented to propagate active span context across
+`.then()` and similar callbacks.  Please note this does not mean each promise will automagically
+result in traced execution, but instead adds to ease of custom instrumentation and enhanced
+instrumentation compatibility during chaining.
+
+#### Redis
 
 ##### Tags
 
 | Tag          | Description                               |
 |--------------|-------------------------------------------|
-| component    | `mysql`                                   |
-| db.type      | `mysql`                                   |
+| component    | `redis`                                   |
+| db.type      | `redis`                                   |
 | db.instance  | The index of the queried database.        |
 | db.statement | The statement used to query the database. |
 | out.host     | The host of the Redis server.             |
@@ -493,6 +663,17 @@ The router and request handling is done by Express instrumentation.
 | omitReserved | `false` | If `true`, skip tracing for reserved events: https://socket.io/docs/emit-cheatsheet/ |
 | omitEvents   | `[]`    | A list of events that should not be traced                                           |
 
+#### when.js
+
+When.js promises will automatically be instrumented to propagate active span context across
+`.then()` callbacks.  Please note this does not mean each promise will automagically result in
+traced execution, but instead adds to ease of custom instrumentation and enhanced
+instrumentation compatibility.
+
+#### winston
+
+The winston instrumentation will automatically add fields for the current `trace_id` and active `span_id`, if applicable, for each logged statement.
+
 ### Advanced Configuration
 
 #### Tracer settings
@@ -502,11 +683,11 @@ Options can be configured as a parameter to the `init()` method or as environmen
 | Config        | Environment Variable         | Default   | Description |
 | ------------- | ---------------------------- | --------- | ----------- |
 | service       | SIGNALFX_SERVICE_NAME        | unnamed-node-service | The service name to be used for this program. |
-| url           | SIGNALFX_ENDPOINT_URL          | http://localhost:9080/v1/trace | The url of the Agent or Gateway to which the tracer will submit traces.
-| accessToken   | SIGNALFX_ACCESS_TOKEN        |           | The optional organization access token for trace submission requests
+| url           | SIGNALFX_ENDPOINT_URL        | http://localhost:9080/v1/trace | The url of the Agent or Gateway to which the tracer will submit traces. |
+| accessToken   | SIGNALFX_ACCESS_TOKEN        |           | The optional organization access token for trace submission requests |
 | enabled       | SIGNALFX_TRACING_ENABLED     | true      | Whether to enable the tracer. |
 | debug         | SIGNALFX_TRACING_DEBUG       | false     | Enable debug logging in the tracer. |
-| logInjection  | SIGNALFX_LOGS_INJECTION      | false     | Enable automatic injection of trace IDs in logs for supported logging libraries.
+| logInjection  | SIGNALFX_LOGS_INJECTION      | false     | Enable automatic injection of trace IDs in logs for supported logging libraries. |
 | tags          |                              | {}        | Set global tags that should be applied to all spans. |
 | sampleRate    |                              | 1         | Percentage of spans to sample as a float between 0 and 1. |
 | flushInterval |                              | 2000      | Interval in milliseconds at which the tracer will submit traces to the agent. |
