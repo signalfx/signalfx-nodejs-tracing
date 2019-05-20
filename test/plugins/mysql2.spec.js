@@ -191,7 +191,6 @@ describe('Plugin', () => {
         it('should do automatic instrumentation', done => {
           agent
             .use(traces => {
-              // debugger
               expect(traces[0][0]).to.have.property('service', 'test')
               expect(traces[0][0]).to.have.property('name', 'SELECT')
               expect(traces[0][0].meta).to.have.property('component', 'mysql2')
