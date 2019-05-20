@@ -682,7 +682,7 @@ Options can be configured as a parameter to the `init()` method or as environmen
 
 | Config        | Environment Variable         | Default   | Description |
 | ------------- | ---------------------------- | --------- | ----------- |
-| service       | SIGNALFX_SERVICE_NAME        | unnamed-node-service | The service name to be used for this program. |
+| service       | SIGNALFX_SERVICE_NAME        | unnamed-nodejs-service | The service name to be used for this program. |
 | url           | SIGNALFX_ENDPOINT_URL        | http://localhost:9080/v1/trace | The url of the Agent or Gateway to which the tracer will submit traces. |
 | accessToken   | SIGNALFX_ACCESS_TOKEN        |           | The optional organization access token for trace submission requests |
 | enabled       | SIGNALFX_TRACING_ENABLED     | true      | Whether to enable the tracer. |

@@ -55,7 +55,7 @@ class Config {
     this.sampleRate = sampleRate
     this.logger = options.logger
     this.plugins = !!plugins
-    this.service = coalesce(options.service, platform.env('SIGNALFX_SERVICE_NAME'), service, 'unnamed-node-service')
+    this.service = coalesce(options.service, platform.env('SIGNALFX_SERVICE_NAME'), service, 'unnamed-nodejs-service')
     this.analytics = String(analytics) === 'true'
   }
 }
