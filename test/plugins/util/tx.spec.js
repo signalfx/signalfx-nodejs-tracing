@@ -18,11 +18,25 @@ describe('plugins/util/tx', () => {
   })
 
   describe('setHost', () => {
-    it('should set the out.host and out.port tags', () => {
+    it('should set the peer.hostname and peer.port tags', () => {
       tx.setHost(span, 'example.com', '1234')
 
-      expect(span.context()._tags).to.have.property('out.host', 'example.com')
-      expect(span.context()._tags).to.have.property('out.port', '1234')
+      expect(span.context()._tags).to.have.property('peer.hostname', 'example.com')
+      expect(span.context()._tags).to.have.property('peer.port', '1234')
+    })
+
+    it('should set the peer.ipv4 and peer.port tags', () => {
+      tx.setHost(span, '127.0.0.1', '1234')
+
+      expect(span.context()._tags).to.have.property('peer.ipv4', '127.0.0.1')
+      expect(span.context()._tags).to.have.property('peer.port', '1234')
+    })
+
+    it('should set the peer.ipv6 and peer.port tags', () => {
+      tx.setHost(span, '2001:db8:1234::1', '1234')
+
+      expect(span.context()._tags).to.have.property('peer.ipv6', '2001:db8:1234::1')
+      expect(span.context()._tags).to.have.property('peer.port', '1234')
     })
   })
 

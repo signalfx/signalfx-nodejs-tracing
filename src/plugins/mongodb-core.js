@@ -2,6 +2,7 @@
 
 const Buffer = require('safe-buffer').Buffer
 const analyticsSampler = require('../analytics_sampler')
+const tx = require('./util/tx')
 
 function createWrapOperation (tracer, config, operationName) {
   return function wrapOperation (operation) {
@@ -69,10 +70,7 @@ function addHost (span, topology) {
   const options = topology && topology.s && topology.s.options
 
   if (options && options.host && options.port) {
-    span.addTags({
-      'out.host': topology.s.options.host,
-      'out.port': topology.s.options.port
-    })
+    tx.setHost(span, topology.s.options.host, topology.s.options.port)
   }
 }
 

@@ -63,7 +63,7 @@ describe('Plugin', () => {
                 expect(span.meta).to.have.property('db.statement', resource)
                 expect(span.meta).to.have.property('component', 'mongodb')
                 expect(span.meta).to.have.property('db.name', `test.${collection}`)
-                expect(span.meta).to.have.property('out.host', 'localhost')
+                expect(span.meta).to.have.property('peer.hostname', 'localhost')
               })
               .then(done)
               .catch(done)
@@ -214,8 +214,8 @@ describe('Plugin', () => {
                 expect(span).to.have.property('service', 'test')
                 expect(span.meta).to.have.property('component', 'mongodb')
                 expect(span.meta).to.have.property('db.name', `test.${collection}`)
-                expect(span.meta).to.have.property('out.host', 'localhost')
-                expect(span.meta).to.have.property('out.port', '27017')
+                expect(span.meta).to.have.property('peer.hostname', 'localhost')
+                expect(span.meta).to.have.property('peer.port', '27017')
                 expect(span.meta).to.have.property('db.statement', `insert test.${collection}`)
               })
               .then(done)
@@ -355,8 +355,8 @@ describe('Plugin', () => {
             .use(traces => {
               const span = traces[0][0]
 
-              expect(span.meta).to.have.property('out.host', 'localhost')
-              expect(span.meta).to.have.property('out.port', '27017')
+              expect(span.meta).to.have.property('peer.hostname', 'localhost')
+              expect(span.meta).to.have.property('peer.port', '27017')
             })
             .then(done)
             .catch(done)

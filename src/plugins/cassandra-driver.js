@@ -119,8 +119,7 @@ function addTag (span, key, value) {
 
 function addHost (span, connection) {
   if (span && connection) {
-    addTag(span, 'out.host', connection.address)
-    addTag(span, 'out.port', connection.port)
+    tx.setHost(span, connection.address, connection.port)
   }
 }
 

@@ -34,10 +34,10 @@ function wrapTcp (tracer, config, socket, options) {
     'resource.name': [host, port].filter(val => val).join(':'),
     'tcp.remote.host': host,
     'tcp.remote.port': port,
-    'tcp.family': `IPv${family}`,
-    'out.host': host,
-    'out.port': port
+    'tcp.family': `IPv${family}`
   })
+
+  tx.setHost(span, host, port)
 
   socket.once('connect', () => {
     if (socket.localAddress) {

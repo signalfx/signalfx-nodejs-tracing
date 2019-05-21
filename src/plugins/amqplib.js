@@ -2,6 +2,7 @@
 
 const kebabCase = require('lodash.kebabcase')
 const analyticsSampler = require('../analytics_sampler')
+const tx = require('./util/tx')
 
 let methods = {}
 
@@ -104,10 +105,7 @@ function addTags (channel, tracer, config, span, method, fields) {
   })
 
   if (channel.connection && channel.connection.stream) {
-    span.addTags({
-      'out.host': channel.connection.stream._host,
-      'out.port': channel.connection.stream.remotePort
-    })
+    tx.setHost(span, channel.connection.stream._host, channel.connection.stream.remotePort)
   }
 
   switch (method) {

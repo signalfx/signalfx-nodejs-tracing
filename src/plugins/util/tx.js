@@ -1,10 +1,21 @@
 'use strict'
 
+const ipaddr = require('ipaddr.js')
+
 const tx = {
-  // Set the outgoing host.
+  // Set the outgoing host by its deduced kind
   setHost (span, hostname, port) {
-    hostname && span.setTag('out.host', hostname)
-    port && span.setTag('out.port', port)
+    try {
+      const parsed = ipaddr.parse(hostname)
+      if (parsed.kind() === 'ipv4') {
+        span.setTag('peer.ipv4', hostname)
+      } else {
+        span.setTag('peer.ipv6', hostname)
+      }
+    } catch (e) {
+      hostname && span.setTag('peer.hostname', hostname)
+    }
+    port && span.setTag('peer.port', port)
   },
 
   // Wrap a promise or a callback to also finish the span.

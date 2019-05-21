@@ -1,6 +1,7 @@
 'use strict'
 
 const analyticsSampler = require('../analytics_sampler')
+const tx = require('./util/tx')
 
 function createWrapCommand (tracer, config) {
   return function wrapCommand (command) {
@@ -55,10 +56,7 @@ function addHost (span, client, server, query) {
   const address = getAddress(client, server, query)
 
   if (address) {
-    span.addTags({
-      'out.host': address[0],
-      'out.port': address[1]
-    })
+    tx.setHost(span, address[0], address[1])
   }
 }
 

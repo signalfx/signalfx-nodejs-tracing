@@ -93,8 +93,8 @@ describe('Plugin', () => {
               'tcp.remote.port': `${port}`,
               'tcp.local.address': '127.0.0.1',
               'tcp.local.port': `${socket.localPort}`,
-              'out.host': 'localhost',
-              'out.port': `${port}`
+              'peer.hostname': 'localhost',
+              'peer.port': `${port}`
             }
           })
           expect(traces[0][0].parent_id.toString()).to.equal(utils.idToHex(parent.context()._spanId))
@@ -123,8 +123,8 @@ describe('Plugin', () => {
               'tcp.remote.port': `${port}`,
               'tcp.local.address': '127.0.0.1',
               'tcp.local.port': `${socket.localPort}`,
-              'out.host': 'localhost',
-              'out.port': `${port}`
+              'peer.hostname': 'localhost',
+              'peer.port': `${port}`
             }
           })
           expect(traces[0][0].parent_id.toString()).to.equal(utils.idToHex(parent.context()._spanId))

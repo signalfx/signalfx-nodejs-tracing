@@ -2,6 +2,7 @@
 
 const Tags = require('opentracing').Tags
 const analyticsSampler = require('../analytics_sampler')
+const tx = require('./util/tx')
 
 const OPERATION_NAME = 'pg.query'
 
@@ -41,10 +42,9 @@ function createWrapQuery (tracer, config) {
       if (params) {
         span.addTags({
           'db.instance': params.database,
-          'db.user': params.user,
-          'out.host': params.host,
-          'out.port': params.port
+          'db.user': params.user
         })
+        tx.setHost(span, params.host, params.port)
       }
 
       pgQuery.callback = scope.bind((err, res) => {

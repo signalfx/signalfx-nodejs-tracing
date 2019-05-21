@@ -1,6 +1,7 @@
 'use strict'
 
 const analyticsSampler = require('../analytics_sampler')
+const tx = require('./util/tx')
 
 function createWrapSend (tracer, config) {
   return function wrapSend (send) {
@@ -47,11 +48,10 @@ function startSendSpan (tracer, config, link) {
       'resource.name': `send ${target}`,
       'span.kind': 'producer',
       'amqp.link.target.address': target,
-      'amqp.link.role': 'sender',
-      'out.host': address.host,
-      'out.port': address.port
+      'amqp.link.role': 'sender'
     }
   })
+  tx.setHost(span, address.host, address.port)
 
   addTags(tracer, config, span, link)
 
