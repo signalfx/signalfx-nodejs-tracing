@@ -43,29 +43,30 @@ For detailed information about configuration and usage, please see the [API docu
 
 * [amqp10 3+](https://github.com/noodlefrenzy/node-amqp10) - `use('amqp10')`
 * [amqplib 0.5+](http://www.squaremobius.net/amqp.node/) - `use('amqplib')`
-* [bluebird 2+](https://github.com/petkaantonov/bluebird) - `use('bluebird')`
-* [bunyan 1+](https://github.com/trentm/node-bunyan) - `use('bunyan')`
+* [Bluebird 2+](https://github.com/petkaantonov/bluebird) - `use('bluebird')`
+* [Bunyan 1+](https://github.com/trentm/node-bunyan) - `use('bunyan')`
 * [cassandra-driver](https://github.com/datastax/nodejs-driver) - `use('cassandra-driver')`
-* [dns](https://nodejs.org/api/dns.html) - `use('dns')`
+* [DNS](https://nodejs.org/api/dns.html) - `use('dns')`
 * [elasticsearch 10+](https://www.elastic.co/guide/en/elasticsearch/client/javascript-api/current/index.html) - `use('elasticsearch')`
-* [express 4+](http://expressjs.com/) - `use('express')`
-* [graphql 0.10+](https://github.com/graphql/graphql-js) - `use('graphql')`
+* [Express 4+](http://expressjs.com/) - `use('express')`
+* [GraphQL 0.10+](https://github.com/graphql/graphql-js) - `use('graphql')`
 * [hapi 2+](https://hapijs.com/) - `use('hapi')`
 * [http/https](https://nodejs.org/api/http.html) - `use('http')`, `use('https')`
 * [ioredis 2+](https://github.com/luin/ioredis) - `use('ioredis')`
-* [koa 2+](https://koajs.com/) - `use('koa')`
-* [memcached 2.2+](https://github.com/3rd-Eden/memcached) - `use('memcached')`
-* [mongodb-core 2+](https://github.com/mongodb-js/mongodb-core) - `use('mongodb-core')`
+* [Koa 2+](https://koajs.com/) - `use('koa')`
+* [Memcached 2.2+](https://github.com/3rd-Eden/memcached) - `use('memcached')`
+* [MongoDB-Core 2+](https://github.com/mongodb-js/mongodb-core) - `use('mongodb-core')`
 * [mysql 2+](https://github.com/mysqljs/mysql) - `use('mysql')`
-* [mysql2 1+](https://github.com/sidorares/node-mysql2) - `use('mysql2')`
-* [net](https://nodejs.org/api/net.html) - `use('net')`
-* [pg 4+](https://github.com/brianc/node-postgres) - `use('pg')`
-* [pino 2+](http://getpino.io/#/) - `use('pino')`
-* [q 1+](https://github.com/kriskowal/q) - `use('q')`
-* [redis 0.12+](https://github.com/NodeRedis/node_redis) - `use('redis')`
+* [MySQL2 1+](https://github.com/sidorares/node-mysql2) - `use('mysql2')`
+* [Net](https://nodejs.org/api/net.html) - `use('net')`
+* [node-postgres 4+](https://github.com/brianc/node-postgres) - `use('pg')`
+* [Pino 2+](http://getpino.io/#/) - `use('pino')`
+* [Q 1+](https://github.com/kriskowal/q) - `use('q')`
+* [Redis 0.12+](https://github.com/NodeRedis/node_redis) - `use('redis')`
 * [restify 3+](http://restify.com/) - `use('restify')`
-* [sails 1+](https://sailsjs.com) - `use('sails')`
-* [when 3+](https://github.com/cujojs/when) - `use('when')`
+* [Sails 1+](https://sailsjs.com) - `use('sails')`
+* [Socket.IO 1.2+](https://socket.io) - `use('socket.io')`
+* [when.js 3+](https://github.com/cujojs/when) - `use('when')`
 * [winston 1+](https://github.com/winstonjs/winston) - `use('winston')`
 
 #### About

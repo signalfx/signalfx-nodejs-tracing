@@ -17,7 +17,7 @@ describe('Config', () => {
   it('should initialize with the correct defaults', () => {
     const config = new Config()
 
-    expect(config).to.have.property('service', 'unnamed-node-service')
+    expect(config).to.have.property('service', 'unnamed-nodejs-service')
     expect(config).to.have.property('enabled', true)
     expect(config).to.have.property('debug', false)
     expect(config).to.have.nested.property('url.protocol', 'http:')
