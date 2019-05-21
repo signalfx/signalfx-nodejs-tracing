@@ -367,6 +367,13 @@ jobs:
         environment:
           - PLUGINS=sails
 
+  node-socket-io:
+    <<: *node-plugin-base
+    docker:
+      - image: node:8
+        environment:
+          - PLUGINS=socket.io
+
   node-when:
     <<: *node-plugin-base
     docker:
@@ -447,6 +454,7 @@ workflows:
       - node-redis
       - node-restify
       - node-sails
+      - node-socket-io
       - node-when
       - node-winston
   nightly:
@@ -486,5 +494,6 @@ workflows:
       - node-redis
       - node-restify
       - node-sails
+      - node-socket-io
       - node-when
       - node-winston

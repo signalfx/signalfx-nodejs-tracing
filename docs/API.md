@@ -476,6 +476,23 @@ mysql2
 This instrumentation only adds traces for Sails actions registered by your app.
 The router and request handling is done by Express instrumentation.
 
+#### Socket.IO
+
+| Tag           | Description                          |
+| ------------- | ----------------                     |
+| component     | `socket.io`                          |
+| namespace     | Namespace of the event. Default: `/` |
+| path          | Path for the socket                  |
+| clients.count | Number of current clients            |
+| events.count  | Number of registered events          |
+
+##### Configuration Options
+
+| Option       | Default | Description                                                                          |
+|--------------|---------|--------------------------------------------------------------------------------------|
+| omitReserved | `false` | If `true`, skip tracing for reserved events: https://socket.io/docs/emit-cheatsheet/ |
+| omitEvents   | `[]`    | A list of events that should not be traced                                           |
+
 ### Advanced Configuration
 
 #### Tracer settings

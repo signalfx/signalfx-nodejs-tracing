@@ -26,6 +26,7 @@ module.exports = {
   'redis': require('./redis'),
   'restify': require('./restify'),
   'sails': require('./sails'),
+  'socket.io': require('./socket.io'),
   'when': require('./when'),
   'winston': require('./winston')
 }
