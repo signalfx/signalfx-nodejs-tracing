@@ -2,6 +2,7 @@
 
 const Tags = require('opentracing').Tags
 const analyticsSampler = require('../analytics_sampler')
+const tx = require('./util/tx')
 
 function createWrapQuery (tracer, config) {
   return function wrapQuery (query) {
@@ -15,12 +16,11 @@ function createWrapQuery (tracer, config) {
           'service.name': config.service || `${tracer._service}-mysql`,
           'span.type': 'mysql',
           'db.type': 'mysql',
-          'db.user': this.config.user,
-          'out.host': this.config.host,
-          'out.port': this.config.port
+          'db.user': this.config.user
         }
       })
 
+      tx.setHost(span, this.config.host, this.config.port)
       span.setTag('db.instance', this.config.database || 'sql')
 
       analyticsSampler.sample(span, config.analytics)

@@ -319,8 +319,10 @@ Each integration also has its own list of default tags. These tags get automatic
 
 | Tag                      | Description                                              |
 |--------------------------|----------------------------------------------------------|
-| out.host                 | The host of the AMQP server.                             |
-| out.port                 | The port of the AMQP server.                             |
+| peer.hostname            | The hostname of the AMQP server (if known).              |
+| peer.ipv4                | The IPv4 address of the AMQP server (if known).          |
+| peer.ipv6                | The IPv6 address of the AMQP server (if known).          |
+| peer.port                | The port of the AMQP server.                             |
 | span.kind                | Set to either `producer` or `consumer` where it applies. |
 | amqp.connection.host     | The host of the AMQP peer.                               |
 | amqp.connection.port     | The port of the AMQP peer.                               |
@@ -337,8 +339,10 @@ Each integration also has its own list of default tags. These tags get automatic
 
 | Tag              | Description                                               |
 |------------------|-----------------------------------------------------------|
-| out.host         | The host of the AMQP server.                              |
-| out.port         | The port of the AMQP server.                              |
+| peer.hostname    | The hostname of the AMQP server (if known).               |
+| peer.ipv4        | The IPv4 address of the AMQP server (if known).           |
+| peer.ipv6        | The IPv6 address of the AMQP server (if known).           |
+| peer.port        | The port of the AMQP server.                              |
 | span.kind        | Set to either `producer` or `consumer` where it applies.  |
 | amqp.queue       | The queue targeted by the command (when available).       |
 | amqp.exchange    | The exchange targeted by the command (when available).    |
@@ -368,6 +372,9 @@ The Bunyan instrumentation will automatically add fields for the current `trace_
 | db.type              | Always set to `cassandra`.                              |
 | db.statement         | The executed command or query (truncated to 1024 chars) |
 | span.kind            | Always set to `client`.                                 |
+| peer.hostname        | The hostname of the Cassandra server (if known).        |
+| peer.ipv4            | The IPv4 address of the Cassandra server (if known).    |
+| peer.ipv6            | The IPv6 address of the Cassandra server (if known).    |
 
 #### DNS
 
@@ -392,8 +399,8 @@ The Bunyan instrumentation will automatically add fields for the current `trace_
 | db.type              | Always set to `elasticsearch`.                        |
 | db.instance          | Always set to `elasticsearch`.                        |
 | db.statement         | The body of the statement to elasticsearch.           |
-| out.host             | The host of the Elasticsearch server.                 |
-| out.port             | The port of the Elasticsearch server.                 |
+| peer.hostname        | The host of the Elasticsearch server.                 |
+| peer.port            | The port of the Elasticsearch server.                 |
 | span.kind            | Always set to `client`.                               |
 | elasticsearch.method | The underlying HTTP request verb.                     |
 | elasticsearch.url    | The underlying HTTP request URL path.                 |
@@ -493,14 +500,16 @@ query HelloWorld {
 
 ##### Tags
 
-| Tag          | Description                               |
-|--------------|-------------------------------------------|
-| component    | `redis`                                   |
-| db.type      | `reids`                                   |
-| db.instance  | The index of the queried database.        |
-| db.statement | The statement used to query the database. |
-| out.host     | The host of the Redis server.             |
-| out.port     | The port of the Redis server.             |
+| Tag           | Description                                      |
+|---------------|--------------------------------------------------|
+| component     | `redis`                                          |
+| db.type       | `redis`                                          |
+| db.instance   | The index of the queried database.               |
+| db.statement  | The statement used to query the database.        |
+| peer.hostname | The hostname of the Redis server (if known).     |
+| peer.ipv4     | The IPv4 address of the Redis server (if known). |
+| peer.ipv6     | The IPv6 address of the Redis server (if known). |
+| peer.port     | The port of the Redis server.                    |
 
 #### Koa
 
@@ -527,8 +536,10 @@ query HelloWorld {
 | Tag              | Description                                               |
 |------------------|-----------------------------------------------------------|
 | memcached.query  | The query sent to the server.                             |
-| out.host         | The host of the Memcached server.                         |
-| out.port         | The port of the Memcached server.                         |
+| peer.hostname    | The hostname of the Memcached server (if known).          |
+| peer.ipv4        | The IPv4 address of the Memcached server (if known).      |
+| peer.ipv6        | The IPv6 address of the Memcached server (if known).      |
+| peer.port        | The port of the Memcached server.                         |
 
 #### MongoDB-Core
 
@@ -537,8 +548,10 @@ query HelloWorld {
 | Tag                  | Description                                           |
 |----------------------|-------------------------------------------------------|
 | db.name              | The qualified name of the queried collection.         |
-| out.host             | The host of the MongoDB server.                       |
-| out.port             | The port of the MongoDB server.                       |
+| peer.hostname        | The hostname of the MongoDB server (if known).        |
+| peer.ipv4            | The IPv4 address of the MongoDB server (if known).    |
+| peer.ipv6            | The IPv6 address of the MongoDB server (if known).    |
+| peer.port            | The port of the MongoDB server.                       |
 | mongodb.cursor.index | When using a cursor, the current index of the cursor. |
 
 #### mysql
@@ -552,8 +565,10 @@ query HelloWorld {
 | db.user          | The user who made the query.                                      |
 | db.instance      | The name of the queried database instance.                        |
 | db.statement     | The database statement for the queried database.                  |
-| out.host         | The host of the MySQL server.                                     |
-| out.port         | The port of the MySQL serve                                       |
+| peer.hostname    | The hostname of the MySQL server (if known).                      |
+| peer.ipv4        | The IPv4 address of the MySQL server (if known).                  |
+| peer.ipv6        | The IPv6 address of the MySQL server (if known).                  |
+| peer.port        | The port of the MySQL serve                                       |
 
 #### MySQL2
 
@@ -566,8 +581,10 @@ query HelloWorld {
 | db.user          | The user who made the query.                                        |
 | db.instance      | The name of the queried database instance.                          |
 | db.statement     | The database statement for the queried database.                    |
-| out.host         | The host of the MySQL server.                                       |
-| out.port         | The port of the MySQL server.                                       |
+| peer.hostname    | The hostname of the MySQL server (if known).                        |
+| peer.ipv4        | The IPv4 address of the MySQL server (if known).                    |
+| peer.ipv6        | The IPv6 address of the MySQL server (if known).                    |
+| peer.port        | The port of the MySQL server.                                       |
 
 #### Net
 
@@ -576,9 +593,11 @@ query HelloWorld {
 | Tag                | Description                                   |
 |--------------------|-----------------------------------------------|
 | ipc.path           | the IPC connection pathname                   |
-| out.host           | Always set to `postgres`.                     |
-| out.port           | Always set to `postgres`.                     |
-| tcp.family         | Always set to `postgres`.                     |
+| peer.hostname      | The remote hostname (if known).               |
+| peer.ipv4          | The remote IPv4 address (if known).           |
+| peer.ipv6          | The remote IPv6 address (if known).           |
+| peer.port          | The remote port attempting to connect with    |
+| tcp.family         | The IP family version                         |
 | tcp.local.address  | Local address socket connected with           |
 | tcp.local.port     | Local port socket connected to                |
 | tcp.remote.address | Remote IP address attempting to connect with  |
@@ -596,8 +615,8 @@ query HelloWorld {
 | db.user          | The user who made the query.                                         |
 | db.instance      | The name of the queried database.                                    |
 | db.statement     | The database statement for the queried database.                     |
-| out.host         | The host of the PostgreSQL server.                                   |
-| out.port         | The port of the PostgreSQL server.                                   |
+| peer.hostname    | The host of the PostgreSQL server.                                   |
+| peer.port        | The port of the PostgreSQL server.                                   |
 
 #### Pino
 
@@ -614,14 +633,14 @@ instrumentation compatibility during chaining.
 
 ##### Tags
 
-| Tag          | Description                               |
-|--------------|-------------------------------------------|
-| component    | `redis`                                   |
-| db.type      | `redis`                                   |
-| db.instance  | The index of the queried database.        |
-| db.statement | The statement used to query the database. |
-| out.host     | The host of the Redis server.             |
-| out.port     | The port of the Redis server.             |
+| Tag           | Description                               |
+|---------------|-------------------------------------------|
+| component     | `redis`                                   |
+| db.type       | `redis`                                   |
+| db.instance   | The index of the queried database.        |
+| db.statement  | The statement used to query the database. |
+| peer.hostname | The host of the Redis server.             |
+| peer.port     | The port of the Redis server.             |
 
 #### restify
 

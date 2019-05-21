@@ -34,8 +34,8 @@ describe('Plugin', () => {
               expect(traces[0][0]).to.have.property('name', 'get')
               expect(traces[0][0].meta).to.have.property('component', 'memcached')
               expect(traces[0][0].meta).to.have.property('span.kind', 'client')
-              expect(traces[0][0].meta).to.have.property('out.host', 'localhost')
-              expect(traces[0][0].meta).to.have.property('out.port', '11211')
+              expect(traces[0][0].meta).to.have.property('peer.hostname', 'localhost')
+              expect(traces[0][0].meta).to.have.property('peer.port', '11211')
               expect(traces[0][0].meta).to.have.property('memcached.command', 'get test')
             })
             .then(done)
@@ -84,8 +84,8 @@ describe('Plugin', () => {
 
           agent
             .use(traces => {
-              expect(traces[0][0].meta).to.have.property('out.host', 'localhost')
-              expect(traces[0][0].meta).to.have.property('out.port', '11211')
+              expect(traces[0][0].meta).to.have.property('peer.hostname', 'localhost')
+              expect(traces[0][0].meta).to.have.property('peer.port', '11211')
             })
             .then(done)
             .catch(done)
@@ -101,8 +101,8 @@ describe('Plugin', () => {
 
           agent
             .use(traces => {
-              expect(traces[0][0].meta).to.have.property('out.host', 'localhost')
-              expect(traces[0][0].meta).to.have.property('out.port', '11211')
+              expect(traces[0][0].meta).to.have.property('peer.hostname', 'localhost')
+              expect(traces[0][0].meta).to.have.property('peer.port', '11211')
             })
             .then(done)
             .catch(done)
@@ -124,8 +124,8 @@ describe('Plugin', () => {
 
             agent
               .use(traces => {
-                expect(traces[0][0].meta).to.have.property('out.host', 'localhost')
-                expect(traces[0][0].meta).to.have.property('out.port', '11211')
+                expect(traces[0][0].meta).to.have.property('peer.hostname', 'localhost')
+                expect(traces[0][0].meta).to.have.property('peer.port', '11211')
               })
               .then(done)
               .catch(done)
