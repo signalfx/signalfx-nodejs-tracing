@@ -12,12 +12,10 @@ const redis = {
       tags: {
         'span.kind': 'client',
         'resource.name': command,
-        'span.type': 'redis',
+        'component': 'redis',
         'db.type': 'redis',
-        'db.name': db || '0',
-        'out.host': '127.0.0.1',
-        'out.port': String(6379),
-        'redis.raw_command': formatCommand(command, args)
+        'db.instance': db || '0',
+        'db.statement': formatCommand(command, args)
       }
     })
 
