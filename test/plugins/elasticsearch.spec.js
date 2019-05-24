@@ -9,118 +9,108 @@ describe('Plugin', () => {
   let elasticsearch
   let tracer
 
-  withVersions(plugin, 'elasticsearch', version => {
-    describe('elasticsearch', () => {
-      beforeEach(() => {
-        tracer = require('../..')
-      })
-
-      describe('without configuration', () => {
-        let client
-
-        before(() => {
-          return agent.load(plugin, 'elasticsearch')
-        })
-
-        after(() => {
-          return agent.close()
-        })
-
+  describe('elasticsearch', () => {
+    ['elasticsearch', '@elastic/elasticsearch'].forEach((pkg) => {
+      withVersions(plugin, pkg, version => {
         beforeEach(() => {
-          elasticsearch = require(`../../versions/elasticsearch@${version}`).get()
-          client = new elasticsearch.Client({
-            host: 'localhost:9200',
-            defer: () => {
-              const deferred = {}
+          tracer = require('../..')
+        })
 
-              deferred.promise = new Promise((resolve, reject) => {
-                deferred.resolve = resolve
-                deferred.reject = reject
-              })
+        describe('without configuration', () => {
+          let client
 
-              deferred.promise.test = true
-
-              return deferred
-            }
+          before(() => {
+            return agent.load(plugin, 'elasticsearch')
           })
-        })
 
-        it('should sanitize the resource name', done => {
-          agent
-            .use(traces => {
-              expect(traces[0][0]).to.have.property('name', 'POST /logstash-?.?.?/_search')
-            })
-            .then(done)
-            .catch(done)
+          after(() => {
+            return agent.close()
+          })
 
-          client.search({ index: 'logstash-2000.01.01' }, () => {})
-        })
+          beforeEach(() => {
+            elasticsearch = require(`../../versions/${pkg}@${version}`).get()
+            client = new elasticsearch.Client({
+              node: 'http://localhost:9200',
+              defer: () => {
+                const deferred = {}
 
-        it('should sanitize ID and query parameter containing request', done => {
-          agent
-            .use(traces => {
-              expect(traces[0][0]).to.have.property('name', 'POST /docs/test/?')
-              expect(traces[0][0].meta).to.have.property('elasticsearch.url', `/docs/test/${randId}`)
-            })
-            .then(done)
-            .catch(done)
+                deferred.promise = new Promise((resolve, reject) => {
+                  deferred.resolve = resolve
+                  deferred.reject = reject
+                })
 
-          const randId = Math.ceil(Math.random())
-          client.index({
-            index: 'docs',
-            id: randId,
-            type: 'test',
-            opType: 'create',
-            query: 'query',
-            body: {}
-          }, () => {})
-        })
+                deferred.promise.test = true
 
-        it('should set the correct tags', done => {
-          agent
-            .use(traces => {
-              expect(traces[0][0].meta).to.have.property('db.type', 'elasticsearch')
-              expect(traces[0][0].meta).to.have.property('span.kind', 'client')
-              expect(traces[0][0].meta).to.have.property('elasticsearch.method', 'POST')
-              expect(traces[0][0].meta).to.have.property('elasticsearch.url', '/docs/_search')
-              expect(traces[0][0].meta).to.have.property('db.statement', '{"query":{"match_all":{}}}')
-              expect(traces[0][0].meta).to.have.property('elasticsearch.index', 'docs')
-              expect(traces[0][0].meta).to.have.property('elasticsearch.params', '{"sort":"name","size":100}')
-              expect(traces[0][0].meta).to.have.property('db.instance', 'elasticsearch')
-            })
-            .then(done)
-            .catch(done)
-
-          client.search({
-            index: 'docs',
-            sort: 'name',
-            size: 100,
-            body: {
-              query: {
-                match_all: {}
+                return deferred
               }
-            }
-          }, () => {})
-        })
-
-        it('should skip tags for unavailable fields', done => {
-          agent
-            .use(traces => {
-              expect(traces[0][0].meta).to.not.have.property('db.statement')
             })
-            .then(done)
-            .catch(done)
+          })
 
-          client.ping(err => err && done(err))
-        })
-
-        describe('when using a callback', () => {
-          it('should do automatic instrumentation', done => {
+          it('should sanitize the resource name', done => {
             agent
               .use(traces => {
-                expect(traces[0][0]).to.have.property('service', 'test')
-                expect(traces[0][0]).to.have.property('name', 'HEAD /')
-                expect(traces[0][0].meta).to.have.property('component', 'elasticsearch')
+                expect(traces[0][0]).to.have.property('name', 'POST /logstash-?.?.?/_search')
+              })
+              .then(done)
+              .catch(done)
+
+            client.search({
+              index: 'logstash-2000.01.01',
+              body: {}
+            }, () => {})
+          })
+
+          it('should sanitize ID and query parameter containing request', done => {
+            agent
+              .use(traces => {
+                expect(traces[0][0]).to.have.property('name', 'POST /docs/test/?')
+                expect(traces[0][0].meta).to.have.property('elasticsearch.url', `/docs/test/${randId}`)
+              })
+              .then(done)
+              .catch(done)
+
+            const randId = Math.ceil(Math.random())
+            client.index({
+              index: 'docs',
+              id: randId,
+              type: 'test',
+              opType: 'create',
+              query: 'query',
+              body: {}
+            }, () => {})
+          })
+
+          it('should set the correct tags', done => {
+            agent
+              .use(traces => {
+                expect(traces[0][0].meta).to.have.property('db.type', 'elasticsearch')
+                expect(traces[0][0].meta).to.have.property('span.kind', 'client')
+                expect(traces[0][0].meta).to.have.property('elasticsearch.method', 'POST')
+                expect(traces[0][0].meta).to.have.property('elasticsearch.url', '/docs/_search')
+                expect(traces[0][0].meta).to.have.property('db.statement', '{"query":{"match_all":{}}}')
+                expect(traces[0][0].meta).to.have.property('elasticsearch.index', 'docs')
+                expect(traces[0][0].meta).to.have.property('elasticsearch.params', '{"sort":"name","size":100}')
+                expect(traces[0][0].meta).to.have.property('db.instance', 'elasticsearch')
+              })
+              .then(done)
+              .catch(done)
+
+            client.search({
+              index: 'docs',
+              sort: 'name',
+              size: 100,
+              body: {
+                query: {
+                  match_all: {}
+                }
+              }
+            }, () => {})
+          })
+
+          it('should skip tags for unavailable fields', done => {
+            agent
+              .use(traces => {
+                expect(traces[0][0].meta).to.not.have.property('db.statement')
               })
               .then(done)
               .catch(done)
@@ -128,170 +118,181 @@ describe('Plugin', () => {
             client.ping(err => err && done(err))
           })
 
-          it('should propagate context', done => {
-            if (process.env.SIGNALFX_CONTEXT_PROPAGATION === 'false') return done()
+          describe('when using a callback', () => {
+            it('should do automatic instrumentation', done => {
+              agent
+                .use(traces => {
+                  expect(traces[0][0]).to.have.property('service', 'test')
+                  expect(traces[0][0]).to.have.property('name', 'HEAD /')
+                  expect(traces[0][0].meta).to.have.property('component', 'elasticsearch')
+                })
+                .then(done)
+                .catch(done)
 
-            agent
-              .use(traces => {
-                expect(traces[0][0]).to.have.property('parent_id')
-                expect(traces[0][0].parent_id).to.not.be.null
+              client.ping(err => err && done(err))
+            })
+
+            it('should propagate context', done => {
+              if (process.env.SIGNALFX_CONTEXT_PROPAGATION === 'false') return done()
+
+              agent
+                .use(traces => {
+                  expect(traces[0][0]).to.have.property('parent_id')
+                  expect(traces[0][0].parent_id).to.not.be.null
+                })
+                .then(done)
+                .catch(done)
+
+              const span = tracer.startSpan('test')
+
+              tracer.scope().activate(span, () => {
+                client.ping(() => span.finish())
               })
-              .then(done)
-              .catch(done)
+            })
 
-            const span = tracer.startSpan('test')
+            it('should run the callback in the parent context', done => {
+              if (process.env.SIGNALFX_CONTEXT_PROPAGATION === 'false') return done()
 
-            tracer.scope().activate(span, () => {
-              client.ping(() => span.finish())
+              client.ping(error => {
+                expect(tracer.scope().active()).to.be.null
+                done(error)
+              })
+            })
+
+            it('should handle errors', done => {
+              let error
+
+              agent
+                .use(traces => {
+                  expect(traces[0][0].meta).to.have.property('error.type', error.name)
+                  expect(traces[0][0].meta).to.have.property('error.msg', error.message)
+                  expect(traces[0][0].meta).to.have.property('error.stack', error.stack)
+                })
+                .then(done)
+                .catch(done)
+
+              client.search({ index: 'invalid' }, err => {
+                error = err
+              })
+            })
+
+            it('should support aborting the query', () => {
+              expect(() => {
+                client.ping(() => {}).abort()
+              }).not.to.throw()
             })
           })
 
-          it('should run the callback in the parent context', done => {
-            if (process.env.SIGNALFX_CONTEXT_PROPAGATION === 'false') return done()
+          describe('when using a promise', () => {
+            it('should do automatic instrumentation', done => {
+              agent
+                .use(traces => {
+                  expect(traces[0][0]).to.have.property('service', 'test')
+                  expect(traces[0][0]).to.have.property('name', 'HEAD /')
+                  expect(traces[0][0].meta).to.have.property('component', 'elasticsearch')
+                })
+                .then(done)
+                .catch(done)
 
-            client.ping(error => {
-              expect(tracer.scope().active()).to.be.null
-              done(error)
+              client.ping().catch(done)
             })
-          })
 
-          it('should handle errors', done => {
-            let error
+            it('should propagate context', done => {
+              if (process.env.SIGNALFX_CONTEXT_PROPAGATION === 'false') return done()
 
-            agent
-              .use(traces => {
+              agent
+                .use(traces => {
+                  expect(traces[0][0]).to.have.property('parent_id')
+                  expect(traces[0][0].parent_id).to.not.be.null
+                })
+                .then(done)
+                .catch(done)
+
+              const span = tracer.startSpan('test')
+
+              tracer.scope().activate(span, () => {
+                client.ping()
+                  .then(() => span.finish())
+                  .catch(done)
+              })
+            })
+
+            it('should run resolved promises in the parent context', () => {
+              if (process.env.SIGNALFX_CONTEXT_PROPAGATION === 'false') return
+
+              return client.ping()
+                .then(() => {
+                  expect(tracer.scope().active()).to.be.null
+                })
+            })
+
+            it('should run rejected promises in the parent context', done => {
+              if (process.env.SIGNALFX_CONTEXT_PROPAGATION === 'false') return done()
+
+              client.search({ index: 'invalid' })
+                .catch(() => {
+                  expect(tracer.scope().active()).to.be.null
+                  done()
+                })
+            })
+
+            it('should handle errors', done => {
+              let error
+
+              agent.use(traces => {
                 expect(traces[0][0].meta).to.have.property('error.type', error.name)
                 expect(traces[0][0].meta).to.have.property('error.msg', error.message)
                 expect(traces[0][0].meta).to.have.property('error.stack', error.stack)
               })
-              .then(done)
-              .catch(done)
+                .then(done)
+                .catch(done)
 
-            client.search({ index: 'invalid' }, err => {
-              error = err
+              client.search({ index: 'invalid' })
+                .catch(err => {
+                  error = err
+                })
             })
-          })
 
-          it('should support aborting the query', () => {
-            expect(() => {
-              client.ping(() => {}).abort()
-            }).not.to.throw()
+            it('should support aborting the query', () => {
+              expect(() => {
+                const promise = client.ping()
+
+                if (promise.abort) {
+                  promise.abort()
+                }
+              }).not.to.throw()
+            })
           })
         })
 
-        describe('when using a promise', () => {
-          it('should do automatic instrumentation', done => {
+        describe('with configuration', () => {
+          let client
+
+          before(() => {
+            return agent.load(plugin, 'elasticsearch', { service: 'test' })
+          })
+
+          after(() => {
+            return agent.close()
+          })
+
+          beforeEach(() => {
+            elasticsearch = require(`../../versions/${pkg}@${version}`).get()
+            client = new elasticsearch.Client({
+              node: 'http://localhost:9200'
+            })
+          })
+
+          it('should be configured with the correct values', done => {
             agent
               .use(traces => {
                 expect(traces[0][0]).to.have.property('service', 'test')
-                expect(traces[0][0]).to.have.property('name', 'HEAD /')
-                expect(traces[0][0].meta).to.have.property('component', 'elasticsearch')
               })
               .then(done)
               .catch(done)
 
-            client.ping().catch(done)
+            client.ping(err => err && done(err))
           })
-
-          it('should propagate context', done => {
-            if (process.env.SIGNALFX_CONTEXT_PROPAGATION === 'false') return done()
-
-            agent
-              .use(traces => {
-                expect(traces[0][0]).to.have.property('parent_id')
-                expect(traces[0][0].parent_id).to.not.be.null
-              })
-              .then(done)
-              .catch(done)
-
-            const span = tracer.startSpan('test')
-
-            tracer.scope().activate(span, () => {
-              client.ping()
-                .then(() => span.finish())
-                .catch(done)
-            })
-          })
-
-          it('should run resolved promises in the parent context', () => {
-            if (process.env.SIGNALFX_CONTEXT_PROPAGATION === 'false') return
-
-            return client.ping()
-              .then(() => {
-                expect(tracer.scope().active()).to.be.null
-              })
-          })
-
-          it('should run rejected promises in the parent context', done => {
-            if (process.env.SIGNALFX_CONTEXT_PROPAGATION === 'false') return done()
-
-            client.search({ index: 'invalid' })
-              .catch(() => {
-                expect(tracer.scope().active()).to.be.null
-                done()
-              })
-          })
-
-          it('should handle errors', done => {
-            let error
-
-            agent.use(traces => {
-              expect(traces[0][0].meta).to.have.property('error.type', error.name)
-              expect(traces[0][0].meta).to.have.property('error.msg', error.message)
-              expect(traces[0][0].meta).to.have.property('error.stack', error.stack)
-            })
-              .then(done)
-              .catch(done)
-
-            client.search({ index: 'invalid' })
-              .catch(err => {
-                error = err
-              })
-          })
-
-          it('should support aborting the query', () => {
-            expect(() => {
-              client.ping().abort()
-            }).not.to.throw()
-          })
-
-          it('should not override the returned promise', () => {
-            const promise = client.ping()
-
-            return promise.then(() => {
-              expect(promise).to.have.property('test', true)
-            })
-          })
-        })
-      })
-
-      describe('with configuration', () => {
-        let client
-
-        before(() => {
-          return agent.load(plugin, 'elasticsearch', { service: 'test' })
-        })
-
-        after(() => {
-          return agent.close()
-        })
-
-        beforeEach(() => {
-          elasticsearch = require(`../../versions/elasticsearch@${version}`).get()
-          client = new elasticsearch.Client({
-            host: 'localhost:9200'
-          })
-        })
-
-        it('should be configured with the correct values', done => {
-          agent
-            .use(traces => {
-              expect(traces[0][0]).to.have.property('service', 'test')
-            })
-            .then(done)
-            .catch(done)
-
-          client.ping(err => err && done(err))
         })
       })
     })
