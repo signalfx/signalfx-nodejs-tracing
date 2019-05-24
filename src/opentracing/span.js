@@ -7,7 +7,6 @@ const SpanContext = require('./span_context')
 const platform = require('../platform')
 const log = require('../log')
 const constants = require('../constants')
-const ext = require('../../ext')
 const utils = require('../utils')
 
 const SAMPLE_RATE_METRIC_KEY = constants.SAMPLE_RATE_METRIC_KEY
@@ -35,6 +34,8 @@ class SignalFxSpan extends Span {
     this._spanContext._tags = tags
     this._spanContext._logs = []
     this._spanContext._metrics = metrics
+
+    this._handle = platform.metrics().track(this)
   }
 
   toString () {
@@ -62,7 +63,6 @@ class SignalFxSpan extends Span {
         traceId: parent._traceId,
         spanId: platform.id(),
         parentId: parent._spanId,
-        sampled: parent._sampled,
         sampling: parent._sampling,
         baggageItems: parent._baggageItems,
         trace: {
@@ -75,8 +75,7 @@ class SignalFxSpan extends Span {
       const spanId = platform.id()
       spanContext = new SpanContext({
         traceId: spanId,
-        spanId,
-        sampled: this._sampler.isSampled(this)
+        spanId
       })
     }
 
@@ -133,20 +132,8 @@ class SignalFxSpan extends Span {
     this._duration = finishTime - this._startTime
     this._spanContext._trace.finished.push(this)
     this._spanContext._isFinished = true
-    this._prioritySampler.sample(this)
-
-    const samplingPriority = this._spanContext._sampling.priority
-    if (this._spanContext._sampled !== false &&
-        !(samplingPriority === ext.priority.USER_REJECT ||
-          samplingPriority === ext.priority.AUTO_REJECT)) {
-      this._recorder.record(this)
-    }
-
-    this._spanContext._children
-      .filter(child => !child.context()._isFinished)
-      .forEach(child => {
-        log.debug(`Parent span ${this} was finished before child span ${child}.`)
-      })
+    this._handle.finish()
+    this._recorder.record(this)
   }
 }
 

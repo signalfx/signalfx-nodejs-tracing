@@ -17,9 +17,6 @@ function createWrapConnect (tracer, config) {
 
       analyticsSampler.sample(span, config.analytics)
 
-      this.once('connect', tx.wrap(span))
-      this.once('error', tx.wrap(span))
-
       return scope.bind(connect, span).apply(this, arguments)
     }
   }
@@ -39,29 +36,20 @@ function wrapTcp (tracer, config, socket, options) {
 
   tx.setHost(span, host, port)
 
-  socket.once('connect', () => {
-    if (socket.localAddress) {
-      span.addTags({
-        'tcp.local.address': socket.localAddress,
-        'tcp.local.port': socket.localPort
-      })
-    }
-  })
-
-  socket.once('lookup', (err, address) => {
-    if (!err) {
-      span.setTag('tcp.remote.address', address)
-    }
-  })
+  setupListeners(socket, span, 'tcp')
 
   return span
 }
 
 function wrapIpc (tracer, config, socket, options) {
-  return startSpan(tracer, config, 'ipc', {
+  const span = startSpan(tracer, config, 'ipc', {
     'resource.name': options.path,
     'ipc.path': options.path
   })
+
+  setupListeners(socket, span, 'ipc')
+
+  return span
 }
 
 function startSpan (tracer, config, protocol, tags) {
@@ -80,10 +68,6 @@ function startSpan (tracer, config, protocol, tags) {
       'service.name': config.service || `${tracer._service}-${protocol}`
     }, tags)
   })
-
-  if (!childOf) {
-    span.context()._sampled = false
-  }
 
   return span
 }
@@ -107,6 +91,37 @@ function getOptions (args) {
         host: typeof args[1] === 'string' ? args[1] : 'localhost'
       }
   }
+}
+
+function setupListeners (socket, span, protocol) {
+  const events = ['connect', 'error', 'close', 'timeout']
+
+  const wrapListener = tx.wrap(span)
+
+  const localListener = () => {
+    span.addTags({
+      'tcp.local.address': socket.localAddress,
+      'tcp.local.port': socket.localPort
+    })
+  }
+
+  const cleanupListener = () => {
+    socket.removeListener('connect', localListener)
+
+    events.forEach(event => {
+      socket.removeListener(event, wrapListener)
+      socket.removeListener(event, cleanupListener)
+    })
+  }
+
+  if (protocol === 'tcp') {
+    socket.once('connect', localListener)
+  }
+
+  events.forEach(event => {
+    socket.once(event, wrapListener)
+    socket.once(event, cleanupListener)
+  })
 }
 
 module.exports = {

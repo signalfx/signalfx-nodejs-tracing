@@ -600,7 +600,6 @@ query HelloWorld {
 | tcp.family         | The IP family version                         |
 | tcp.local.address  | Local address socket connected with           |
 | tcp.local.port     | Local port socket connected to                |
-| tcp.remote.address | Remote IP address attempting to connect with  |
 | tcp.remote.host    | Remote hostname attempting to connection with |
 | tcp.remote.port    | Remote port attempting to connect to          |
 

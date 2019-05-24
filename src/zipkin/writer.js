@@ -6,8 +6,8 @@ const format = require('./format')
 const Writer = require('../writer')
 
 class ZipkinV2Writer extends Writer {
-  constructor (prioritySampler, url, size, path, headers) {
-    super(prioritySampler, url, size)
+  constructor (prioritySampler, url, path, headers) {
+    super(prioritySampler, url)
     // The dd-writer updates service-based sampling priorities for each
     // trace write to the agent.  We just need to prime the default
     // AUTO_KEEP sampler for subsequent isSampled(span) calls
@@ -28,6 +28,7 @@ class ZipkinV2Writer extends Writer {
       this._request(data)
 
       this._queue = []
+      this._size = 0
     }
   }
 

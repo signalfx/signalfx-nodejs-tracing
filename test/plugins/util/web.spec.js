@@ -570,7 +570,6 @@ describe('plugins/util/web', () => {
           end.apply(this, arguments)
 
           try {
-            // console.log(tracer.scope().active())
             expect(tracer.scope().active()).to.not.be.null
             done()
           } catch (e) {

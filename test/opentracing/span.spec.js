@@ -2,7 +2,6 @@
 
 const Uint64BE = require('int64-buffer').Uint64BE
 const constants = require('../../src/constants')
-const ext = require('../../ext')
 
 const SAMPLE_RATE_METRIC_KEY = constants.SAMPLE_RATE_METRIC_KEY
 
@@ -14,17 +13,23 @@ describe('Span', () => {
   let prioritySampler
   let sampler
   let platform
+  let handle
 
   beforeEach(() => {
-    platform = { id: sinon.stub() }
+    handle = { finish: sinon.spy() }
+    platform = {
+      id: sinon.stub(),
+      metrics: sinon.stub().returns({
+        track: sinon.stub().returns(handle)
+      })
+    }
     platform.id.onFirstCall().returns(new Uint64BE(123, 123))
     platform.id.onSecondCall().returns(new Uint64BE(456, 456))
 
     tracer = {}
 
     sampler = {
-      rate: sinon.stub().returns(1),
-      isSampled: sinon.stub().returns(true)
+      rate: sinon.stub().returns(1)
     }
 
     recorder = {
@@ -57,7 +62,6 @@ describe('Span', () => {
     const parent = {
       _traceId: new Uint64BE(123, 123),
       _spanId: new Uint64BE(456, 456),
-      _sampled: false,
       _baggageItems: { foo: 'bar' },
       _trace: {
         started: ['span'],
@@ -79,7 +83,6 @@ describe('Span', () => {
     const parent = {
       _traceId: new Uint64BE(123, 123),
       _spanId: new Uint64BE(456, 456),
-      _sampled: false,
       _baggageItems: { foo: 'bar' },
       _trace: {
         started: ['span'],
@@ -96,6 +99,16 @@ describe('Span', () => {
 
   it('should set the sample rate metric from the sampler', () => {
     expect(span.context()._metrics).to.have.property(SAMPLE_RATE_METRIC_KEY, 1)
+  })
+
+  it('should keep track of its memory lifecycle', () => {
+    span = new Span(tracer, recorder, sampler, prioritySampler, { operationName: 'operation' })
+
+    expect(platform.metrics().track).to.have.been.calledWith(span)
+
+    span.finish()
+
+    expect(handle.finish).to.have.been.called
   })
 
   describe('tracer', () => {
@@ -120,7 +133,6 @@ describe('Span', () => {
       const parent = {
         traceId: new Uint64BE(123, 123),
         spanId: new Uint64BE(456, 456),
-        _sampled: false,
         _baggageItems: {},
         _trace: {
           started: ['span'],
@@ -162,6 +174,13 @@ describe('Span', () => {
       expect(span.context()._tags).to.have.property('foo', 'bar')
     })
 
+    it('should store the original values', () => {
+      span = new Span(tracer, recorder, sampler, prioritySampler, { operationName: 'operation' })
+      span.addTags({ foo: 123 })
+
+      expect(span.context()._tags).to.have.property('foo', 123)
+    })
+
     it('should handle errors', () => {
       span = new Span(tracer, recorder, sampler, prioritySampler, { operationName: 'operation' })
 
@@ -179,49 +198,13 @@ describe('Span', () => {
       expect(span.context()._trace.finished).to.deep.equal([span])
     })
 
-    it('should record the span if sampled', () => {
+    it('should record the span', () => {
       recorder.record.returns(Promise.resolve())
 
       span = new Span(tracer, recorder, sampler, prioritySampler, { operationName: 'operation' })
       span.finish()
 
       expect(recorder.record).to.have.been.calledWith(span)
-    })
-
-    it('should not record the span if not sampled', () => {
-      recorder.record.returns(Promise.resolve())
-      sampler.isSampled.returns(false)
-
-      span = new Span(tracer, recorder, sampler, prioritySampler, { operationName: 'operation' })
-      span.finish()
-
-      expect(recorder.record).to.not.have.been.called
-    })
-
-    const reject = [ext.priority.AUTO_REJECT, ext.priority.USER_REJECT]
-    reject.forEach((priority) => {
-      it(`should not record the span if priority ${priority}`, () => {
-        recorder.record.returns(Promise.resolve())
-
-        span = new Span(tracer, recorder, sampler, prioritySampler, { operationName: 'operation' })
-        span.context()._sampling.priority = priority
-        span.finish()
-
-        expect(recorder.record).to.not.have.been.called
-      })
-    })
-
-    const keep = [ext.priority.AUTO_KEEP, ext.priority.USER_KEEP]
-    keep.forEach((priority) => {
-      it(`should record the span if priority ${priority}`, () => {
-        recorder.record.returns(Promise.resolve())
-
-        span = new Span(tracer, recorder, sampler, prioritySampler, { operationName: 'operation' })
-        span.context()._sampling.priority = priority
-        span.finish()
-
-        expect(recorder.record).to.have.been.calledWith(span)
-      })
     })
 
     it('should not record the span if already finished', () => {
@@ -232,16 +215,6 @@ describe('Span', () => {
       span.finish()
 
       expect(recorder.record).to.have.been.calledOnce
-    })
-
-    it('should generate sampling priority', () => {
-      prioritySampler.sample = span => {
-        span.context()._sampling.priority = 2
-      }
-      span = new Span(tracer, recorder, sampler, prioritySampler, { operationName: 'operation' })
-      span.finish()
-
-      expect(span.context()._sampling.priority).to.equal(2)
     })
   })
 })

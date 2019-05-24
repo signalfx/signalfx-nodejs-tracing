@@ -9,7 +9,7 @@ describe('Plugin', () => {
   let elasticsearch
   let tracer
 
-  withVersions(plugin, 'elasticsearch', version => {
+  withVersions(plugin, ['elasticsearch', '@elastic/elasticsearch'], (version, moduleName) => {
     describe('elasticsearch', () => {
       beforeEach(() => {
         tracer = require('../..')
@@ -27,21 +27,9 @@ describe('Plugin', () => {
         })
 
         beforeEach(() => {
-          elasticsearch = require(`../../versions/elasticsearch@${version}`).get()
+          elasticsearch = require(`../../versions/${moduleName}@${version}`).get()
           client = new elasticsearch.Client({
-            host: 'localhost:9200',
-            defer: () => {
-              const deferred = {}
-
-              deferred.promise = new Promise((resolve, reject) => {
-                deferred.resolve = resolve
-                deferred.reject = reject
-              })
-
-              deferred.promise.test = true
-
-              return deferred
-            }
+            node: 'http://localhost:9200'
           })
         })
 
@@ -53,7 +41,10 @@ describe('Plugin', () => {
             .then(done)
             .catch(done)
 
-          client.search({ index: 'logstash-2000.01.01' }, () => {})
+          client.search({
+            index: 'logstash-2000.01.01',
+            body: {}
+          }, () => {})
         })
 
         it('should sanitize ID and query parameter containing request', done => {
@@ -213,25 +204,6 @@ describe('Plugin', () => {
             })
           })
 
-          it('should run resolved promises in the parent context', () => {
-            if (process.env.SIGNALFX_CONTEXT_PROPAGATION === 'false') return
-
-            return client.ping()
-              .then(() => {
-                expect(tracer.scope().active()).to.be.null
-              })
-          })
-
-          it('should run rejected promises in the parent context', done => {
-            if (process.env.SIGNALFX_CONTEXT_PROPAGATION === 'false') return done()
-
-            client.search({ index: 'invalid' })
-              .catch(() => {
-                expect(tracer.scope().active()).to.be.null
-                done()
-              })
-          })
-
           it('should handle errors', done => {
             let error
 
@@ -251,16 +223,12 @@ describe('Plugin', () => {
 
           it('should support aborting the query', () => {
             expect(() => {
-              client.ping().abort()
+              const promise = client.ping()
+
+              if (promise.abort) {
+                promise.abort()
+              }
             }).not.to.throw()
-          })
-
-          it('should not override the returned promise', () => {
-            const promise = client.ping()
-
-            return promise.then(() => {
-              expect(promise).to.have.property('test', true)
-            })
           })
         })
       })
@@ -277,9 +245,9 @@ describe('Plugin', () => {
         })
 
         beforeEach(() => {
-          elasticsearch = require(`../../versions/elasticsearch@${version}`).get()
+          elasticsearch = require(`../../versions/${moduleName}@${version}`).get()
           client = new elasticsearch.Client({
-            host: 'localhost:9200'
+            node: 'http://localhost:9200'
           })
         })
 
