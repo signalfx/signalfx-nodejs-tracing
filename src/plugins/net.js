@@ -1,7 +1,13 @@
 'use strict'
 
+const opentracing = require('opentracing')
+
 const tx = require('./util/tx')
 const analyticsSampler = require('../analytics_sampler')
+const constants = require('../constants')
+const Reference = opentracing.Reference
+const REFERENCE_CHILD_OF = opentracing.REFERENCE_CHILD_OF
+const REFERENCE_NOOP = constants.REFERENCE_NOOP
 
 function createWrapConnect (tracer, config) {
   return function wrapConnect (connect) {
@@ -54,6 +60,8 @@ function wrapIpc (tracer, config, socket, options) {
 
 function startSpan (tracer, config, protocol, tags) {
   const childOf = tracer.scope().active()
+  const type = (childOf !== null) ? REFERENCE_CHILD_OF : REFERENCE_NOOP
+  const references = [ new Reference(type, childOf) ]
 
   let operationName = `${protocol}.connect`
   const resourceName = tags['resource.name']
@@ -61,8 +69,9 @@ function startSpan (tracer, config, protocol, tags) {
     delete tags['resource.name']
     operationName = `${operationName}: ${resourceName}`
   }
+
   const span = tracer.startSpan(operationName, {
-    childOf,
+    references,
     tags: Object.assign({
       'span.kind': 'client',
       'service.name': config.service || `${tracer._service}-${protocol}`

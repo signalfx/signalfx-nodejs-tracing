@@ -38,11 +38,16 @@ function patch (http, methodName, tracer, config) {
 
       const scope = tracer.scope()
       const childOf = scope.active()
-      const type = config.filter(uri) ? REFERENCE_CHILD_OF : REFERENCE_NOOP
+
+      let references
+      if (config.filter(uri)) {
+        references = (childOf !== null) ? [ new Reference(REFERENCE_CHILD_OF, childOf) ] : []
+      } else {
+        references = [ new Reference(REFERENCE_NOOP, childOf) ]
+      }
+
       const span = tracer.startSpan('http.request', {
-        references: [
-          new Reference(type, childOf)
-        ],
+        references,
         tags: {
           [SPAN_KIND]: CLIENT,
           'service.name': getServiceName(tracer, config, options),
