@@ -40,7 +40,7 @@ describe('Plugin', () => {
             agent
               .use(traces => {
                 expect(traces[0][0]).to.have.property('service', 'test')
-                expect(traces[0][0]).to.have.property('name', 'GET')
+                expect(traces[0][0]).to.have.property('name', 'restify.request')
                 expect(traces[0][0].meta).to.have.property('component', 'restify')
                 expect(traces[0][0].meta).to.have.property('span.kind', 'server')
                 expect(traces[0][0].meta).to.have.property('http.url', `http://localhost:${port}/user`)
@@ -69,7 +69,7 @@ describe('Plugin', () => {
           getPort().then(port => {
             agent
               .use(traces => {
-                expect(traces[0][0]).to.have.property('name', 'GET /user/:id')
+                expect(traces[0][0]).to.have.property('name', '/user/:id')
                 expect(traces[0][0].meta).to.have.property('http.url', `http://localhost:${port}/user/123`)
               })
               .then(done)
@@ -157,7 +157,7 @@ describe('Plugin', () => {
           getPort().then(port => {
             agent
               .use(traces => {
-                expect(traces[0][0]).to.have.property('name', 'GET /user/:id')
+                expect(traces[0][0]).to.have.property('name', '/user/:id')
                 expect(traces[0][0].meta).to.have.property('http.url', `http://localhost:${port}/user/123`)
               })
               .then(done)
