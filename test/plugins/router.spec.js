@@ -70,7 +70,7 @@ describe('Plugin', () => {
               .use(traces => {
                 const spans = sort(traces[0])
 
-                expect(spans[0]).to.have.property('name', 'GET /parent/child/:id')
+                expect(spans[0]).to.have.property('name', '/parent/child/:id')
               })
               .then(done)
               .catch(done)
