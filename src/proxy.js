@@ -57,6 +57,10 @@ class Tracer extends BaseTracer {
           platform.validate()
           platform.configure(config)
 
+          if (config.runtimeMetrics) {
+            platform.metrics().start()
+          }
+
           this._tracer = new SignalFxTracer(config)
           this._instrumenter.enable()
           this._instrumenter.patch(config)

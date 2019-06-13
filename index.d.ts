@@ -1,4 +1,4 @@
-import { IncomingMessage, ServerResponse } from "http";
+import { ClientRequest, IncomingMessage, ServerResponse } from "http";
 import * as opentracing from "opentracing";
 import { SpanOptions } from "opentracing/lib/tracer";
 
@@ -212,6 +212,17 @@ export declare interface TracerOptions {
   port?: number | string;
 
   /**
+   * Options specific for the Dogstatsd agent.
+   */
+  dogstatsd?: {
+    /**
+     * The port of the Dogstatsd agent that the metrics will submitted to.
+     * @default 8125
+     */
+    port?: number
+  };
+
+  /**
    * Set an application’s environment e.g. prod, pre-prod, stage.
    */
   env?: string;
@@ -221,6 +232,12 @@ export declare interface TracerOptions {
    * @default 1
    */
   sampleRate?: number;
+
+  /**
+   * Whether to enable runtime metrics.
+   * @default false
+   */
+  runtimeMetrics?: boolean
 
   /**
    * Experimental features can be enabled all at once by using true or individually using key / value pairs.
@@ -307,6 +324,7 @@ interface Plugins {
   "hapi": plugins.hapi;
   "http": plugins.http;
   "ioredis": plugins.ioredis;
+  "knex": plugins.knex;
   "koa": plugins.koa;
   "memcached": plugins.memcached;
   "mongodb-core": plugins.mongodb_core;
@@ -443,6 +461,16 @@ declare namespace plugins {
      * @default code => code < 400
      */
     validateStatus?: (code: number) => boolean;
+
+    /**
+     * Hooks to run before spans are finished.
+     */
+    hooks?: {
+      /**
+       * Hook to execute just before the request span finishes.
+       */
+      request?: (span?: opentracing.Span, req?: ClientRequest, res?: IncomingMessage) => any;
+    };
   }
 
   /**
@@ -582,6 +610,20 @@ declare namespace plugins {
      * Configuration for HTTP servers.
      */
     server?: HttpServer
+
+    /**
+     * Hooks to run before spans are finished.
+     */
+    hooks?: {
+      /**
+       * Hook to execute just before the request span finishes.
+       */
+      request?: (
+        span?: opentracing.Span,
+        req?: IncomingMessage | ClientRequest,
+        res?: ServerResponse | IncomingMessage
+      ) => any;
+    };
   }
 
   /**
@@ -589,6 +631,12 @@ declare namespace plugins {
    * [ioredis](https://github.com/luin/ioredis) module.
    */
   interface ioredis extends Integration {}
+
+  /**
+   * This plugin patches the [knex](https://knexjs.org/)
+   * module to bind the promise callback the the caller context.
+   */
+  interface knex extends Integration {}
 
   /**
    * This plugin automatically instruments the

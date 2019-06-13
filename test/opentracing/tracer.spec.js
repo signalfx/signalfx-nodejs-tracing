@@ -1,6 +1,7 @@
 'use strict'
 
 const opentracing = require('opentracing')
+const SpanContext = require('../../src/opentracing/span_context')
 const Reference = opentracing.Reference
 
 describe('Tracer', () => {
@@ -16,7 +17,6 @@ describe('Tracer', () => {
   let recorder
   let Sampler
   let sampler
-  let SpanContext
   let spanContext
   let fields
   let carrier
@@ -29,8 +29,6 @@ describe('Tracer', () => {
 
   beforeEach(() => {
     fields = {}
-
-    SpanContext = sinon.spy()
 
     span = {}
     Span = sinon.stub().returns(span)
@@ -69,7 +67,6 @@ describe('Tracer', () => {
       service: 'service',
       url: 'http://test:7777',
       flushInterval: 2000,
-      bufferSize: 1000,
       sampleRate: 0.5,
       logger: 'logger',
       tags: {},
@@ -99,7 +96,7 @@ describe('Tracer', () => {
     tracer = new Tracer(config)
 
     expect(Writer).to.have.been.called
-    expect(Writer).to.have.been.calledWith(prioritySampler, config.url, config.bufferSize)
+    expect(Writer).to.have.been.calledWith(prioritySampler, config.url)
     expect(Recorder).to.have.been.calledWith(writer, config.flushInterval)
     expect(recorder.init).to.have.been.called
   })
@@ -141,19 +138,17 @@ describe('Tracer', () => {
     it('should start a span that is the child of a span', () => {
       const parent = new SpanContext()
 
-      parent._children = []
       fields.references = [
         new Reference(opentracing.REFERENCE_CHILD_OF, parent)
       ]
 
       tracer = new Tracer(config)
-      const span = tracer.startSpan('name', fields)
+      tracer.startSpan('name', fields)
 
       expect(Span).to.have.been.calledWithMatch(tracer, recorder, sampler, prioritySampler, {
         operationName: 'name',
         parent
       })
-      expect(parent.children).to.include(span)
     })
 
     it('should start a span that follows from a span', () => {
@@ -265,6 +260,41 @@ describe('Tracer', () => {
           'env': 'test'
         }
       })
+    })
+
+    it('should return a noop span when not sampled', () => {
+      sampler.isSampled.returns(false)
+
+      tracer = new Tracer(config)
+
+      expect(tracer.startSpan('name', fields)).to.equal(tracer._noopSpan)
+    })
+
+    it('should return a noop span when the parent is not sampled', () => {
+      tracer = new Tracer(config)
+
+      const parent = tracer._noopSpan
+
+      fields.references = [
+        new Reference(opentracing.REFERENCE_CHILD_OF, parent)
+      ]
+
+      expect(tracer.startSpan('name', fields)).to.equal(tracer._noopSpan)
+    })
+
+    it('should always start a new span when the parent is sampled', () => {
+      const parent = new SpanContext()
+
+      fields.references = [
+        new Reference(opentracing.REFERENCE_CHILD_OF, parent)
+      ]
+
+      sampler.isSampled.returns(false)
+
+      tracer = new Tracer(config)
+      tracer.startSpan('name', fields)
+
+      expect(Span).to.have.been.called
     })
   })
 

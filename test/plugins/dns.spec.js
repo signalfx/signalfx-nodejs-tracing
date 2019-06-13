@@ -29,9 +29,18 @@ describe('Plugin', () => {
             service: 'test',
             meta: {
               'dns.hostname': 'localhost',
+              'dns.address': '127.0.0.1',
               'span.kind': 'client'
             }
+            // name: 'dns.lookup',
+            // service: 'test-dns',
+            // resource: 'localhost'
           })
+          // expect(traces[0][0].meta).to.deep.include({
+          //   'dns.hostname': 'localhost',
+          //   'dns.address': '127.0.0.1',
+          //   'span.kind': 'client'
+          // })
         })
         .then(done)
         .catch(done)
@@ -50,7 +59,15 @@ describe('Plugin', () => {
               'dns.port': '22',
               'span.kind': 'client'
             }
+            // name: 'dns.lookup_service',
+            // service: 'test-dns',
+            // resource: '127.0.0.1:22'
           })
+          // expect(traces[0][0].meta).to.deep.include({
+          //   'dns.address': '127.0.0.1',
+          //   'dns.port': '22',
+          //   'span.kind': 'client'
+          // })
         })
         .then(done)
         .catch(done)
@@ -69,7 +86,15 @@ describe('Plugin', () => {
               'dns.rrtype': 'A',
               'span.kind': 'client'
             }
+            // name: 'dns.resolve',
+            // service: 'test-dns',
+            // resource: 'A localhost'
           })
+          // expect(traces[0][0].meta).to.deep.include({
+          //   'dns.hostname': 'localhost',
+          //   'dns.rrtype': 'A',
+          //   'span.kind': 'client'
+          // })
         })
         .then(done)
         .catch(done)
@@ -88,7 +113,15 @@ describe('Plugin', () => {
               'dns.rrtype': 'ANY',
               'span.kind': 'client'
             }
+            // name: 'dns.resolve',
+            // service: 'test-dns',
+            // resource: 'ANY localhost'
           })
+          // expect(traces[0][0].meta).to.deep.include({
+          //   'dns.hostname': 'localhost',
+          //   'dns.rrtype': 'ANY',
+          //   'span.kind': 'client'
+          // })
         })
         .then(done)
         .catch(done)
@@ -106,7 +139,14 @@ describe('Plugin', () => {
               'dns.ip': '127.0.0.1',
               'span.kind': 'client'
             }
+            // name: 'dns.reverse',
+            // service: 'test-dns',
+            // resource: '127.0.0.1'
           })
+          // expect(traces[0][0].meta).to.deep.include({
+          //   'dns.ip': '127.0.0.1',
+          //   'span.kind': 'client'
+          // })
         })
         .then(done)
         .catch(done)
@@ -128,7 +168,15 @@ describe('Plugin', () => {
                 'dns.rrtype': 'A',
                 'span.kind': 'client'
               }
+              // name: 'dns.resolve',
+              // service: 'test-dns',
+              // resource: 'A localhost'
             })
+            // expect(traces[0][0].meta).to.deep.include({
+            //   'dns.hostname': 'localhost',
+            //   'dns.rrtype': 'A',
+            //   'span.kind': 'client'
+            // })
           })
           .then(done)
           .catch(done)

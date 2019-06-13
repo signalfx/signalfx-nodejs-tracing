@@ -1,5 +1,26 @@
 import sfxTrace, { tracer, Tracer, TracerOptions, Span, SpanContext, SpanOptions, Scope } from '..';
-import { HTTP_HEADERS } from '../ext/formats';
+import { formats, kinds, priority, tags, types } from '../ext';
+import { BINARY, HTTP_HEADERS, LOG, TEXT_MAP } from '../ext/formats';
+import { SERVER, CLIENT, PRODUCER, CONSUMER } from '../ext/kinds'
+import { USER_REJECT, AUTO_REJECT, AUTO_KEEP, USER_KEEP } from '../ext/priority'
+import {
+  ANALYTICS,
+  ERROR,
+  HTTP_METHOD,
+  HTTP_REQUEST_HEADERS,
+  HTTP_RESPONSE_HEADERS,
+  HTTP_ROUTE,
+  HTTP_STATUS_CODE,
+  HTTP_URL,
+  MANUAL_DROP,
+  MANUAL_KEEP,
+  RESOURCE_NAME,
+  SAMPLING_PRIORITY,
+  SERVICE_NAME,
+  SPAN_KIND,
+  SPAN_TYPE,
+} from '../ext/tags'
+import { HTTP, WEB } from '../ext/types'
 import * as opentracing from 'opentracing';
 
 opentracing.initGlobalTracer(tracer);
@@ -17,7 +38,8 @@ tracer.init({
   logInjection: true,
   analytics: true,
   env: 'test',
-  experimental: true,
+  runtimeMetrics: true,
+  experimental: {},
   hostname: 'agent',
   logger: {
     error (message: string) {},
@@ -25,6 +47,9 @@ tracer.init({
   },
   plugins: false,
   port: 7777,
+  dogstatsd: {
+    port: 8888
+  },
   sampleRate: 0.1,
   service: 'test',
   tags: {
@@ -51,7 +76,10 @@ const httpServerOptions = {
 
 const httpClientOptions = {
   ...httpOptions,
-  splitByDomain: true
+  splitByDomain: true,
+  hooks: {
+    request: (span, req, res) => {}
+  }
 };
 
 const graphqlOptions = {
@@ -83,6 +111,7 @@ tracer.use('http', {
   client: httpClientOptions
 });
 tracer.use('ioredis');
+tracer.use('knex');
 tracer.use('koa');
 tracer.use('koa', httpServerOptions);
 tracer.use('memcached');

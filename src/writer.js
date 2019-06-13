@@ -6,14 +6,16 @@ const format = require('./format')
 const encode = require('./encode')
 const tracerVersion = require('../lib/version')
 
+const MAX_SIZE = 8 * 1024 * 1024 // 8MB
+
 class Writer {
-  constructor (prioritySampler, url, size) {
+  constructor (prioritySampler, url) {
     this._queue = []
     this._prioritySampler = prioritySampler
     this._url = url
-    this._size = size
     this.format = format
     this.encode = encode
+    this._size = 0
   }
 
   get length () {
@@ -25,6 +27,8 @@ class Writer {
     const trace = spanContext._trace
 
     if (trace.started.length === trace.finished.length) {
+      this._prioritySampler.sample(spanContext)
+
       const formattedTrace = trace.finished.map(this.format)
 
       if (spanContext._sampling.drop === true) {
@@ -38,11 +42,12 @@ class Writer {
 
       log.debug(() => `Adding encoded trace to buffer: ${buffer.toString('hex').match(/../g).join(' ')}`)
 
-      if (this.length < this._size) {
-        this._queue.push(buffer)
-      } else {
-        this._squeeze(buffer)
+      if (buffer.length + this._size > MAX_SIZE) {
+        this.flush()
       }
+
+      this._size += buffer.length
+      this._queue.push(buffer)
     }
   }
 
@@ -53,14 +58,12 @@ class Writer {
       this._request(data, this._queue.length)
 
       this._queue = []
+      this._size = 0
     }
   }
 
   _request (data, count) {
     const options = {
-      protocol: this._url.protocol,
-      hostname: this._url.hostname,
-      port: this._url.port,
       path: '/v0.4/traces',
       method: 'PUT',
       headers: {
@@ -73,6 +76,14 @@ class Writer {
       }
     }
 
+    if (this._url.protocol === 'unix:') {
+      options.socketPath = this._url.pathname
+    } else {
+      options.protocol = this._url.protocol
+      options.hostname = this._url.hostname
+      options.port = this._url.port
+    }
+
     log.debug(() => `Request to the agent: ${JSON.stringify(options)}`)
 
     platform
@@ -83,11 +94,6 @@ class Writer {
         this._prioritySampler.update(JSON.parse(res).rate_by_service)
       })
       .catch(e => log.error(e))
-  }
-
-  _squeeze (buffer) {
-    const index = Math.floor(Math.random() * this.length)
-    this._queue[index] = buffer
   }
 }
 

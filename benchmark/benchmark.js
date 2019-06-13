@@ -3,9 +3,12 @@
 /* eslint-disable no-console */
 
 const Benchmark = require('benchmark')
+const nock = require('nock')
 
 Benchmark.options.maxTime = 0.1
 Benchmark.options.minSamples = 5
+
+nock.disableNetConnect()
 
 module.exports = title => {
   const suite = new Benchmark.Suite()
@@ -18,6 +21,6 @@ module.exports = title => {
       console.log(String(event.target))
     })
     .on('error', event => {
-      console.log(String(event.target.error))
+      throw event.target.error
     })
 }

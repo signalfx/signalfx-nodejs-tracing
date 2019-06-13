@@ -61,11 +61,11 @@ describe('Plugin', () => {
         .use(traces => {
           expect(traces[0][0]).to.deep.include({
             name: 'ipc.connect: /tmp/dd-trace.sock',
-            service: 'test',
-            meta: {
-              'span.kind': 'client',
-              'ipc.path': '/tmp/dd-trace.sock'
-            }
+            service: 'test'
+          })
+          expect(traces[0][0].meta).to.deep.include({
+            'span.kind': 'client',
+            'ipc.path': '/tmp/dd-trace.sock'
           })
           expect(traces[0][0].parent_id.toString()).to.equal(utils.idToHex(parent.context()._spanId))
         })
@@ -84,18 +84,17 @@ describe('Plugin', () => {
         .use(traces => {
           expect(traces[0][0]).to.deep.include({
             name: `tcp.connect: localhost:${port}`,
-            service: 'test',
-            meta: {
-              'span.kind': 'client',
-              'tcp.family': 'IPv4',
-              'tcp.remote.host': 'localhost',
-              'tcp.remote.address': '127.0.0.1',
-              'tcp.remote.port': `${port}`,
-              'tcp.local.address': '127.0.0.1',
-              'tcp.local.port': `${socket.localPort}`,
-              'peer.hostname': 'localhost',
-              'peer.port': `${port}`
-            }
+            service: 'test'
+          })
+          expect(traces[0][0].meta).to.deep.include({
+            'span.kind': 'client',
+            'tcp.family': 'IPv4',
+            'tcp.remote.host': 'localhost',
+            'tcp.remote.port': `${port}`,
+            'tcp.local.address': '127.0.0.1',
+            'tcp.local.port': `${socket.localPort}`,
+            'peer.hostname': 'localhost',
+            'peer.port': `${port}`
           })
           expect(traces[0][0].parent_id.toString()).to.equal(utils.idToHex(parent.context()._spanId))
         })
@@ -114,18 +113,17 @@ describe('Plugin', () => {
         .use(traces => {
           expect(traces[0][0]).to.deep.include({
             name: `tcp.connect: localhost:${port}`,
-            service: 'test',
-            meta: {
-              'span.kind': 'client',
-              'tcp.family': 'IPv4',
-              'tcp.remote.host': 'localhost',
-              'tcp.remote.address': '127.0.0.1',
-              'tcp.remote.port': `${port}`,
-              'tcp.local.address': '127.0.0.1',
-              'tcp.local.port': `${socket.localPort}`,
-              'peer.hostname': 'localhost',
-              'peer.port': `${port}`
-            }
+            service: 'test'
+          })
+          expect(traces[0][0].meta).to.deep.include({
+            'span.kind': 'client',
+            'tcp.family': 'IPv4',
+            'tcp.remote.host': 'localhost',
+            'tcp.remote.port': `${port}`,
+            'tcp.local.address': '127.0.0.1',
+            'tcp.local.port': `${socket.localPort}`,
+            'peer.hostname': 'localhost',
+            'peer.port': `${port}`
           })
           expect(traces[0][0].parent_id.toString()).to.equal(utils.idToHex(parent.context()._spanId))
         })
@@ -145,11 +143,11 @@ describe('Plugin', () => {
         .use(traces => {
           expect(traces[0][0]).to.deep.include({
             name: 'ipc.connect: /tmp/dd-trace.sock',
-            service: 'test',
-            meta: {
-              'span.kind': 'client',
-              'ipc.path': '/tmp/dd-trace.sock'
-            }
+            service: 'test'
+          })
+          expect(traces[0][0].meta).to.deep.include({
+            'span.kind': 'client',
+            'ipc.path': '/tmp/dd-trace.sock'
           })
           expect(traces[0][0].parent_id.toString()).to.equal(utils.idToHex(parent.context()._spanId))
         })
@@ -159,6 +157,58 @@ describe('Plugin', () => {
       tracer.scope().activate(parent, () => {
         net.connect({
           path: '/tmp/dd-trace.sock'
+        })
+      })
+    })
+
+    it('should instrument error', done => {
+      const socket = new net.Socket()
+
+      let error = null
+
+      agent
+        .use(traces => {
+          expect(traces[0][0]).to.deep.include({
+            name: `tcp.connect: localhost:${port}`,
+            service: 'test'
+          })
+          expect(traces[0][0].meta).to.deep.include({
+            'span.kind': 'client',
+            'tcp.family': 'IPv4',
+            'tcp.remote.host': 'localhost',
+            'tcp.remote.port': `${port}`,
+            'peer.hostname': 'localhost',
+            'peer.port': `${port}`,
+            'error.type': error.name,
+            'error.msg': error.message,
+            'error.stack': error.stack
+          })
+          expect(traces[0][0].parent_id.toString()).to.equal(utils.idToHex(parent.context()._spanId))
+        })
+        .then(done)
+        .catch(done)
+
+      tracer.scope().activate(parent, () => {
+        tcp.close()
+        socket.connect({ port })
+        socket.once('error', (err) => {
+          error = err
+        })
+      })
+    })
+
+    it('should cleanup event listeners when the socket changes state', done => {
+      const socket = new net.Socket()
+
+      tracer.scope().activate(parent, () => {
+        const events = ['connect', 'error', 'close', 'timeout']
+
+        socket.connect({ port })
+        socket.destroy()
+
+        socket.once('close', () => {
+          expect(socket.eventNames()).to.not.include.members(events)
+          done()
         })
       })
     })
