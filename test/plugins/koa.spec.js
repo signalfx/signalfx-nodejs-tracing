@@ -46,7 +46,7 @@ describe('Plugin', () => {
               const spans = sort(traces[0])
 
               expect(spans[0]).to.have.property('service', 'test')
-              expect(spans[0]).to.have.property('name', 'GET')
+              expect(spans[0]).to.have.property('name', 'koa.request')
               expect(spans[0].meta).to.have.property('component', 'koa')
               expect(spans[0].meta).to.have.property('span.kind', 'server')
               expect(spans[0].meta).to.have.property('http.url', `http://localhost:${port}/user`)
@@ -80,7 +80,7 @@ describe('Plugin', () => {
               const spans = sort(traces[0])
 
               expect(spans[0]).to.have.property('service', 'test')
-              expect(spans[0]).to.have.property('name', 'GET')
+              expect(spans[0]).to.have.property('name', 'koa.request')
               expect(spans[0].meta).to.have.property('component', 'koa')
               expect(spans[0].meta).to.have.property('span.kind', 'server')
               expect(spans[0].meta).to.have.property('http.url', `http://localhost:${port}/user`)
@@ -235,7 +235,7 @@ describe('Plugin', () => {
               .use(traces => {
                 const spans = sort(traces[0])
 
-                expect(spans[0]).to.have.property('name', 'GET /user/:id')
+                expect(spans[0]).to.have.property('name', '/user/:id')
                 expect(spans[0].meta).to.have.property('http.url', `http://localhost:${port}/user/123`)
 
                 expect(spans[1]).to.have.property('name', 'dispatch')
@@ -269,7 +269,7 @@ describe('Plugin', () => {
               .use(traces => {
                 const spans = sort(traces[0])
 
-                expect(spans[0]).to.have.property('name', 'GET /user/:id')
+                expect(spans[0]).to.have.property('name', '/user/:id')
               })
               .then(done)
               .catch(done)
@@ -298,7 +298,7 @@ describe('Plugin', () => {
               .use(traces => {
                 const spans = sort(traces[0])
 
-                expect(spans[0]).to.have.property('name', 'GET /forums/:fid/posts/:pid')
+                expect(spans[0]).to.have.property('name', '/forums/:fid/posts/:pid')
                 expect(spans[0].meta).to.have.property('http.url', `http://localhost:${port}/forums/123/posts/456`)
               })
               .then(done)
@@ -331,7 +331,7 @@ describe('Plugin', () => {
               .use(traces => {
                 const spans = sort(traces[0])
 
-                expect(spans[0]).to.have.property('name', 'GET /forums/:fid/posts/:pid')
+                expect(spans[0]).to.have.property('name', '/forums/:fid/posts/:pid')
                 expect(spans[0].meta).to.have.property('http.url', `http://localhost:${port}/forums/123/posts/456`)
               })
               .then(done)
@@ -362,7 +362,7 @@ describe('Plugin', () => {
               .use(traces => {
                 const spans = sort(traces[0])
 
-                expect(spans[0]).to.have.property('name', 'GET /user/:id')
+                expect(spans[0]).to.have.property('name', '/user/:id')
                 expect(spans[0].meta).to.have.property('http.url', `http://localhost:${port}/user/123`)
               })
               .then(done)
@@ -395,7 +395,7 @@ describe('Plugin', () => {
               .use(traces => {
                 const spans = sort(traces[0])
 
-                expect(spans[0]).to.have.property('name', 'GET /user/:id')
+                expect(spans[0]).to.have.property('name', '/user/:id')
                 expect(spans[0].meta).to.have.property('http.url', `http://localhost:${port}/user/123`)
                 expect(spans[0].meta.error).to.equal('true')
 
@@ -478,7 +478,7 @@ describe('Plugin', () => {
               agent.use(t => {
                 spans.push(t[0][0])
                 expect(spans).to.have.length(3)
-                expect(spans[0]).to.have.property('name', 'GET')
+                expect(spans[0]).to.have.property('name', 'koa.request')
                 expect(spans[0].meta).to.have.property('component', 'koa')
                 expect(spans[0].meta).to.have.property('span.kind', 'server')
                 expect(spans[0].parent_id.toString()).to.equal(spans[2].trace_id.toString())

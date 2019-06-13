@@ -276,12 +276,16 @@ function addResourceTag (req) {
   if (tags['resource.name']) return
 
   const path = expandRouteParameters(tags[HTTP_ROUTE], req)
-  const resource = [req.method]
-    .concat(path)
+  const resource = [].concat(path)
     .filter(val => val)
     .join(' ')
 
-  span.setTag(RESOURCE_NAME, resource)
+  if (!resource) {
+    const componentName = tags.component ? tags.component : 'handle'
+    span.setTag(RESOURCE_NAME, `${componentName}.request`)
+  } else {
+    span.setTag(RESOURCE_NAME, resource)
+  }
 }
 
 // Allows :routeParameters to be expanded by their request path value

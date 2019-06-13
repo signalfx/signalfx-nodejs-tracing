@@ -308,7 +308,7 @@ describe('plugins/util/web', () => {
         res.end()
 
         expect(span.context()._tags).to.include({
-          [RESOURCE_NAME]: 'GET',
+          [RESOURCE_NAME]: 'handle.request',
           [HTTP_STATUS_CODE]: '200'
         })
       })
@@ -371,7 +371,7 @@ describe('plugins/util/web', () => {
         web.instrument(tracer, config, req, res, 'test.request', span => {
           res.end()
 
-          expect(span.context()._tags).to.have.property('resource.name', 'GET /custom/route')
+          expect(span.context()._tags).to.have.property('resource.name', '/custom/route')
         })
       })
     })
@@ -392,7 +392,7 @@ describe('plugins/util/web', () => {
       web.enterRoute(req, '/bar')
       res.end()
 
-      expect(span.context()._tags).to.have.property(RESOURCE_NAME, 'GET /foo/bar')
+      expect(span.context()._tags).to.have.property(RESOURCE_NAME, '/foo/bar')
       expect(span.context()._tags).to.have.property(HTTP_ROUTE, '/foo/bar')
     })
   })
@@ -413,7 +413,7 @@ describe('plugins/util/web', () => {
       web.exitRoute(req)
       res.end()
 
-      expect(span.context()._tags).to.have.property(RESOURCE_NAME, 'GET /foo')
+      expect(span.context()._tags).to.have.property(RESOURCE_NAME, '/foo')
     })
   })
 

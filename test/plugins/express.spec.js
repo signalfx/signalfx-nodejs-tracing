@@ -51,7 +51,7 @@ describe('Plugin', () => {
 
                 expect(spans[0]).to.have.property('service', 'test')
                 expect(spans[0].meta).to.have.property('component', 'express')
-                expect(spans[0]).to.have.property('name', 'GET /user')
+                expect(spans[0]).to.have.property('name', '/user')
                 expect(spans[0].meta).to.have.property('span.kind', 'server')
                 expect(spans[0].meta).to.have.property('http.url', `http://localhost:${port}/user`)
                 expect(spans[0].meta).to.have.property('http.method', 'GET')
@@ -84,7 +84,7 @@ describe('Plugin', () => {
                 const spans = sort(traces[0])
 
                 expect(spans[0]).to.have.property('service', 'test')
-                expect(spans[0]).to.have.property('name', 'GET /app/user/:id')
+                expect(spans[0]).to.have.property('name', '/app/user/:id')
                 expect(spans[0].meta).to.have.property('component', 'express')
                 expect(spans[0].meta).to.have.property('span.kind', 'server')
                 expect(spans[0].meta).to.have.property('http.url', `http://localhost:${port}/app/user/1`)
@@ -120,7 +120,7 @@ describe('Plugin', () => {
                 const spans = sort(traces[0])
 
                 expect(spans[0]).to.have.property('service', 'test')
-                expect(spans[0]).to.have.property('name', 'GET /app/user/:id')
+                expect(spans[0]).to.have.property('name', '/app/user/:id')
                 expect(spans[0].meta).to.have.property('component', 'express')
                 expect(spans[0].meta).to.have.property('span.kind', 'server')
                 expect(spans[0].meta).to.have.property('http.url', `http://localhost:${port}/app/user/1`)
@@ -156,7 +156,7 @@ describe('Plugin', () => {
 
                 expect(spans).to.have.length(5)
 
-                expect(spans[0]).to.have.property('name', 'GET /app/user/:id')
+                expect(spans[0]).to.have.property('name', '/app/user/:id')
                 expect(spans[0].meta).to.have.property('component', 'express')
                 expect(spans[1]).to.have.property('name', 'named')
                 expect(spans[1].meta).to.have.property('component', 'express')
@@ -194,7 +194,7 @@ describe('Plugin', () => {
               .use(traces => {
                 const spans = sort(traces[0])
 
-                expect(spans[0]).to.have.property('name', 'GET /app(/^\\/user\\/(\\d)$/)')
+                expect(spans[0]).to.have.property('name', '/app(/^\\/user\\/(\\d)$/)')
               })
               .then(done)
               .catch(done)
@@ -222,7 +222,7 @@ describe('Plugin', () => {
               .use(traces => {
                 const spans = sort(traces[0])
 
-                expect(spans[0]).to.have.property('name', 'GET /app/user/:id')
+                expect(spans[0]).to.have.property('name', '/app/user/:id')
               })
               .then(done)
               .catch(done)
@@ -256,7 +256,7 @@ describe('Plugin', () => {
               .use(traces => {
                 const spans = sort(traces[0])
 
-                expect(spans[0]).to.have.property('name', 'GET /foo/bar')
+                expect(spans[0]).to.have.property('name', '/foo/bar')
               })
               .then(done)
               .catch(done)
@@ -284,7 +284,7 @@ describe('Plugin', () => {
               .use(traces => {
                 const spans = sort(traces[0])
 
-                expect(spans[0]).to.have.property('name', 'GET /app/user/:id')
+                expect(spans[0]).to.have.property('name', '/app/user/:id')
               })
               .then(done)
               .catch(done)
@@ -313,7 +313,7 @@ describe('Plugin', () => {
               .use(traces => {
                 const spans = sort(traces[0])
 
-                expect(spans[0]).to.have.property('name', 'GET /app/user/:id')
+                expect(spans[0]).to.have.property('name', '/app/user/:id')
               })
               .then(done)
               .catch(done)
@@ -345,7 +345,7 @@ describe('Plugin', () => {
                   return span.meta.component === 'express' &&
                          span.meta['http.url']
                 })).to.have.length(1)
-                expect(spans[0]).to.have.property('name', 'GET /parent/child')
+                expect(spans[0]).to.have.property('name', '/parent/child')
               })
               .then(done)
               .catch(done)
@@ -413,7 +413,7 @@ describe('Plugin', () => {
               .use(traces => {
                 const spans = sort(traces[0])
 
-                expect(spans[0]).to.have.property('name', 'GET /app/user/:id')
+                expect(spans[0]).to.have.property('name', '/app/user/:id')
               })
               .then(done)
               .catch(done)
@@ -447,7 +447,7 @@ describe('Plugin', () => {
               .use(traces => {
                 const spans = sort(traces[0])
 
-                expect(spans[0]).to.have.property('name', 'GET /app/user/:id')
+                expect(spans[0]).to.have.property('name', '/app/user/:id')
               })
               .then(done)
               .catch(done)
@@ -476,7 +476,7 @@ describe('Plugin', () => {
               .use(traces => {
                 const spans = sort(traces[0])
 
-                expect(spans[0]).to.have.property('name', 'GET /app')
+                expect(spans[0]).to.have.property('name', '/app')
               })
               .then(done)
               .catch(done)
@@ -533,7 +533,7 @@ describe('Plugin', () => {
               .use(traces => {
                 const spans = sort(traces[0])
 
-                expect(spans[0]).to.have.property('name', 'GET')
+                expect(spans[0]).to.have.property('name', 'express.request')
               })
               .then(done)
               .catch(done)
@@ -629,7 +629,7 @@ describe('Plugin', () => {
               .use(traces => {
                 const spans = sort(traces[0])
 
-                expect(spans[0]).to.have.property('name', 'GET /app/user/:id')
+                expect(spans[0]).to.have.property('name', '/app/user/:id')
               })
               .then(done)
               .catch(done)
@@ -688,7 +688,7 @@ describe('Plugin', () => {
               const spans = sort(traces[0])
 
               expect(spans[0].meta).to.have.property('error', 'true')
-              expect(spans[0]).to.have.property('name', 'GET /user')
+              expect(spans[0]).to.have.property('name', '/user')
               expect(spans[0].meta).to.have.property('http.status_code', '500')
 
               done()
@@ -721,7 +721,7 @@ describe('Plugin', () => {
               const spans = sort(traces[0])
 
               expect(spans[0].meta).to.not.have.property('error')
-              expect(spans[0]).to.have.property('name', 'GET /user')
+              expect(spans[0]).to.have.property('name', '/user')
               expect(spans[0].meta).to.have.property('http.status_code', '400')
 
               done()
@@ -806,7 +806,7 @@ describe('Plugin', () => {
               .use(traces => {
                 const spans = sort(traces[0])
 
-                expect(spans[0]).to.have.property('name', 'GET /:path(*)')
+                expect(spans[0]).to.have.property('name', '/:path(*)')
                 expect(spans[0].meta).to.have.property('http.url', `http://localhost:${port}/user`)
               })
               .then(done)
@@ -969,7 +969,7 @@ describe('Plugin', () => {
               agent
                 .use(traces => {
                   const spans = sort(traces[0])
-                  expect(spans[0]).to.have.property('name', `GET ${expected}`)
+                  expect(spans[0]).to.have.property('name', `${expected}`)
                 })
                 .then(done)
                 .catch(done)

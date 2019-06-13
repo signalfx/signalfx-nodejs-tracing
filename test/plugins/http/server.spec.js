@@ -54,7 +54,7 @@ describe('Plugin', () => {
       it('should do automatic instrumentation', done => {
         agent
           .use(traces => {
-            expect(traces[0][0]).to.have.property('name', 'GET')
+            expect(traces[0][0]).to.have.property('name', 'handle.request')
             expect(traces[0][0]).to.have.property('service', 'test')
             expect(traces[0][0].meta).to.have.property('component', 'http')
             expect(traces[0][0].meta).to.have.property('span.kind', 'server')
