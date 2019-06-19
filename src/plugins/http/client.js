@@ -214,7 +214,7 @@ function getStatusValidator (config) {
   } else if (config.hasOwnProperty('validateStatus')) {
     log.error('Expected `validateStatus` to be a function.')
   }
-  return code => code < 400 || code >= 500
+  return code => code < 500 || code >= 600
 }
 
 function getFilter (tracer, config) {
