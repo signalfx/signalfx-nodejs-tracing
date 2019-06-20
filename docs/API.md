@@ -492,7 +492,7 @@ query HelloWorld {
 | Option           | Default                               | Description       |
 |------------------|---------------------------------------|-------------------|
 | splitByDomain    | false                                 | Use the remote endpoint host as the service name instead of the default. |
-| validateStatus   | `code => code < 400 || code >= 500`   | Callback function to determine if an HTTP response should be recorded as an error. It should take a status code as its only parameter and return `true` for success or `false` for errors.
+| validateStatus   | `code => code < 500 \|\| code >= 600` | Callback function to determine if an HTTP response should be recorded as an error. It should take a status code as its only parameter and return `true` for success or `false` for errors.
 | blacklist        | []                                    | List of URLs that should not be instrumented. Can be a string, RegExp, callback that takes the URL as a parameter, or an array of any of these.
 | whitelist        | /.*/                                  | List of URLs that should be instrumented. If this is set, other URLs will not be instrumented. Can be a string, RegExp, callback that takes the URL as a parameter, or an array of any of these.
 
