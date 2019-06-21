@@ -282,7 +282,7 @@ tracer.use('pg')
 // enable and configure express instrumentations
 tracer.use('express', { headers: ['x-my-tagged-header'] })
 ```
-
+* [adonis 4+](#adonisjs) - `use('adonis')`
 * [amqp10 3+](#amqp10) - `use('amqp10')`
 * [amqplib 0.5+](#amqplib) - `use('amqplib')`
 * [Bluebird 2+](#Bluebird) - `use('bluebird')`
@@ -312,6 +312,25 @@ tracer.use('express', { headers: ['x-my-tagged-header'] })
 * [winston 1+](#winston) - `use('winston')`
 
 Each integration also has its own list of default tags. These tags get automatically added to the span created by the integration.  Some have additional configuration settings to determine traced behavior.  These are configured by providing an object of the form `{ optionOneName: optionOneValue, optionTwoName: optionsTwoValue }`.
+
+#### adonisjs
+
+##### Tags
+
+| Tag              | Description                                               |
+|------------------|-----------------------------------------------------------|
+| http.url         | The complete URL of the request.                          |
+| http.method      | The HTTP method of the request.                           |
+| http.status_code | The HTTP status code of the response.                     |
+| http.headers.*   | A recorded HTTP header. 
+
+
+##### Configuration Options
+
+| Option           | Default                   | Description                            |
+|------------------|---------------------------|----------------------------------------|
+| validateStatus   | `code => code < 500`      | Callback function to determine if there was an error. It should take a status code as its only parameter and return `true` for success or `false` for errors. |
+| headers          | `[]`                      | An array of headers to include in the span tags. |
 
 #### amqp10
 

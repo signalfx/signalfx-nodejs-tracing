@@ -4,6 +4,7 @@ const axios = require('axios')
 const getPort = require('get-port')
 const agent = require('./agent')
 const plugin = require('../../src/plugins/koa')
+const http = require('http')
 
 wrapIt()
 
@@ -485,10 +486,10 @@ describe('Plugin', () => {
 
                 expect(spans[2].meta).to.have.property('span.kind', 'client')
                 expect(spans[2].meta).to.have.property('component', 'http')
-              }).then(done).catch(done)
+              }).then(done)
+                .catch(done)
             })
 
-          const http = require('http')
           appListener = app.listen(port, 'localhost', () => {
             const req = http.request(`http://localhost:${port}/user`, res => {
               res.on('data', () => { })

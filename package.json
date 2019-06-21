@@ -77,6 +77,8 @@
     "xregexp": "^4.2.4"
   },
   "devDependencies": {
+    "@adonisjs/fold": "^4.0.9",
+    "@adonisjs/sink": "^1.0.17",
     "axios": "^0.18.0",
     "benchmark": "^2.1.4",
     "body-parser": "^1.18.2",
