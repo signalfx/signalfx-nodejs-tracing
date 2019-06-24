@@ -2,6 +2,7 @@
 
 const URL = require('url-parse')
 const platform = require('./platform')
+const version = require('../lib/version')
 const coalesce = require('koalas')
 
 class Config {
@@ -58,7 +59,10 @@ class Config {
     this.plugins = !!plugins
     this.service = coalesce(options.service, platform.env('SIGNALFX_SERVICE_NAME'), service, 'unnamed-nodejs-service')
     this.analytics = String(analytics) === 'true'
-    this.tags = Object.assign({}, options.tags)
+    this.tags = Object.assign({
+      'signalfx.tracing.library': 'nodejs-tracing',
+      'signalfx.tracing.version': version
+    }, options.tags)
     this.dogstatsd = {
       port: String(coalesce(dogstatsd.port, platform.env('DD_DOGSTATSD_PORT'), 8125))
     }
