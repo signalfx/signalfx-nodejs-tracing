@@ -12,7 +12,7 @@ const pkg = require('../package.json')
 
 const name = `${os.platform()}-${os.arch()}`
 
-if (process.env.DD_NATIVE_METRICS !== 'false') {
+if (process.env.DD_NATIVE_METRICS === 'true') {
   download(`v${pkg.version}`)
     .catch(() => getLatestTag().then(download))
     .then(persist)
