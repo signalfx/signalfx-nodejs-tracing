@@ -166,6 +166,12 @@ jobs:
           command: yarn leak:core
 
   # Plugin tests
+  node-adonis:
+    <<: *node-plugin-base
+    docker:
+      - image: node:8
+        environment:
+          - PLUGINS=adonis
 
   node-amqplib:
     <<: *node-plugin-base
@@ -541,6 +547,7 @@ workflows:
       - node-core-10
       - node-core-12
       - node-core-latest
+      - node-adonis
       - node-amqplib
       - node-amqp10
       - node-bluebird
@@ -610,6 +617,7 @@ workflows:
       - node-core-10
       - node-core-12
       - node-core-latest
+      - node-adonis
       - node-amqplib
       - node-amqp10
       - node-bluebird

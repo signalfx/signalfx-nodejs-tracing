@@ -41,6 +41,7 @@ For detailed information about configuration and usage, please see the [API docu
 
 **All instrumentations are currently in Beta**
 
+* [adonis 4+](https://github.com/adonisjs) - `use('adonis')`
 * [amqp10 3+](https://github.com/noodlefrenzy/node-amqp10) - `use('amqp10')`
 * [amqplib 0.5+](http://www.squaremobius.net/amqp.node/) - `use('amqplib')`
 * [Bluebird 2+](https://github.com/petkaantonov/bluebird) - `use('bluebird')`

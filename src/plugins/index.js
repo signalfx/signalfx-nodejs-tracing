@@ -1,6 +1,7 @@
 'use strict'
 
 module.exports = {
+  'adonis': require('./adonis'),
   'amqp10': require('./amqp10'),
   'amqplib': require('./amqplib'),
   'bluebird': require('./bluebird'),
