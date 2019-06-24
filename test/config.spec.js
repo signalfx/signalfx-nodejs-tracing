@@ -1,5 +1,7 @@
 'use strict'
 
+const version = require('../lib/version')
+
 describe('Config', () => {
   let Config
   let platform
@@ -26,7 +28,10 @@ describe('Config', () => {
     expect(config).to.have.property('flushInterval', 2000)
     expect(config).to.have.property('sampleRate', 1)
     expect(config).to.have.property('runtimeMetrics', false)
-    expect(config).to.have.deep.property('tags', {})
+    expect(config).to.have.deep.property('tags', {
+      'signalfx.tracing.library': 'nodejs-tracing',
+      'signalfx.tracing.version': version
+    })
     expect(config).to.have.property('plugins', true)
     expect(config).to.have.property('env', undefined)
   })
@@ -121,7 +126,9 @@ describe('Config', () => {
     expect(config).to.have.property('plugins', false)
     expect(config.headers).to.have.property('x-sf-token', 'MyToken')
     expect(config).to.have.deep.property('tags', {
-      'foo': 'bar'
+      'foo': 'bar',
+      'signalfx.tracing.library': 'nodejs-tracing',
+      'signalfx.tracing.version': version
     })
   })
 

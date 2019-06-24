@@ -3,6 +3,7 @@
 const semver = require('semver')
 const agent = require('./agent')
 const plugin = require('../../src/plugins/dns')
+const version = require('../../lib/version')
 
 wrapIt()
 
@@ -30,17 +31,11 @@ describe('Plugin', () => {
             meta: {
               'dns.hostname': 'localhost',
               'dns.address': '127.0.0.1',
-              'span.kind': 'client'
+              'span.kind': 'client',
+              'signalfx.tracing.library': 'nodejs-tracing',
+              'signalfx.tracing.version': version
             }
-            // name: 'dns.lookup',
-            // service: 'test-dns',
-            // resource: 'localhost'
           })
-          // expect(traces[0][0].meta).to.deep.include({
-          //   'dns.hostname': 'localhost',
-          //   'dns.address': '127.0.0.1',
-          //   'span.kind': 'client'
-          // })
         })
         .then(done)
         .catch(done)
@@ -57,17 +52,11 @@ describe('Plugin', () => {
             meta: {
               'dns.address': '127.0.0.1',
               'dns.port': '22',
-              'span.kind': 'client'
+              'span.kind': 'client',
+              'signalfx.tracing.library': 'nodejs-tracing',
+              'signalfx.tracing.version': version
             }
-            // name: 'dns.lookup_service',
-            // service: 'test-dns',
-            // resource: '127.0.0.1:22'
           })
-          // expect(traces[0][0].meta).to.deep.include({
-          //   'dns.address': '127.0.0.1',
-          //   'dns.port': '22',
-          //   'span.kind': 'client'
-          // })
         })
         .then(done)
         .catch(done)
@@ -84,17 +73,11 @@ describe('Plugin', () => {
             meta: {
               'dns.hostname': 'localhost',
               'dns.rrtype': 'A',
-              'span.kind': 'client'
+              'span.kind': 'client',
+              'signalfx.tracing.library': 'nodejs-tracing',
+              'signalfx.tracing.version': version
             }
-            // name: 'dns.resolve',
-            // service: 'test-dns',
-            // resource: 'A localhost'
           })
-          // expect(traces[0][0].meta).to.deep.include({
-          //   'dns.hostname': 'localhost',
-          //   'dns.rrtype': 'A',
-          //   'span.kind': 'client'
-          // })
         })
         .then(done)
         .catch(done)
@@ -111,17 +94,11 @@ describe('Plugin', () => {
             meta: {
               'dns.hostname': 'localhost',
               'dns.rrtype': 'ANY',
-              'span.kind': 'client'
+              'span.kind': 'client',
+              'signalfx.tracing.library': 'nodejs-tracing',
+              'signalfx.tracing.version': version
             }
-            // name: 'dns.resolve',
-            // service: 'test-dns',
-            // resource: 'ANY localhost'
           })
-          // expect(traces[0][0].meta).to.deep.include({
-          //   'dns.hostname': 'localhost',
-          //   'dns.rrtype': 'ANY',
-          //   'span.kind': 'client'
-          // })
         })
         .then(done)
         .catch(done)
@@ -137,16 +114,11 @@ describe('Plugin', () => {
             service: 'test',
             meta: {
               'dns.ip': '127.0.0.1',
-              'span.kind': 'client'
+              'span.kind': 'client',
+              'signalfx.tracing.library': 'nodejs-tracing',
+              'signalfx.tracing.version': version
             }
-            // name: 'dns.reverse',
-            // service: 'test-dns',
-            // resource: '127.0.0.1'
           })
-          // expect(traces[0][0].meta).to.deep.include({
-          //   'dns.ip': '127.0.0.1',
-          //   'span.kind': 'client'
-          // })
         })
         .then(done)
         .catch(done)
@@ -166,17 +138,11 @@ describe('Plugin', () => {
               meta: {
                 'dns.hostname': 'localhost',
                 'dns.rrtype': 'A',
-                'span.kind': 'client'
+                'span.kind': 'client',
+                'signalfx.tracing.library': 'nodejs-tracing',
+                'signalfx.tracing.version': version
               }
-              // name: 'dns.resolve',
-              // service: 'test-dns',
-              // resource: 'A localhost'
             })
-            // expect(traces[0][0].meta).to.deep.include({
-            //   'dns.hostname': 'localhost',
-            //   'dns.rrtype': 'A',
-            //   'span.kind': 'client'
-            // })
           })
           .then(done)
           .catch(done)
