@@ -20,7 +20,12 @@ const logKeys = [traceIdKey, spanIdKey, parentIdKey, sampledKey]
 
 class B3TextMapPropagator {
   inject (spanContext, carrier) {
-    carrier[traceIdKey] = idToHex(spanContext._traceId)
+    const traceId = idToHex(spanContext._traceId)
+    // Don't inject trace data from NoopSpan
+    if (traceId === '0000000000000000') {
+      return
+    }
+    carrier[traceIdKey] = traceId
     carrier[spanIdKey] = idToHex(spanContext._spanId)
 
     const parentId = spanContext._parentId
