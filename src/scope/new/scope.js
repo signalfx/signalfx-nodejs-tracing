@@ -1,7 +1,7 @@
 'use strict'
 
 const asyncHooks = require('../async_hooks')
-const executionAsyncId = asyncHooks.executionAsyncId
+const executionAsyncId = asyncHooks.executionAsyncId || asyncHooks.currentId
 const Base = require('./base')
 const platform = require('../../platform')
 
