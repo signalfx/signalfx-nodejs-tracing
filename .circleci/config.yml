@@ -463,40 +463,6 @@ jobs:
       - store_artifacts:
           path: ./addons-linux-x32.tgz
 
-  prebuild-darwin-x64:
-    macos:
-      xcode: "10.2.0"
-    working_directory: ~/dd-trace-js
-    resource_class: small
-    environment:
-      - ARCH=x64
-    steps:
-      - checkout
-      - *yarn-versions
-      - *restore-yarn-cache
-      - *yarn-install
-      - *save-yarn-cache
-      - *yarn-prebuild
-      - store_artifacts:
-          path: ./addons-darwin-x64.tgz
-
-  prebuild-darwin-x32:
-    macos:
-      xcode: "10.2.0"
-    working_directory: ~/dd-trace-js
-    resource_class: small
-    environment:
-      - ARCH=x32
-    steps:
-      - checkout
-      - *yarn-versions
-      - *restore-yarn-cache
-      - *yarn-install
-      - *save-yarn-cache
-      - *yarn-prebuild
-      - store_artifacts:
-          path: ./addons-darwin-x32.tgz
-
   alpine:
     docker:
       - image: node:10-alpine
@@ -581,18 +547,6 @@ workflows:
                 - master
                 - /v\d+\.\d+\.\d+([-a-z]+\.\d+)?/
       - prebuild-linux-x32:
-          filters:
-            branches:
-              only:
-                - master
-                - /v\d+\.\d+\.\d+([-a-z]+\.\d+)?/
-      - prebuild-darwin-x64:
-          filters:
-            branches:
-              only:
-                - master
-                - /v\d+\.\d+\.\d+([-a-z]+\.\d+)?/
-      - prebuild-darwin-x32:
           filters:
             branches:
               only:
