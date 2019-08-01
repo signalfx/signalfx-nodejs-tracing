@@ -28,7 +28,8 @@ describe('SpanContext', () => {
     }
     const spanContext = new SpanContext(props)
 
-    expect(spanContext).to.deep.equal({
+    // Support deep-eql for OpenTracing 0.14.4 SpanContext prototype changes and Node 4 & 6
+    expect(spanContext).to.deep.equal(Object.setPrototypeOf({
       _traceId: '123',
       _spanId: '456',
       _parentId: '789',
@@ -43,7 +44,7 @@ describe('SpanContext', () => {
         started: ['span1', 'span2'],
         finished: ['span1']
       }
-    })
+    }, Object.getPrototypeOf(spanContext)))
   })
 
   it('should have the correct default values', () => {
@@ -69,7 +70,7 @@ describe('SpanContext', () => {
       spanId: expected.spanId
     })
 
-    expect(spanContext).to.deep.equal({
+    expect(spanContext).to.deep.equal(Object.setPrototypeOf({
       _traceId: '123',
       _spanId: '456',
       _parentId: null,
@@ -84,7 +85,7 @@ describe('SpanContext', () => {
         started: [],
         finished: []
       }
-    })
+    }, Object.getPrototypeOf(spanContext)))
   })
 
   describe('toTraceId()', () => {
