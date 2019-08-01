@@ -50,8 +50,8 @@ describe('Plugin', () => {
         it('should sanitize ID and query parameter containing request', done => {
           agent
             .use(traces => {
-              expect(traces[0][0]).to.have.property('name', 'POST /docs/test/?')
-              expect(traces[0][0].meta).to.have.property('elasticsearch.url', `/docs/test/${randId}`)
+              expect(traces[0][0]).to.have.property('name', 'POST /docs/_doc/?')
+              expect(traces[0][0].meta).to.have.property('elasticsearch.url', `/docs/_doc/${randId}`)
             })
             .then(done)
             .catch(done)
@@ -60,7 +60,7 @@ describe('Plugin', () => {
           client.index({
             index: 'docs',
             id: randId,
-            type: 'test',
+            type: '_doc',
             opType: 'create',
             query: 'query',
             body: {}
