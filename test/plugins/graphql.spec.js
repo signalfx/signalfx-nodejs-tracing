@@ -1295,10 +1295,11 @@ describe('Plugin', () => {
         let mergeSchemas
         let makeExecutableSchema
 
-        before(() => {
+        before(function (done) {
+          this.timeout(5000)
           tracer = require('../..')
 
-          return agent.load(plugin, 'graphql')
+          agent.load(plugin, 'graphql')
             .then(() => {
               graphql = require(`../../versions/graphql@${version}`).get()
 
@@ -1308,6 +1309,7 @@ describe('Plugin', () => {
               runQuery = apolloCore.runQuery
               mergeSchemas = graphqlTools.mergeSchemas
               makeExecutableSchema = graphqlTools.makeExecutableSchema
+              done()
             })
         })
 
