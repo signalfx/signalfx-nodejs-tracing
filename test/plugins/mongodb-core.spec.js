@@ -63,6 +63,8 @@ describe('Plugin', () => {
                 expect(span.meta).to.have.property('db.statement', resource)
                 expect(span.meta).to.have.property('component', 'mongodb')
                 expect(span.meta).to.have.property('db.name', `test.${collection}`)
+                expect(span.meta).to.have.property('db.type', 'mongo')
+                expect(span.meta).to.have.property('db.instance', 'test')
                 expect(span.meta).to.have.property('peer.hostname', 'localhost')
               })
               .then(done)
@@ -79,6 +81,8 @@ describe('Plugin', () => {
 
                 expect(span).to.have.property('name', 'mongo.planCacheListPlans')
                 expect(span.meta).to.have.property('db.statement', resource)
+                expect(span.meta).to.have.property('db.type', 'mongo')
+                expect(span.meta).to.have.property('db.instance', 'test')
               })
               .then(done)
               .catch(done)
@@ -121,6 +125,8 @@ describe('Plugin', () => {
 
                 expect(span).to.have.property('name', 'mongo.find')
                 expect(span.meta).to.have.property('db.statement', resource)
+                expect(span.meta).to.have.property('db.type', 'mongo')
+                expect(span.meta).to.have.property('db.instance', 'test')
               })
               .then(done)
               .catch(done)
@@ -143,6 +149,7 @@ describe('Plugin', () => {
 
                 expect(span).to.have.property('name', 'mongo.find')
                 expect(span.meta).to.have.property('db.statement', resource)
+                expect(span.meta).to.have.property('db.type', 'mongo')
               })
               .then(done)
               .catch(done)
@@ -163,6 +170,8 @@ describe('Plugin', () => {
 
                 expect(span).to.have.property('name', 'mongo.find')
                 expect(span.meta).to.have.property('db.statement', resource)
+                expect(span.meta).to.have.property('db.type', 'mongo')
+                expect(span.meta).to.have.property('db.instance', 'test')
               })
               .then(done)
               .catch(done)
@@ -217,6 +226,8 @@ describe('Plugin', () => {
                 expect(span.meta).to.have.property('peer.hostname', 'localhost')
                 expect(span.meta).to.have.property('peer.port', '27017')
                 expect(span.meta).to.have.property('db.statement', `insert test.${collection}`)
+                expect(span.meta).to.have.property('db.type', 'mongo')
+                expect(span.meta).to.have.property('db.instance', 'test')
               })
               .then(done)
               .catch(done)
@@ -266,6 +277,8 @@ describe('Plugin', () => {
 
                 expect(span).to.have.property('name', 'mongo.find')
                 expect(span.meta).to.have.property('db.statement', resource)
+                expect(span.meta).to.have.property('db.type', 'mongo')
+                expect(span.meta).to.have.property('db.instance', 'test')
               })
               .then(done)
               .catch(done)

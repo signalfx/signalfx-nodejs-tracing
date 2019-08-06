@@ -60,7 +60,9 @@ function addTags (span, tracer, config, ns, cmd, topology, operationName) {
     'service.name': config.service || `${tracer._service}-mongodb`,
     'span.type': 'mongodb',
     'db.name': ns,
-    'db.statement': resource
+    'db.statement': resource,
+    'db.type': 'mongo',
+    'db.instance': ns.split('.')[0]
   })
 
   addHost(span, topology)

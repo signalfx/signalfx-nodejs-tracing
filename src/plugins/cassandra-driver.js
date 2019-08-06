@@ -97,7 +97,7 @@ function start (tracer, config, client, name, query) {
   })
 
   if (client.keyspace) {
-    addTag(span, 'cassandra.keyspace', client.keyspace)
+    addTag(span, 'db.instance', client.keyspace)
   }
 
   return span
