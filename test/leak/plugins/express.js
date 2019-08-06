@@ -19,7 +19,7 @@ test('express plugin should not leak', t => {
     })
 
     const listener = app.listen(port, '127.0.0.1', () => {
-      profile(t, operation).then(() => listener.close())
+      profile(t, operation, 2000).then(() => listener.close())
 
       function operation (done) {
         axios.get(`http://localhost:${port}`).then(done)

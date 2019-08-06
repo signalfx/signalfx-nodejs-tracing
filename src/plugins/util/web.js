@@ -9,6 +9,9 @@ const tags = require('../../../ext/tags')
 const types = require('../../../ext/types')
 const kinds = require('../../../ext/kinds')
 const urlFilter = require('./urlfilter')
+const platform = require('../../platform')
+const SpanContext = require('../../opentracing/span_context')
+const idToHex = require('../../utils').idToHex
 
 const HTTP = types.HTTP
 const SERVER = kinds.SERVER
@@ -34,13 +37,15 @@ const web = {
     const hooks = getHooks(config)
     const filter = urlFilter.getFilter(config)
     const expandRouteParameters = getExpandRouteParameters(config)
+    const synthesizeRequestingContext = getSynthesizeRequestingContext(config)
 
     return Object.assign({}, config, {
       headers,
       validateStatus,
       hooks,
       filter,
-      expandRouteParameters
+      expandRouteParameters,
+      synthesizeRequestingContext
     })
   },
 
@@ -134,7 +139,8 @@ const web = {
         span: null,
         paths: [],
         middleware: [],
-        beforeEnd: []
+        beforeEnd: [],
+        childOfRequestingContext: false
       }
     })
   },
@@ -161,7 +167,13 @@ function startSpan (tracer, config, req, res, name) {
     return req._datadog.span
   }
 
-  const childOf = tracer.extract(FORMAT_HTTP_HEADERS, req.headers)
+  let childOf = tracer.extract(FORMAT_HTTP_HEADERS, req.headers)
+  if (!childOf) {
+    childOf = synthesizedSpanContext(req)
+  } else {
+    req._datadog.childOfRequestingContext = true
+  }
+
   const span = tracer.startSpan(name, { childOf })
 
   req._datadog.tracer = tracer
@@ -180,6 +192,7 @@ function finish (req, res) {
   req._datadog.config.hooks.request(req._datadog.span, req, res)
 
   addResourceTag(req)
+  revertSynthesizedContext(req)
 
   req._datadog.span.finish()
   req._datadog.finished = true
@@ -336,6 +349,37 @@ function expandRouteParameters (httpRoute, req) {
   return expandedPath
 }
 
+// Creates a new span context and sets its ids as `req.sfx.traceId`
+// and `req.sfx.spanId` for user access.
+function synthesizedSpanContext (req) {
+  const traceId = platform.id()
+  const spanContext = new SpanContext({ traceId, spanId: traceId })
+  const resId = idToHex(traceId)
+  Object.defineProperty(req, 'sfx', { value: { traceId: resId, spanId: resId } })
+  return spanContext
+}
+
+// Will remove the synthesized parent for any request without
+// `synthesizeRequestingContext` configured.  Since the router
+// instrumentation only determines paths by the end of the
+// lifecycle, this must affect all spans that aren't the actual
+// child of propagated context.
+function revertSynthesizedContext (req) {
+  if (req._datadog.childOfRequestingContext) {
+    return
+  }
+  const span = req._datadog.span
+  const tags = span.context()._tags
+  const path = tags[HTTP_ROUTE]
+
+  const synthesize = req._datadog.config.synthesizeRequestingContext[path]
+  if (synthesize) {
+    return
+  }
+  // "revert" synthesized context
+  span.context()._parentId = null
+}
+
 function addHeaders (req) {
   const span = req._datadog.span
 
@@ -393,6 +437,15 @@ function getExpandRouteParameters (config) {
     return config.expandRouteParameters
   } else if (config.hasOwnProperty('expandRouteParameters')) {
     log.error('Expected `expandRouteParameters` to be an object of paths to expansion rules')
+  }
+  return {}
+}
+
+function getSynthesizeRequestingContext (config) {
+  if (typeof config.synthesizeRequestingContext === 'object') {
+    return config.synthesizeRequestingContext
+  } else if (config.hasOwnProperty('synthesizeRequestingContext')) {
+    log.error('Expected `synthesizeRequestingContext` to be an object of paths to booleans')
   }
   return {}
 }

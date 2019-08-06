@@ -160,7 +160,7 @@ describe('Plugin', () => {
                 expect(spans[0].meta).to.have.property('component', 'express')
                 expect(spans[1]).to.have.property('name', 'named')
                 expect(spans[1].meta).to.have.property('component', 'express')
-                expect(spans[1].parent_id.toString()).to.equal(spans[0].trace_id.toString())
+                expect(spans[1].parent_id.toString()).to.equal(spans[0].span_id.toString())
                 expect(spans[2]).to.have.property('name', 'router')
                 expect(spans[2].meta).to.have.property('component', 'express')
                 expect(spans[3].name).to.match(/^bound\s.*$/)
@@ -822,30 +822,52 @@ describe('Plugin', () => {
       })
 
       describe('with configuration', () => {
-        const pathOne = '/a/:one/:two/:three'
+        const erpPathOne = '/a/:one/:two/:three'
         // for router registration at /some/prefix
-        const pathTwo = '/some/prefix/b/:four/:five/:six/some'
+        const erpPathTwo = '/some/prefix/b/:four/:five/:six/some'
         // no expandRouteParameters directive provided
-        const pathThree = '/c/:seven/thing/:eight/:nine/something'
-        const pathFour = '/:ten(\\d+)-:eleven(\\w+)/a/[a-z]{0,}/:twelve(\\d+)....:thirteen(\\d{2})/[a-z]+'
-        const pathFive = ('/athing/:fourteen(\\D+|\\W)---:fifteen([0-4]+|[^9])/([^0]+)/[a-z]{0,}/' +
+        const erpPathThree = '/c/:seven/thing/:eight/:nine/something'
+        const erpPathFour = '/:ten(\\d+)-:eleven(\\w+)/a/[a-z]{0,}/:twelve(\\d+)....:thirteen(\\d{2})/[a-z]+'
+        const erpPathFive = ('/athing/:fourteen(\\D+|\\W)---:fifteen([0-4]+|[^9])/([^0]+)/[a-z]{0,}/' +
           ':sixteen(\\d\\d\\S\\S):seventeen(\\d{2})/([a-z]+)')
-        const pathSix = ('/bthing/:eighteen(\\D+|\\W)---:nineteen([0-4]+|[^9])/([^0]+)/[a-z]{0,}/' +
+        const erpPathSix = ('/bthing/:eighteen(\\D+|\\W)---:nineteen([0-4]+|[^9])/([^0]+)/[a-z]{0,}/' +
           ':twenty(\\d\\d\\S\\S):twentyone(\\d{2})/([a-z]+)')
-        const paths = [pathOne, pathThree, pathFour, pathFive, pathSix]
+        const erpPaths = [erpPathOne, erpPathThree, erpPathFour, erpPathFive, erpPathSix]
 
         const expandRouteParameters = {}
-        expandRouteParameters[pathOne] = { 'two': true }
-        expandRouteParameters[pathTwo] = { 'four': true, 'six': true }
-        expandRouteParameters[pathFour] = { 'ten': true, 'thirteen': true }
-        expandRouteParameters[pathFive] = { 'fourteen': true, 'fifteen': true, 'sixteen': true, 'seventeen': true }
-        expandRouteParameters[pathSix] = { 'eighteen': true, 'twenty': true }
+        expandRouteParameters[erpPathOne] = { 'two': true }
+        expandRouteParameters[erpPathTwo] = { 'four': true, 'six': true }
+        expandRouteParameters[erpPathFour] = { 'ten': true, 'thirteen': true }
+        expandRouteParameters[erpPathFive] = { 'fourteen': true, 'fifteen': true, 'sixteen': true, 'seventeen': true }
+        expandRouteParameters[erpPathSix] = { 'eighteen': true, 'twenty': true }
+
+        const srcPath = '/src/true'
+        const srcPathWithId = '/src/true/:id'
+        const srcPathFalse = '/src/false'
+        const srcPathFalseWithId = '/src/false/:id'
+        const srcRouterPath = '/prefix/src/true'
+        const srcRouterPathWithId = '/prefix/src/true/:id'
+        const srcRouterPathFalse = '/prefix/src/false'
+        const srcRouterPathFalseWithId = '/prefix/src/false/:id'
+        const srcPaths = [srcPath, srcPathWithId, srcPathFalse, srcPathFalseWithId]
+
+        const synthesizeRequestingContext = {
+          [srcPath]: true,
+          [srcPathWithId]: true,
+          [srcPathFalse]: false,
+          [srcPathFalseWithId]: false,
+          [srcRouterPath]: true,
+          [srcRouterPathWithId]: true,
+          [srcRouterPathFalse]: false,
+          [srcRouterPathFalseWithId]: false
+        }
 
         before(() => {
           return agent.load(plugin, 'express', {
             validateStatus: code => code < 400,
             headers: ['User-Agent'],
-            expandRouteParameters
+            expandRouteParameters,
+            synthesizeRequestingContext
           })
         })
 
@@ -953,7 +975,7 @@ describe('Plugin', () => {
           it(`should expand specified route parameters (${name})`, done => {
             const app = express()
 
-            paths.forEach(path => {
+            erpPaths.forEach(path => {
               app.get(path, (req, res) => {
                 res.status(200).send()
               })
@@ -977,6 +999,64 @@ describe('Plugin', () => {
               appListener = app.listen(port, 'localhost', () => {
                 axios
                   .get(`http://localhost:${port}${path}`, {})
+                  .catch(done)
+              })
+            })
+          })
+        });
+
+        [['base', '/src/true', true],
+          ['with id', '/src/true/myId', true],
+          ['false', '/src/false', false],
+          ['false with id', '/src/false/:id', false],
+          ['prefix', '/prefix/src/true', true],
+          ['prefix with id', '/prefix/src/true/myId', true],
+          ['prefix false', '/prefix/src/false', false],
+          ['false with id', '/prefix/src/false/:id', false]
+        ].forEach(function (params) {
+          const name = params[0]
+          const path = params[1]
+          const synthesized = params[2]
+
+          it(`should synthesize request context (${name})`, done => {
+            const app = express()
+
+            const handler = (req, res) => {
+              const traceId = req.sfx.traceId
+              expect(traceId).to.have.lengthOf(16)
+              const spanId = req.sfx.spanId
+              expect(spanId).to.have.lengthOf(16)
+              res.status(200).send(`${traceId},${spanId}`)
+            }
+            srcPaths.forEach(path => { app.get(path, handler) })
+
+            const router = express.Router()
+            srcPaths.forEach(path => { router.get(path, handler) })
+            app.use('/prefix', router)
+
+            const expected = { traceId: '' }
+
+            getPort().then(port => {
+              agent
+                .use(traces => {
+                  const span = traces[0].slice(-1).pop()
+                  expect(span.trace_id.toString()).to.equal(expected.traceId)
+                  if (synthesized) {
+                    expect(span.parent_id.toString()).to.equal(expected.spanId)
+                  } else {
+                    expect(span.parent_id).to.be.undefined
+                  }
+                })
+                .then(done)
+                .catch(done)
+
+              appListener = app.listen(port, 'localhost', () => {
+                axios
+                  .get(`http://localhost:${port}${path}`).then((res) => {
+                    const traceInfo = res.data.split(',')
+                    expected.traceId = traceInfo[0]
+                    expected.spanId = traceInfo[1]
+                  })
                   .catch(done)
               })
             })
