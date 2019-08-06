@@ -21,8 +21,12 @@ class ZipkinV2Writer extends Writer {
 
   flush () {
     if (this._queue.length > 0) {
-      let spans = []
-      this._queue.forEach((trace) => { spans = spans.concat(trace) })
+      const spans = []
+      this._queue.forEach((trace) => {
+        trace.forEach((span) => {
+          spans.push(span)
+        })
+      })
       const data = JSON.stringify(spans)
 
       this._request(data)
