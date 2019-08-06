@@ -47,7 +47,7 @@ function startSendSpan (tracer, config, link) {
     tags: {
       'resource.name': `send ${target}`,
       'span.kind': 'producer',
-      'amqp.link.target.address': target,
+      'message_bus.destination': target,
       'amqp.link.role': 'sender'
     }
   })
@@ -66,7 +66,7 @@ function startReceiveSpan (tracer, config, link) {
     tags: {
       'resource.name': `receive ${source}`,
       'span.kind': 'consumer',
-      'amqp.link.source.address': source,
+      'message_bus.destination': source,
       'amqp.link.role': 'receiver'
     }
   })
@@ -86,8 +86,8 @@ function addTags (tracer, config, span, link) {
     'component': 'amqp10',
     'amqp.link.name': link.name,
     'amqp.link.handle': link.handle,
-    'amqp.connection.host': address.host,
-    'amqp.connection.port': address.port
+    'peer.hostname': address.host,
+    'peer.port': address.port
   })
 
   if (address.user) {

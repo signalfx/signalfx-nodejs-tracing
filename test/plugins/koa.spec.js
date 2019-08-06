@@ -485,6 +485,7 @@ describe('Plugin', () => {
                 expect(spans[0].parent_id.toString()).to.equal(spans[2].trace_id.toString())
 
                 expect(spans[2].meta).to.have.property('span.kind', 'client')
+                expect(spans[2].meta).to.have.property('http.url', `http://localhost:${port}/user`)
                 expect(spans[2].meta).to.have.property('component', 'http')
               }).then(done)
                 .catch(done)

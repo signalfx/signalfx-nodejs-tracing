@@ -97,6 +97,14 @@ function addTags (channel, tracer, config, span, method, fields) {
     'source',
     'destination'
   ]
+  let destinationName = fields.exchange
+
+  if (destinationName === undefined) {
+    destinationName = fields.queue
+  }
+  if (destinationName) {
+    span.setTag('message_bus.destination', destinationName)
+  }
 
   span.addTags({
     'service.name': config.service || `${tracer._service}-amqp`,
