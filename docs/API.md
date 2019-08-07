@@ -444,6 +444,46 @@ The Bunyan instrumentation will automatically add fields for the current `trace_
 | validateStatus          | `code => code < 500`      | Callback function to determine if there was an error. It should take a status code as its only parameter and return `true` for success or `false` for errors. |
 | headers                 | `[]`                      | An array of headers to include in the span tags. |
 | expandRouteParameters | `{}`                      | An object of the form `{ '/exact/path/:paramOne/:paramTwo': { 'paramOne': true } }` that will expand parameter values for operation names for each request to that path.  Be sure to only use for low-cardinality parameters.  Omitted parameters default to `false`. |
+| synthesizeRequestingContext | `{}`                      | An object of the form `{ '/exact/path/:paramOne/:paramTwo': true }` whose request handler spans will be "parented" by a synthesized requesting context.  Omitted paths default to `false`.  The synthesized context ids will be available in the [Request object](https://expressjs.com/en/api.html#req) as `Request.sfx.traceId` and `Request.sfx.spanId` to be used in response content for the purpose of retroactively reporting parent spans by separate, custom client logic.  Only intended for use cases where actual initiating client-instrumentation proves cumbersome (e.g. initial web browser request). |
+
+```javascript
+// expandRouteParameters:
+// Span operation names would be distinct for each `path` parameter value
+// GET /my/exact/version1/someValue -> '/my/exact/version1/:params'
+// GET /my/exact/version2/otherValue -> '/my/exact/version2/:params'
+const tracer = require('signalfx-tracing').init()
+tracer.use('express', {
+  expandRouteParameters : {
+    '/my/exact/:path/:params': { 'path': true, 'params': false }
+  }
+})
+const express = require('express')
+
+app = express()
+app.get('/my/exact/:path/:params', (req, res) => {
+  res.status(200).send()
+})
+
+// synthesizeRequestingContext:
+// Instrumentation-generated request handler spans will have a synthesized parent,
+// to be created retroactively by the user in their own custom client instrumentation
+const tracer = require('signalfx-tracing').init()
+tracer.use('express', {
+  synthesizeRequestingContext : {
+    '/my/exact/:path/:params': true
+  }
+})
+const express = require('express')
+
+app = express()
+app.get('/my/exact/:path/:params', (req, res) => {
+  // Ids are available on modified Request object
+  const traceId = req.sfx.traceId // 64bit hexadecimal
+  const synthesizedParentId = req.sfx.spanId // 64bit hexadecimal
+  // Trace and span ids to be sent for custom span creation (not shown).
+  res.status(200).send(`<html>Trace ID: ${traceId}, Span ID: ${synthesizedParentId}</html>`)
+})
+```
 
 #### GraphQL
 

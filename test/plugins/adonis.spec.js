@@ -304,7 +304,7 @@ describe('Plugin', () => {
             expect(spans[1]).to.have.property('service', 'test')
             expect(spans[1]).to.have.property('name', 'Middleware/AppMiddleware')
             expect(spans[1].meta).to.have.property('component', 'adonis')
-            expect(spans[1].parent_id.toString()).to.equal(spans[2].trace_id.toString())
+            expect(spans[1].parent_id.toString()).to.equal(spans[2].span_id.toString())
 
             expect(spans[2]).to.have.property('service', 'test')
             expect(spans[2]).to.have.property('name', `/api/user`)
