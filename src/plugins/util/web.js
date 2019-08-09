@@ -354,6 +354,7 @@ function expandRouteParameters (httpRoute, req) {
 function synthesizedSpanContext (req) {
   const traceId = platform.id()
   const spanContext = new SpanContext({ traceId, spanId: traceId })
+  Object.defineProperty(spanContext, 'isSynthesized', { value: true })
   const resId = idToHex(traceId)
   Object.defineProperty(req, 'sfx', { value: { traceId: resId, spanId: resId } })
   return spanContext
