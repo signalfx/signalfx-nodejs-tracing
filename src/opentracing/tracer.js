@@ -72,7 +72,9 @@ class SignalFxTracer extends Tracer {
 
     if (type === REFERENCE_NOOP) return noopSpan
     if (parent && parent === noopSpan.context()) return noopSpan
-    if (!parent && !this._sampler.isSampled()) return noopSpan
+    const isSampled = this._sampler.isSampled()
+    if (!parent && !isSampled) return noopSpan
+    if (parent && parent.isSynthesized && !isSampled) return noopSpan
 
     const tags = {
       'service.name': this._service
