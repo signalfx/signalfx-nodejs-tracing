@@ -56,6 +56,19 @@ function createWrapParse (tracer, config) {
 
         if (!operation) return document // skip schema parsing
 
+        if (operation.operation) {
+          let operationValue = `${operation.operation}`
+          if (operation.name && operation.name.value) {
+            operationValue = `.${operationValue}.${operation.name.value}`
+          } else if (operation.selectionSet && operation.selectionSet.selections) {
+            if (operation.selectionSet.selections.length > 0) {
+              if (operation.selectionSet.selections[0].name && operation.selectionSet.selections[0].name.value) {
+                operationValue = `.${operationValue}.${operation.selectionSet.selections[0].name.value}`
+              }
+            }
+          }
+          span.setOperationName(`graphql.parse${operationValue}`)
+        }
         Object.defineProperties(document, {
           _datadog_source: {
             value: source.body || source
@@ -94,6 +107,26 @@ function createWrapValidate (tracer, config) {
         // skip schema stitching nested validation
         if (error || document.loc) {
           const span = startSpan(tracer, config, 'validate', { startTime })
+
+          if (document) {
+            if (document.definitions[0]) {
+              const docs = document.definitions[0]
+              if (docs.operation) {
+                let operationValue = `.${docs.operation}`
+                if (docs.name && docs.name.value) {
+                  operationValue = `${operationValue}.${docs.name.value}`
+                } else if (docs.selectionSet && docs.selectionSet.selections) {
+                  if (docs.selectionSet.selections.length > 1) {
+                    if (docs.selectionSet.selections[0].name && docs.selectionSet.selections[0].name.value) {
+                      operationValue = `${operationValue}.${docs.selectionSet.selections[0].name.value}`
+                    }
+                  }
+                }
+                span.setOperationName(`graphql.validate${operationValue}`)
+              }
+            }
+          }
+
           addDocumentTags(span, document)
           analyticsSampler.sample(span, config.analytics)
           finish(error, span)
@@ -214,6 +247,12 @@ function normalizeArgs (args) {
 
 function startExecutionSpan (tracer, config, operation, args) {
   const span = startSpan(tracer, config, 'execute')
+  let operationValue = ''
+  if (operation && operation.name) {
+    operationValue = `.${operation.operation}.${operation.name.value}`
+  }
+
+  span.setOperationName(`graphql.execute${operationValue}`)
 
   addExecutionTags(span, config, operation, args.document, args.operationName)
   addDocumentTags(span, args.document)
@@ -228,7 +267,8 @@ function addExecutionTags (span, config, operation, document, operationName) {
   const type = operation && operation.operation
   const name = operation && operation.name && operation.name.value
   const tags = {
-    'resource.name': getSignature(document, name, type, config.signature)
+    'resource.name': `${span.context()._name}`,
+    'graphql.operation.signature': getSignature(document, name, type, config.signature)
   }
 
   if (type) {
@@ -284,7 +324,8 @@ function startResolveSpan (tracer, config, childOf, path, info, contextValue) {
   const fieldNode = info.fieldNodes.find(fieldNode => fieldNode.kind === 'Field')
 
   span.addTags({
-    'resource.name': `${info.fieldName}:${info.returnType}`,
+    'resource.name': `${span.context()._name}`,
+    'graphql.field.info': `${info.fieldName}:${info.returnType}`,
     'graphql.field.name': info.fieldName,
     'graphql.field.path': path.join('.'),
     'graphql.field.type': info.returnType.name
@@ -398,7 +439,7 @@ function getDepth (config) {
   if (typeof config.depth === 'number') {
     return config.depth
   } else if (config.hasOwnProperty('depth')) {
-    log.error('Expected `depth` to be a integer.')
+    log.error('Expected `depth` to be an integer.')
   }
   return -1
 }
