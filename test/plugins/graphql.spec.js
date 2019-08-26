@@ -183,8 +183,7 @@ describe('Plugin', () => {
               const span = traces[0][0]
 
               expect(span).to.have.property('service', 'test')
-              // expect(span).to.have.property('name', 'graphql.parse')
-              // expect(span).to.have.property('resource', 'graphql.parse')
+              expect(span).to.have.property('name', 'graphql.parse.query.MyQuery')
               expect(span.meta).to.have.property('graphql.source', source)
             })
             .then(done)
@@ -201,8 +200,7 @@ describe('Plugin', () => {
               const span = traces[0][0]
 
               expect(span).to.have.property('service', 'test')
-              // expect(span).to.have.property('name', 'graphql.validate')
-              // expect(span).to.have.property('resource', 'graphql.validate')
+              expect(span).to.have.property('name', 'graphql.validate.query.MyQuery')
               expect(span.meta).to.have.property('graphql.source', source)
             })
             .then(done)
@@ -219,8 +217,8 @@ describe('Plugin', () => {
               const spans = sort(traces[0])
 
               expect(spans[0]).to.have.property('service', 'test')
-              // expect(spans[0]).to.have.property('name', 'graphql.execute')
-              // expect(spans[0]).to.have.property('resource', 'query MyQuery{hello(name:"")}')
+              expect(spans[0]).to.have.property('name', 'graphql.execute.query.MyQuery')
+              expect(spans[0].meta).to.have.property('graphql.operation.signature', 'query MyQuery{hello(name:"")}')
               expect(spans[0].meta).to.have.property('graphql.source', source)
               expect(spans[0].meta).to.have.property('graphql.operation.type', 'query')
               expect(spans[0].meta).to.have.property('graphql.operation.name', 'MyQuery')
@@ -254,8 +252,8 @@ describe('Plugin', () => {
 
               expect(spans).to.have.length(2)
               expect(spans[1]).to.have.property('service', 'test')
-              // expect(spans[1]).to.have.property('name', 'graphql.resolve')
-              // expect(spans[1]).to.have.property('resource', 'hello:String')
+              expect(spans[1]).to.have.property('name', 'graphql.resolve')
+              expect(spans[1].meta).to.have.property('graphql.field.info', 'hello:String')
               expect(spans[1].meta).to.have.property('graphql.field.name', 'hello')
               expect(spans[1].meta).to.have.property('graphql.field.path', 'hello')
               expect(spans[1].meta).to.have.property('graphql.field.type', 'String')
@@ -292,30 +290,30 @@ describe('Plugin', () => {
               const addressCivicNumber = spans[4]
               const addressStreet = spans[5]
 
-              // expect(execute).to.have.property('name', 'graphql.execute')
+              expect(execute).to.have.property('name', 'graphql.execute')
 
-              // expect(human).to.have.property('name', 'graphql.resolve')
-              // expect(human).to.have.property('resource', 'human:Human')
+              expect(human).to.have.property('name', 'graphql.resolve')
+              expect(human.meta).to.have.property('graphql.field.info', 'human:Human')
               expect(human.meta).to.have.property('graphql.field.path', 'human')
               expect(human.parent_id.toString()).to.equal(execute.span_id.toString())
 
-              // expect(humanName).to.have.property('name', 'graphql.resolve')
-              // expect(humanName).to.have.property('resource', 'name:String')
+              expect(humanName).to.have.property('name', 'graphql.resolve')
+              expect(humanName.meta).to.have.property('graphql.field.info', 'name:String')
               expect(humanName.meta).to.have.property('graphql.field.path', 'human.name')
               expect(humanName.parent_id.toString()).to.equal(human.span_id.toString())
 
-              // expect(address).to.have.property('name', 'graphql.resolve')
-              // expect(address).to.have.property('resource', 'address:Address')
+              expect(address).to.have.property('name', 'graphql.resolve')
+              expect(address.meta).to.have.property('graphql.field.info', 'address:Address')
               expect(address.meta).to.have.property('graphql.field.path', 'human.address')
               expect(address.parent_id.toString()).to.equal(human.span_id.toString())
 
-              // expect(addressCivicNumber).to.have.property('name', 'graphql.resolve')
-              // expect(addressCivicNumber).to.have.property('resource', 'civicNumber:String')
+              expect(addressCivicNumber).to.have.property('name', 'graphql.resolve')
+              expect(addressCivicNumber.meta).to.have.property('graphql.field.info', 'civicNumber:String')
               expect(addressCivicNumber.meta).to.have.property('graphql.field.path', 'human.address.civicNumber')
               expect(addressCivicNumber.parent_id.toString()).to.equal(address.span_id.toString())
 
-              // expect(addressStreet).to.have.property('name', 'graphql.resolve')
-              // expect(addressStreet).to.have.property('resource', 'street:String')
+              expect(addressStreet).to.have.property('name', 'graphql.resolve')
+              expect(addressStreet.meta).to.have.property('graphql.field.info', 'street:String')
               expect(addressStreet.meta).to.have.property('graphql.field.path', 'human.address.street')
               expect(addressStreet.parent_id.toString()).to.equal(address.span_id.toString())
             })
@@ -347,25 +345,25 @@ describe('Plugin', () => {
               const pets = spans[3]
               const petsName = spans[4]
 
-              // expect(execute).to.have.property('name', 'graphql.execute')
+              expect(execute).to.have.property('name', 'graphql.execute')
 
-              // expect(friends).to.have.property('name', 'graphql.resolve')
-              // expect(friends).to.have.property('resource', 'friends:[Human]')
+              expect(friends).to.have.property('name', 'graphql.resolve')
+              expect(friends.meta).to.have.property('graphql.field.info', 'friends:[Human]')
               expect(friends.meta).to.have.property('graphql.field.path', 'friends')
               expect(friends.parent_id.toString()).to.equal(execute.span_id.toString())
 
-              // expect(friendsName).to.have.property('name', 'graphql.resolve')
-              // expect(friendsName).to.have.property('resource', 'name:String')
+              expect(friendsName).to.have.property('name', 'graphql.resolve')
+              expect(friendsName.meta).to.have.property('graphql.field.info', 'name:String')
               expect(friendsName.meta).to.have.property('graphql.field.path', 'friends.*.name')
               expect(friendsName.parent_id.toString()).to.equal(friends.span_id.toString())
 
-              // expect(pets).to.have.property('name', 'graphql.resolve')
-              // expect(pets).to.have.property('resource', 'pets:[Pet!]')
+              expect(pets).to.have.property('name', 'graphql.resolve')
+              expect(pets.meta).to.have.property('graphql.field.info', 'pets:[Pet!]')
               expect(pets.meta).to.have.property('graphql.field.path', 'friends.*.pets')
               expect(pets.parent_id.toString()).to.equal(friends.span_id.toString())
 
-              // expect(petsName).to.have.property('name', 'graphql.resolve')
-              // expect(petsName).to.have.property('resource', 'name:String')
+              expect(petsName).to.have.property('name', 'graphql.resolve')
+              expect(petsName.meta).to.have.property('graphql.field.info', 'name:String')
               expect(petsName.meta).to.have.property('graphql.field.path', 'friends.*.pets.*.name')
               expect(petsName.parent_id.toString()).to.equal(pets.span_id.toString())
             })
@@ -430,8 +428,8 @@ describe('Plugin', () => {
               const spans = sort(traces[0])
 
               expect(spans).to.have.length(2)
-              // expect(spans[0]).to.have.property('name', 'graphql.execute')
-              // expect(spans[1]).to.have.property('name', 'graphql.resolve')
+              expect(spans[0]).to.have.property('name', 'graphql.execute')
+              expect(spans[1]).to.have.property('name', 'graphql.resolve')
             })
             .then(done)
             .catch(done)
@@ -459,8 +457,8 @@ describe('Plugin', () => {
               const spans = sort(traces[0])
 
               expect(spans).to.have.length(2)
-              // expect(spans[0]).to.have.property('name', 'graphql.execute')
-              // expect(spans[1]).to.have.property('name', 'graphql.resolve')
+              expect(spans[0]).to.have.property('name', 'graphql.execute')
+              expect(spans[1]).to.have.property('name', 'graphql.resolve')
             })
             .then(done)
             .catch(done)
@@ -499,21 +497,21 @@ describe('Plugin', () => {
 
               expect(spans).to.have.length(5)
 
-              // expect(spans[0]).to.have.property('name', 'test.request')
+              expect(spans[0]).to.have.property('name', 'test.request')
 
               expect(spans[1]).to.have.property('service', 'test')
-              // expect(spans[1]).to.have.property('name', 'graphql.parse')
+              expect(spans[1]).to.have.property('name', 'graphql.parse.query.MyQuery')
 
               expect(spans[2]).to.have.property('service', 'test')
-              // expect(spans[2]).to.have.property('name', 'graphql.validate')
+              expect(spans[2]).to.have.property('name', 'graphql.validate.query.MyQuery')
 
               expect(spans[3]).to.have.property('service', 'test')
-              // expect(spans[3]).to.have.property('name', 'graphql.execute')
-              // expect(spans[3]).to.have.property('resource', 'query MyQuery{hello(name:"")}')
+              expect(spans[3]).to.have.property('name', 'graphql.execute.query.MyQuery')
+              expect(spans[3].meta).to.have.property('graphql.operation.signature', 'query MyQuery{hello(name:"")}')
 
               expect(spans[4]).to.have.property('service', 'test')
-              // expect(spans[4]).to.have.property('name', 'graphql.resolve')
-              // expect(spans[4]).to.have.property('resource', 'hello:String')
+              expect(spans[4]).to.have.property('name', 'graphql.resolve')
+              expect(spans[4].meta).to.have.property('graphql.field.info', 'hello:String')
             })
             .then(done)
             .catch(done)
@@ -597,18 +595,18 @@ describe('Plugin', () => {
               agent.use(traces => {
                 const spans = sort(traces[0])
                 expect(spans[0].meta).to.have.property('component', 'graphql')
-                // expect(spans[0]).to.have.property('name', 'graphql.parse')
+                expect(spans[0]).to.have.property('name', 'graphql.parse.query.MyQuery')
               }),
               agent.use(traces => {
                 const spans = sort(traces[0])
                 expect(spans[0].meta).to.have.property('component', 'graphql')
-                // expect(spans[0]).to.have.property('name', 'graphql.validate')
+                expect(spans[0]).to.have.property('name', 'graphql.validate.query.MyQuery')
               }),
               agent.use(traces => {
                 const spans = sort(traces[0])
                 expect(spans[0].meta).to.have.property('component', 'graphql')
-                // expect(spans[0]).to.have.property('name', 'graphql.execute')
-                // expect(spans[1]).to.have.property('name', 'graphql.resolve')
+                expect(spans[0]).to.have.property('name', 'graphql.execute.query.MyQuery')
+                expect(spans[1]).to.have.property('name', 'graphql.resolve')
               })
             ])
             .then(() => done())
@@ -630,8 +628,8 @@ describe('Plugin', () => {
 
               expect(spans).to.have.length(2)
               expect(spans[0]).to.have.property('service', 'test')
-              // expect(spans[0]).to.have.property('name', 'graphql.execute')
-              // expect(spans[0]).to.have.property('resource', 'query MyQuery{hello(name:"")}')
+              expect(spans[0]).to.have.property('name', 'graphql.execute.query.MyQuery')
+              expect(spans[0].meta).to.have.property('graphql.operation.signature', 'query MyQuery{hello(name:"")}')
               expect(spans[0].meta).to.have.property('graphql.source', source)
             })
             .then(done)
@@ -649,7 +647,7 @@ describe('Plugin', () => {
 
               expect(spans).to.have.length(1)
               expect(spans[0]).to.have.property('service', 'test')
-              // expect(spans[0]).to.have.property('name', 'graphql.parse')
+              expect(spans[0]).to.have.property('name', 'graphql.parse')
               expect(spans[0].meta).to.have.property('error', 'true')
               expect(spans[0].meta).to.have.property('error.type', error.name)
               expect(spans[0].meta).to.have.property('error.msg', error.message)
@@ -674,7 +672,7 @@ describe('Plugin', () => {
 
               expect(spans).to.have.length(1)
               expect(spans[0]).to.have.property('service', 'test')
-              // expect(spans[0]).to.have.property('name', 'graphql.validate')
+              expect(spans[0]).to.have.property('name', 'graphql.validate')
               expect(spans[0].meta).to.have.property('error', 'true')
               expect(spans[0].meta).to.have.property('error.type', error.name)
               expect(spans[0].meta).to.have.property('error.msg', error.message)
@@ -700,7 +698,7 @@ describe('Plugin', () => {
 
               expect(spans).to.have.length(1)
               expect(spans[0]).to.have.property('service', 'test')
-              // expect(spans[0]).to.have.property('name', 'graphql.validate')
+              expect(spans[0]).to.have.property('name', 'graphql.validate.query')
               expect(spans[0].meta).to.have.property('error', 'true')
               expect(spans[0].meta).to.have.property('error.type', errors[0].name)
               expect(spans[0].meta).to.have.property('error.msg', errors[0].message)
@@ -724,7 +722,7 @@ describe('Plugin', () => {
 
               expect(spans).to.have.length(1)
               expect(spans[0]).to.have.property('service', 'test')
-              // expect(spans[0]).to.have.property('name', 'graphql.execute')
+              expect(spans[0]).to.have.property('name', 'graphql.execute')
               expect(spans[0].meta).to.have.property('error', 'true')
               expect(spans[0].meta).to.have.property('error.type', error.name)
               expect(spans[0].meta).to.have.property('error.msg', error.message)
@@ -764,7 +762,7 @@ describe('Plugin', () => {
 
               expect(spans).to.have.length(2)
               expect(spans[0]).to.have.property('service', 'test')
-              // expect(spans[0]).to.have.property('name', 'graphql.execute')
+              expect(spans[0]).to.have.property('name', 'graphql.execute')
               expect(spans[0].meta).to.have.property('error', 'true')
               expect(spans[0].meta).to.have.property('error.type', error.name)
               expect(spans[0].meta).to.have.property('error.msg', error.message)
@@ -900,8 +898,8 @@ describe('Plugin', () => {
               const spans = sort(traces[0])
 
               expect(spans[0]).to.have.property('service', 'test')
-              // expect(spans[0]).to.have.property('name', 'graphql.execute')
-              // expect(spans[0]).to.have.property('resource', 'query SecondQuery{hello(name:"")}')
+              expect(spans[0]).to.have.property('name', 'graphql.execute.query.SecondQuery')
+              expect(spans[0].meta).to.have.property('graphql.operation.signature', 'query SecondQuery{hello(name:"")}')
               expect(spans[0].meta).to.have.property('graphql.source', source)
               expect(spans[0].meta).to.have.property('graphql.operation.type', 'query')
               expect(spans[0].meta).to.have.property('graphql.operation.name', 'SecondQuery')
@@ -928,11 +926,11 @@ describe('Plugin', () => {
             .use(traces => {
               const spans = sort(traces[0])
 
-              // const resource = 'query WithFragments{human{...firstFields}}fragment firstFields on Human{name}'
+              const resource = 'query WithFragments{human{...firstFields}}fragment firstFields on Human{name}'
 
               expect(spans[0]).to.have.property('service', 'test')
-              // expect(spans[0]).to.have.property('name', 'graphql.execute')
-              // expect(spans[0]).to.have.property('resource', resource)
+              expect(spans[0]).to.have.property('name', 'graphql.execute.query.WithFragments')
+              expect(spans[0].meta).to.have.property('graphql.operation.signature', resource)
               expect(spans[0].meta).to.have.property('graphql.source', source)
               expect(spans[0].meta).to.have.property('graphql.operation.type', 'query')
               expect(spans[0].meta).to.have.property('graphql.operation.name', 'WithFragments')
@@ -948,12 +946,12 @@ describe('Plugin', () => {
         //     .use(traces => {
         //       const spans = sort(traces[0])
 
-        //       console.log(spans.map(span => `${span.name} | ${span.resource}`))
+        //       console.log(spans.map(span => `${span.name} | ${span.graphql.operation.signature}`))
         //       const resource = 'query WithFragments{human{...firstFields}}fragment firstFields on Human{name}'
 
         //       expect(spans[0]).to.have.property('service', 'test')
         //       expect(spans[0]).to.have.property('name', 'graphql.execute')
-        //       expect(spans[0]).to.have.property('resource', resource)
+        //       expect(spans[0].meta).to.have.property('graphql.operation.signature', resource)
         //       expect(spans[0].meta).to.have.property('graphql.source', source)
         //       expect(spans[0].meta).to.have.property('graphql.operation.type', 'query')
         //       expect(spans[0].meta).to.have.property('graphql.operation.name', 'WithFragments')
@@ -1113,7 +1111,7 @@ describe('Plugin', () => {
               const spans = sort(traces[0])
 
               expect(spans).to.have.length(1)
-              // expect(spans[0]).to.have.property('name', 'graphql.execute')
+              expect(spans[0]).to.have.property('name', 'graphql.execute')
             })
             .then(done)
             .catch(done)
@@ -1232,20 +1230,20 @@ describe('Plugin', () => {
               const friend0Name = spans[2]
               const friend1Name = spans[3]
 
-              // expect(execute).to.have.property('name', 'graphql.execute')
+              expect(execute).to.have.property('name', 'graphql.execute')
 
-              // expect(friends).to.have.property('name', 'graphql.resolve')
-              // expect(friends).to.have.property('resource', 'friends:[Human]')
+              expect(friends).to.have.property('name', 'graphql.resolve')
+              expect(friends.meta).to.have.property('graphql.field.info', 'friends:[Human]')
               expect(friends.meta).to.have.property('graphql.field.path', 'friends')
               expect(friends.parent_id.toString()).to.equal(execute.span_id.toString())
 
-              // expect(friend0Name).to.have.property('name', 'graphql.resolve')
-              // expect(friend0Name).to.have.property('resource', 'name:String')
+              expect(friend0Name).to.have.property('name', 'graphql.resolve')
+              expect(friend0Name.meta).to.have.property('graphql.field.info', 'name:String')
               expect(friend0Name.meta).to.have.property('graphql.field.path', 'friends.0.name')
               expect(friend0Name.parent_id.toString()).to.equal(friends.span_id.toString())
 
-              // expect(friend1Name).to.have.property('name', 'graphql.resolve')
-              // expect(friend1Name).to.have.property('resource', 'name:String')
+              expect(friend1Name).to.have.property('name', 'graphql.resolve')
+              expect(friend1Name.meta).to.have.property('graphql.field.info', 'name:String')
               expect(friend1Name.meta).to.have.property('graphql.field.path', 'friends.1.name')
               expect(friend1Name.parent_id.toString()).to.equal(friends.span_id.toString())
             })
@@ -1280,8 +1278,8 @@ describe('Plugin', () => {
               const spans = sort(traces[0])
 
               expect(spans[0].meta).to.have.property('component', 'graphql')
-              // expect(spans[0]).to.have.property('name', 'graphql.execute')
-              // expect(spans[0]).to.have.property('resource', 'query WithoutSignature')
+              expect(spans[0]).to.have.property('name', 'graphql.execute.query.WithoutSignature')
+              expect(spans[0].meta).to.have.property('graphql.operation.signature', 'query WithoutSignature')
             })
             .then(done)
             .catch(done)
@@ -1324,12 +1322,12 @@ describe('Plugin', () => {
 
               expect(spans).to.have.length(2)
 
-              // expect(spans[0]).to.have.property('name', 'graphql.execute')
-              // expect(spans[0]).to.have.property('resource', 'query MyQuery{hello}')
+              expect(spans[0]).to.have.property('name', 'graphql.execute.query.MyQuery')
+              expect(spans[0].meta).to.have.property('graphql.operation.signature', 'query MyQuery{hello}')
               expect(spans[0].meta).to.have.property('graphql.source')
 
-              // expect(spans[1]).to.have.property('name', 'graphql.resolve')
-              // expect(spans[1]).to.have.property('resource', 'hello:String')
+              expect(spans[1]).to.have.property('name', 'graphql.resolve')
+              expect(spans[1].meta).to.have.property('graphql.field.info', 'hello:String')
             })
             .then(done)
             .catch(done)
