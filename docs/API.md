@@ -69,8 +69,8 @@ function myApplicationLogic (argOne, activeSpan) {
   activeSpan.setTag('MyArg', argOne)
 
   return myAdditionalApplicationLogic(result => {
-    span.setTag('MyResult', result)
-    span.finish()
+    activeSpan.setTag('MyResult', result)
+    activeSpan.finish()
   })
 }
 ```
@@ -82,8 +82,8 @@ function myApplicationLogic (argOne) {
   activeSpan.setTag('MyArg', argOne)
 
   return myAdditionalApplicationLogic(result => {
-    span.setTag('MyResult', result)
-    span.finish()
+    activeSpan.setTag('MyResult', result)
+    activeSpan.finish()
   })
 }
 ```
