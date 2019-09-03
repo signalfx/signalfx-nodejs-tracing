@@ -77,8 +77,13 @@ function myApplicationLogic (argOne, activeSpan) {
 
 ```javascript
 // automatic context propagation via the scope manager
+
+// Tracer initialization should occur once, and can
+// be exported for usage in other modules.
+const tracer = require('signalfx-tracing').init()
+
 function myApplicationLogic (argOne) {
-  activeSpan = opentracing.globalTracer().scope().active()
+  activeSpan = tracer.scope().active()
   activeSpan.setTag('MyArg', argOne)
 
   return myAdditionalApplicationLogic(result => {
@@ -100,7 +105,9 @@ variable to `false`.
 **Note**: Disabling the scope manager will result in more division among trace contexts and require manual span management via modified function signatures or other custom mechanisms.
 
 The scope manager is available via `tracer.scope()`, whose return value can be used
-in a global context.  It has three methods that are useful for active span management:
+in a global context.  It has three methods that are useful for active span management, described below.
+
+**Note**: Because the scope manager isn't defined in the current OpenTracing JavaScript API, the delegation pattern of the OpenTracing global tracer (`require('opentracing').globalTracer()`) isn't able to provide access to the scope manager (via `scope()` method).  For this reason, a reference to the tracer instance returned by `init()` should be made accessible where manual scope management is necessary.
 
 ###### scope.active()
 
