@@ -138,6 +138,10 @@ class Tracer extends BaseTracer {
   bindEmitter () {
     this._deprecate('bindEmitter')
   }
+
+  flush () {
+    return this._tracer.flush.apply(this._tracer, arguments)
+  }
 }
 
 module.exports = Tracer

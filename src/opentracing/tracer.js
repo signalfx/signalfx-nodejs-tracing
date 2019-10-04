@@ -113,6 +113,14 @@ class SignalFxTracer extends Tracer {
       return null
     }
   }
+
+  flush () {
+    const flushed = this._writer.flush()
+    if (flushed == null) {
+      return Promise.resolve()
+    }
+    return flushed
+  }
 }
 
 function getReferences (references) {

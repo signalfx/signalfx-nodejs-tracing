@@ -51,4 +51,10 @@ describe('NoopTracer', () => {
       expect(span.context().toSpanId()).to.equal('0')
     })
   })
+
+  describe('flush', () => {
+    it('should return a Promise', () => {
+      expect(tracer.flush()).to.be.a('Promise')
+    })
+  })
 })

@@ -29,10 +29,11 @@ class ZipkinV2Writer extends Writer {
       })
       const data = JSON.stringify(spans)
 
-      this._request(data)
+      const request = this._request(data)
 
       this._queue = []
       this._size = 0
+      return request
     }
   }
 
@@ -47,7 +48,7 @@ class ZipkinV2Writer extends Writer {
     }
     log.debug(() => `Request to the agent: ${JSON.stringify(options)}`)
 
-    platform
+    return platform
       .request(Object.assign({ data }, options))
       .catch(e => log.error(e))
   }

@@ -123,15 +123,17 @@ describe('Writer', () => {
 
   describe('flush', () => {
     it('should skip flushing if empty', () => {
-      writer.flush()
+      const flushed = writer.flush()
 
+      expect(flushed).to.be.undefined
       expect(platform.request).to.not.have.been.called
     })
 
     it('should empty the internal queue', () => {
       writer.append(span)
-      writer.flush()
+      const flushed = writer.flush()
 
+      expect(flushed).to.be.a('Promise')
       expect(writer.length).to.equal(0)
     })
 

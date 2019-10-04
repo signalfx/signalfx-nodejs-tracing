@@ -168,6 +168,8 @@ const carrier = {}
 tracer.inject(span || span.context(), HTTP_HEADERS, carrier);
 context = tracer.extract(HTTP_HEADERS, carrier);
 
+tracer.flush().then(() => {})
+
 traceId = context.toTraceId();
 spanId = context.toSpanId();
 

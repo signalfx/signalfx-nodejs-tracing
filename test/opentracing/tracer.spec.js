@@ -38,7 +38,9 @@ describe('Tracer', () => {
     }
     PrioritySampler = sinon.stub().returns(prioritySampler)
 
-    writer = {}
+    writer = {
+      flush: sinon.spy()
+    }
     Writer = sinon.stub().returns(writer)
 
     recorder = {
@@ -99,6 +101,12 @@ describe('Tracer', () => {
     expect(Writer).to.have.been.calledWith(prioritySampler, config.url)
     expect(Recorder).to.have.been.calledWith(writer, config.flushInterval)
     expect(recorder.init).to.have.been.called
+  })
+
+  it('should support manual flushing', () => {
+    tracer = new Tracer(config)
+    tracer.flush()
+    expect(writer.flush).to.have.been.called
   })
 
   it('should support sampling', () => {

@@ -22,7 +22,8 @@ describe('TracerProxy', () => {
       inject: sinon.stub().returns('tracer'),
       extract: sinon.stub().returns('spanContext'),
       currentSpan: sinon.stub().returns('current'),
-      scopeManager: sinon.stub().returns('scopeManager')
+      scopeManager: sinon.stub().returns('scopeManager'),
+      flush: sinon.stub().returns('flush')
     }
 
     noop = {
@@ -33,7 +34,8 @@ describe('TracerProxy', () => {
       inject: sinon.stub().returns('noop'),
       extract: sinon.stub().returns('spanContext'),
       currentSpan: sinon.stub().returns('current'),
-      scopeManager: sinon.stub().returns('scopeManager')
+      scopeManager: sinon.stub().returns('scopeManager'),
+      flush: sinon.stub().returns('flush')
     }
 
     instrumenter = {
@@ -227,6 +229,15 @@ describe('TracerProxy', () => {
         expect(returnValue).to.equal('scopeManager')
       })
     })
+
+    describe('flush', () => {
+      it('should call the underlying NoopTracer', () => {
+        const returnValue = proxy.flush()
+
+        expect(noop.flush).to.have.been.called
+        expect(returnValue).to.equal('flush')
+      })
+    })
   })
 
   describe('initialized', () => {
@@ -321,6 +332,15 @@ describe('TracerProxy', () => {
 
         expect(tracer.scopeManager).to.have.been.called
         expect(returnValue).to.equal('scopeManager')
+      })
+    })
+
+    describe('flush', () => {
+      it('should call the underlying SignalFxTracer', () => {
+        const returnValue = proxy.flush()
+
+        expect(tracer.flush).to.have.been.called
+        expect(returnValue).to.equal('flush')
       })
     })
   })
