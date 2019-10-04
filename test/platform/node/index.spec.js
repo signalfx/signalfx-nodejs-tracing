@@ -2,10 +2,16 @@
 
 const Buffer = require('safe-buffer').Buffer
 const semver = require('semver')
+const nock = require('nock')
 
 wrapIt()
 
 describe('Platform', () => {
+  after(() => {
+    // Overridden http properties subtly break instrumentation
+    nock.restore()
+  })
+
   describe('Node', () => {
     let platform
 
