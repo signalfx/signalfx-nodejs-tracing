@@ -55,10 +55,11 @@ class Writer {
     if (this._queue.length > 0) {
       const data = platform.msgpack.prefix(this._queue)
 
-      this._request(data, this._queue.length)
+      const request = this._request(data, this._queue.length)
 
       this._queue = []
       this._size = 0
+      return request
     }
   }
 
@@ -86,7 +87,7 @@ class Writer {
 
     log.debug(() => `Request to the agent: ${JSON.stringify(options)}`)
 
-    platform
+    return platform
       .request(Object.assign({ data }, options))
       .then(res => {
         log.debug(`Response from the agent: ${res}`)

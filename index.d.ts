@@ -89,6 +89,11 @@ export declare interface Tracer extends opentracing.Tracer {
    */
   wrap<T = (...args: any[]) => any>(name: string, fn: T): T;
   wrap<T = (...args: any[]) => any>(name: string, options: TraceOptions & SpanOptions, fn: T): T;
+
+  /**
+   * Calls writer's flush() and returns its requesting promise
+   */
+  flush<T>(): Promise<T>;
 }
 
 export declare interface TraceOptions {

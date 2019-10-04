@@ -44,6 +44,10 @@ class NoopTracer extends Tracer {
   _startSpan (name, options) {
     return this._span
   }
+
+  flush () {
+    return Promise.resolve()
+  }
 }
 
 module.exports = NoopTracer

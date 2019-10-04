@@ -29,6 +29,8 @@ const app = express()
 
 Regardless if you are using a [supported library instrumentation](#instrumentations), you may want to add custom instrumentation to your code.  This can be done using the [OpenTracing API](#opentracing-api) and [Scope](#scope) utility.
 
+**Note**: Because a number of helpful methods aren't provided by the current OpenTracing JavaScript API, the delegation pattern of the OpenTracing global tracer (`require('opentracing').globalTracer()`) isn't fully compatible with our tracer instances.  For this reason, a reference to the actual tracer instance returned by `init()` should be made accessible where custom instrumentation utilizes scope management and manual trace reporting.
+
 #### OpenTracing API
 
 You can use the [OpenTracing API](https://doc.esdoc.org/github.com/opentracing/opentracing-javascript/) and the `signalfx-tracing` library to track execution state and duration for specific pieces of code. In the following example, a tracer is initialized and used as an OpenTracing global tracer:
@@ -40,6 +42,7 @@ const opentracing = require('opentracing')
 opentracing.initGlobalTracer(tracer)
 
 function myApplicationLogic() {
+  // This tracer delegate only supports the base OpenTracing API
   const globalTracer =  opentracing.globalTracer()
   const span = globalTracer.startSpan('myApplicationLogic') 
   span.setTag('MyTag', 'MyTagValue')
@@ -275,6 +278,19 @@ scope.activate(outerSpan, async () => {
 
 innerEmitter.emit('request')
 outerEmitter.emit('request')
+```
+
+##### Manual Trace Reporting
+
+In cases where reporting all enqueued traces is necessary, like before suspending activity in a serverless environment, manually flushing the internal tracer writer is possible.  The tracer's `flush()` method will return the writer's request Promise that represents the trace submission to the SignalFx Smart Agent or Gateway.
+
+```javascript
+const tracer = require('signalfx-tracing').init();
+
+// <...traced activity...>
+
+// Report any unsent traces before pausing.
+tracer.flush().then(() => { console.log('ready to suspend') });
 ```
 
 ### Instrumentations
