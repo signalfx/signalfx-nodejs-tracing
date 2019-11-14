@@ -281,6 +281,13 @@ jobs:
         environment:
           - PLUGINS=koa
 
+  node-knex:
+    <<: *node-plugin-base
+    docker:
+      - image: node:8
+        environment:
+          - PLUGINS=knex
+  
   node-memcached:
     <<: *node-plugin-base
     docker:
