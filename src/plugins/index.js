@@ -21,6 +21,7 @@ module.exports = {
   'mongodb-core': require('./mongodb-core'),
   'mysql': require('./mysql'),
   'mysql2': require('./mysql2'),
+  'nest': require('./nest'),
   'net': require('./net'),
   'pg': require('./pg'),
   'pino': require('./pino'),

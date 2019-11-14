@@ -331,6 +331,13 @@ jobs:
         environment:
           - PLUGINS=net
 
+  node-nest:
+    <<: *node-plugin-base
+    docker:
+      - image: node:8
+        environment:
+          - PLUGINS=nest
+
   node-pino:
     <<: *node-plugin-base
     docker:
