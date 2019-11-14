@@ -59,6 +59,7 @@ For detailed information about configuration and usage, please see the [API docu
 * [MongoDB-Core 2+](https://github.com/mongodb-js/mongodb-core) - `use('mongodb-core')`
 * [mysql 2+](https://github.com/mysqljs/mysql) - `use('mysql')`
 * [MySQL2 1+](https://github.com/sidorares/node-mysql2) - `use('mysql2')`
+* [Nest](https://nestjs.com/) - `use('nest')`
 * [Net](https://nodejs.org/api/net.html) - `use('net')`
 * [node-postgres 4+](https://github.com/brianc/node-postgres) - `use('pg')`
 * [Pino 2+](http://getpino.io/#/) - `use('pino')`
