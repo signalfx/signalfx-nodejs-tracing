@@ -259,6 +259,13 @@ module.exports = [
   {
     name: '@nestjs/core',
     versions: ['>=1.0.2'],
+    additionalDependencies: {
+      "@nestjs/common": "^1.0.0",
+      "@nestjs/websockets": "^1.0.0",
+      "@nestjs/microservices": "^2.0.0", // FIXME: this should really be "^1.0.0" but that package version does not exist on npm
+      "reflect-metadata": "0.1.10",
+      "rxjs": "^5.0.3"
+    },
     file: 'nest-factory.js',
     patch (NestFactoryStatic, tracer, config) {
       this.wrap(NestFactoryStatic.NestFactoryStatic.prototype,
@@ -272,6 +279,13 @@ module.exports = [
   {
     name: '@nestjs/core',
     versions: ['>=1.0.2'],
+    additionalDependencies: {
+      "@nestjs/common": "^1.0.0",
+      "@nestjs/websockets": "^1.0.0",
+      "@nestjs/microservices": "^2.0.0", // FIXME: this should really be "^1.0.0" but that package version does not exist on npm
+      "reflect-metadata": "0.1.10",
+      "rxjs": "^5.0.3"
+    },
     file: 'router/router-execution-context.js',
     patch (RouterExecutionContext, tracer, config) {
       this.wrap(RouterExecutionContext.RouterExecutionContext.prototype,
@@ -285,6 +299,13 @@ module.exports = [
   {
     name: '@nestjs/core',
     versions: ['>=4.5.2'],
+    additionalDependencies: {
+      "@nestjs/common": "^4.*",
+      "@nestjs/websockets": "^4.*",
+      "@nestjs/microservices": "^4.*",
+      "reflect-metadata": "0.1.10",
+      "rxjs": "^5.4.2"
+    },
     file: 'router/router-execution-context.js',
     patch (RouterExecutionContext, tracer, config) {
       this.wrap(RouterExecutionContext.RouterExecutionContext.prototype,
@@ -298,6 +319,13 @@ module.exports = [
   {
     name: '@nestjs/core',
     versions: ['3.0.2 - 4.5.1'],
+    additionalDependencies: {
+      "@nestjs/common": "<=4.5.1",
+      "@nestjs/websockets": "<=4.5.1",
+      "@nestjs/microservices": "<=4.5.1",
+      "reflect-metadata": "0.1.10",
+      "rxjs": "5.0.3"
+    },
     file: 'guards/guards-consumer.js',
     patch (GuardsConsumer, tracer, config) {
       this.wrap(GuardsConsumer.GuardsConsumer.prototype,
@@ -311,6 +339,13 @@ module.exports = [
   {
     name: '@nestjs/core',
     versions: ['>=3.0.5'],
+    additionalDependencies: {
+      "@nestjs/common": "~3.*",
+      "@nestjs/websockets": "~3.*",
+      "@nestjs/microservices": "~3.*",
+      "reflect-metadata": "0.1.10",
+      "rxjs": "5.4.2"
+    },
     file: 'interceptors/interceptors-consumer.js',
     patch (InterceptorsConsumer, tracer, config) {
       this.wrap(InterceptorsConsumer.InterceptorsConsumer.prototype,
@@ -324,6 +359,13 @@ module.exports = [
   {
     name: '@nestjs/core',
     versions: ['>=4.5.2'],
+    additionalDependencies: {
+      "@nestjs/common": "^4.*",
+      "@nestjs/websockets": "^4.*",
+      "@nestjs/microservices": "^4.*",
+      "reflect-metadata": "0.1.10",
+      "rxjs": "^5.4.2"
+    },
     file: 'router/router-execution-context.js',
     patch (RouterExecutionContext, tracer, config) {
       this.wrap(RouterExecutionContext.RouterExecutionContext.prototype,

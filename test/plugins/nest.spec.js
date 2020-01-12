@@ -138,7 +138,6 @@ describe('Plugin', () => {
               expect(spans[0]).to.have.property('name', 'nest.factory.create')
               expect(spans[0].meta).to.have.property('component', 'nest')
               expect(spans[0].meta).to.have.property('nest.module', 'AppModule')
-
               if (semver.intersects(version, '>=3.0.2')) {
                 expect(spans[1]).to.have.property('service', 'test')
                 expect(spans[1]).to.have.property('name', 'nest.guard.canActivate.UsersController(getUsers)')
@@ -187,7 +186,7 @@ describe('Plugin', () => {
               .get(`http://localhost:${port}/users`)
               .catch((error) => {})
           })
-        })
+        }).timeout(5000)
       })
     })
   })
