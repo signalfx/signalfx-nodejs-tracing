@@ -35,7 +35,7 @@ describe('Plugin', () => {
                 useNullAsDefault: true
               })
             })
-      })
+        })
 
         afterEach(() => {
           client.schema.dropTableIfExists('testTable')
