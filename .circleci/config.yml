@@ -533,6 +533,7 @@ workflows:
       - node-graphql
       - node-hapi
       - node-http
+      - node-knex
       - node-koa
       - node-memcached
       - node-mongodb-core
@@ -591,6 +592,7 @@ workflows:
       - node-graphql
       - node-hapi
       - node-http
+      - node-knex
       - node-koa
       - node-memcached
       - node-mongodb-core

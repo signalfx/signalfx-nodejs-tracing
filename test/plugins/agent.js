@@ -8,6 +8,7 @@ const path = require('path')
 const Int64BE = require('int64-buffer').Int64BE
 
 const handlers = new Set()
+let receivedRequests = []
 let agent = null
 let server = null
 let listener = null
@@ -53,6 +54,7 @@ module.exports = {
     })
 
     agent.post('/v1/trace', (req, res) => {
+      receivedRequests.push(req.body)
       res.status(200).send()
       handlers.forEach(handler => handler(req.body))
     })
@@ -129,6 +131,7 @@ module.exports = {
 
   // Unregister any outstanding expectation callbacks.
   reset () {
+    receivedRequests = []
     handlers.clear()
   },
 
@@ -143,6 +146,10 @@ module.exports = {
   // Return the current active span.
   currentSpan () {
     return tracer.scope().active()
+  },
+
+  receivedRequests () {
+    return receivedRequests
   },
 
   // Stop the mock agent, reset all expectations and wipe the require cache.

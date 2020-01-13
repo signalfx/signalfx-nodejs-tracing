@@ -604,6 +604,18 @@ query HelloWorld {
 | http.status_code | The HTTP status code of the response.                     |
 | http.headers.*   | A recorded HTTP header.                                   |
 
+#### Knex
+
+##### Tags
+
+| Tag              | Description                                                |
+|------------------|------------------------------------------------------------|
+| component        | `knex`                                                     |
+| db.type          | The database driver being used such as sqlite3, etc        |
+| db.user          | The database user used by the driver to connect to the db. |
+| db.statement     | The SQL statement executed by the traced query.            |
+| db.instance      | The name of the queried database instance.                 |
+
 ##### Configuration Options
 
 | Option           | Default                   | Description                            |

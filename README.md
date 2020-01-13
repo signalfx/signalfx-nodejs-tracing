@@ -55,6 +55,7 @@ For detailed information about configuration and usage, please see the [API docu
 * [http/https](https://nodejs.org/api/http.html) - `use('http')`, `use('https')`
 * [ioredis 2+](https://github.com/luin/ioredis) - `use('ioredis')`
 * [Koa 2+](https://koajs.com/) - `use('koa')`
+* [Knex 0.10+](https://knexjs.org/) - `use('bluebird'); use('knex')` (depends on bluebird instrumentation)
 * [Memcached 2.2+](https://github.com/3rd-Eden/memcached) - `use('memcached')`
 * [MongoDB-Core 2+](https://github.com/mongodb-js/mongodb-core) - `use('mongodb-core')`
 * [mysql 2+](https://github.com/mysqljs/mysql) - `use('mysql')`
