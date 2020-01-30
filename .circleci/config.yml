@@ -281,6 +281,13 @@ jobs:
         environment:
           - PLUGINS=koa
 
+  node-knex:
+    <<: *node-plugin-base
+    docker:
+      - image: node:8
+        environment:
+          - PLUGINS=knex
+  
   node-memcached:
     <<: *node-plugin-base
     docker:
@@ -526,6 +533,7 @@ workflows:
       - node-graphql
       - node-hapi
       - node-http
+      - node-knex
       - node-koa
       - node-memcached
       - node-mongodb-core
@@ -584,6 +592,7 @@ workflows:
       - node-graphql
       - node-hapi
       - node-http
+      - node-knex
       - node-koa
       - node-memcached
       - node-mongodb-core
