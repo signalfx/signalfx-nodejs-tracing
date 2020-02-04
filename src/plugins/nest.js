@@ -13,16 +13,6 @@ function createWrapNestFactoryCreate (tracer, config) {
         }
       })
 
-      if (typeof this.createHttpAdapter === 'function') {
-        const httpServerOptions = this.isHttpServer(serverOrOptions)
-          ? [serverOrOptions, options]
-          : [this.createHttpAdapter(), serverOrOptions]
-        const server = httpServerOptions[0]
-        if (server.constructor && server.constructor.name) {
-          span.setTag('nest.server', server.constructor.name)
-        }
-      }
-
       return scope.activate(span, () => {
         try {
           return create.apply(this, arguments)
@@ -51,9 +41,9 @@ function createWrapCreateHandler (tracer, config) {
           childOf,
           tags: {
             'component': 'nest',
-            'request.method': req.method,
-            'request.url': req.originalUrl,
-            'request.route.path': req.route.path,
+            'http.method': req.method,
+            'http.url': req.originalUrl,
+            'nest.route.path': req.route.path
           }
         })
 
@@ -118,8 +108,9 @@ function createWrapIntercept (tracer, config) {
       }
 
       const request = args.length > 1 ? args[0] : args
-      span.setTag('request.method', request.method)
-      span.setTag('request.url', request.originalUrl)
+      span.setTag('http.method', request.method)
+      span.setTag('http.url', request.originalUrl)
+      span.setTag('nest.route.path', request.route.path)
 
       if (interceptors.length > 0) {
         const interceptorNames = []
@@ -207,9 +198,9 @@ function createGuardsTrace (tracer, args, guards, instance, callback, fn) {
     childOf,
     tags: {
       'component': 'nest',
-      'request.method': request.method,
-      'request.url': request.originalUrl,
-      'request.route.path': request.route.path
+      'http.method': request.method,
+      'http.url': request.originalUrl,
+      'nest.route.path': request.route.path
     }
   })
 
@@ -255,17 +246,10 @@ function addError (span, error) {
   return error
 }
 
-module.exports = [
-  {
+function patchNestFactory (versions) {
+  return {
     name: '@nestjs/core',
-    versions: ['>=1.0.2'],
-    additionalDependencies: {
-      "@nestjs/common": "^1.0.0",
-      "@nestjs/websockets": "^1.0.0",
-      "@nestjs/microservices": "^2.0.0", // FIXME: this should really be "^1.0.0" but that package version does not exist on npm
-      "reflect-metadata": "0.1.10",
-      "rxjs": "^5.0.3"
-    },
+    versions: versions,
     file: 'nest-factory.js',
     patch (NestFactoryStatic, tracer, config) {
       this.wrap(NestFactoryStatic.NestFactoryStatic.prototype,
@@ -275,17 +259,13 @@ module.exports = [
     unpatch (NestFactoryStatic) {
       this.unwrap(NestFactoryStatic.NestFactoryStatic.prototype, 'create')
     }
-  },
-  {
+  }
+}
+
+function patchRouterExecutionContext (versions) {
+  return {
+    versions,
     name: '@nestjs/core',
-    versions: ['>=1.0.2'],
-    additionalDependencies: {
-      "@nestjs/common": "^1.0.0",
-      "@nestjs/websockets": "^1.0.0",
-      "@nestjs/microservices": "^2.0.0", // FIXME: this should really be "^1.0.0" but that package version does not exist on npm
-      "reflect-metadata": "0.1.10",
-      "rxjs": "^5.0.3"
-    },
     file: 'router/router-execution-context.js',
     patch (RouterExecutionContext, tracer, config) {
       this.wrap(RouterExecutionContext.RouterExecutionContext.prototype,
@@ -295,37 +275,13 @@ module.exports = [
     unpatch (RouterExecutionContext) {
       this.unwrap(RouterExecutionContext.RouterExecutionContext.prototype, 'create')
     }
-  },
-  {
+  }
+}
+
+function patchGuardsConsumer (versions) {
+  return {
+    versions,
     name: '@nestjs/core',
-    versions: ['>=4.5.2'],
-    additionalDependencies: {
-      "@nestjs/common": "^4.*",
-      "@nestjs/websockets": "^4.*",
-      "@nestjs/microservices": "^4.*",
-      "reflect-metadata": "0.1.10",
-      "rxjs": "^5.4.2"
-    },
-    file: 'router/router-execution-context.js',
-    patch (RouterExecutionContext, tracer, config) {
-      this.wrap(RouterExecutionContext.RouterExecutionContext.prototype,
-        'createGuardsFn',
-        createWrapCreateGuardsFn(tracer, config))
-    },
-    unpatch (RouterExecutionContext) {
-      this.unwrap(RouterExecutionContext.RouterExecutionContext.prototype, 'createGuardsFn')
-    }
-  },
-  {
-    name: '@nestjs/core',
-    versions: ['3.0.2 - 4.5.1'],
-    additionalDependencies: {
-      "@nestjs/common": "<=4.5.1",
-      "@nestjs/websockets": "<=4.5.1",
-      "@nestjs/microservices": "<=4.5.1",
-      "reflect-metadata": "0.1.10",
-      "rxjs": "5.0.3"
-    },
     file: 'guards/guards-consumer.js',
     patch (GuardsConsumer, tracer, config) {
       this.wrap(GuardsConsumer.GuardsConsumer.prototype,
@@ -335,17 +291,29 @@ module.exports = [
     unpatch (GuardsConsumer) {
       this.unwrap(GuardsConsumer.GuardsConsumer.prototype, 'tryActivate')
     }
-  },
-  {
+  }
+}
+
+function patchRouterExecutionContextGuard (versions) {
+  return {
+    versions,
     name: '@nestjs/core',
-    versions: ['>=3.0.5'],
-    additionalDependencies: {
-      "@nestjs/common": "~3.*",
-      "@nestjs/websockets": "~3.*",
-      "@nestjs/microservices": "~3.*",
-      "reflect-metadata": "0.1.10",
-      "rxjs": "5.4.2"
+    file: 'router/router-execution-context.js',
+    patch (RouterExecutionContext, tracer, config) {
+      this.wrap(RouterExecutionContext.RouterExecutionContext.prototype,
+        'createGuardsFn',
+        createWrapCreateGuardsFn(tracer, config))
     },
+    unpatch (RouterExecutionContext) {
+      this.unwrap(RouterExecutionContext.RouterExecutionContext.prototype, 'createGuardsFn')
+    }
+  }
+}
+
+function patchInterceptors (versions) {
+  return {
+    versions,
+    name: '@nestjs/core',
     file: 'interceptors/interceptors-consumer.js',
     patch (InterceptorsConsumer, tracer, config) {
       this.wrap(InterceptorsConsumer.InterceptorsConsumer.prototype,
@@ -355,17 +323,13 @@ module.exports = [
     unpatch (InterceptorsConsumer) {
       this.unwrap(InterceptorsConsumer.InterceptorsConsumer.prototype, 'intercept')
     }
-  },
-  {
+  }
+}
+
+function patchRouterExecutionContextPipes (versions) {
+  return {
+    versions,
     name: '@nestjs/core',
-    versions: ['>=4.5.2'],
-    additionalDependencies: {
-      "@nestjs/common": "^4.*",
-      "@nestjs/websockets": "^4.*",
-      "@nestjs/microservices": "^4.*",
-      "reflect-metadata": "0.1.10",
-      "rxjs": "^5.4.2"
-    },
     file: 'router/router-execution-context.js',
     patch (RouterExecutionContext, tracer, config) {
       this.wrap(RouterExecutionContext.RouterExecutionContext.prototype,
@@ -376,4 +340,26 @@ module.exports = [
       this.unwrap(RouterExecutionContext.RouterExecutionContext.prototype, 'createPipesFn')
     }
   }
+}
+
+module.exports = [
+  patchGuardsConsumer(['>=4.0.0 <=4.5.1']),
+
+  patchNestFactory(['>=4.0.0 <5.0.0']),
+  patchRouterExecutionContext(['>=4.0.0 <5.0.0']),
+  patchInterceptors(['>=4.0.0 <5.0.0']),
+  patchRouterExecutionContextGuard(['>=4.5.2 <5.0.0']),
+  patchRouterExecutionContextPipes(['>=4.5.2 <5.0.0']),
+
+  patchNestFactory(['>=5.0.0 <6.0.0']),
+  patchRouterExecutionContext(['>=5.0.0 <6.0.0']),
+  patchInterceptors(['>=5.0.0 <6.0.0']),
+  patchRouterExecutionContextGuard(['>=5.0.0 <6.0.0']),
+  patchRouterExecutionContextPipes(['>=5.0.0 <6.0.0']),
+
+  patchNestFactory(['>=6.0.0 <7.0.0']),
+  patchRouterExecutionContext(['>=6.0.0 <7.0.0']),
+  patchInterceptors(['>=6.0.0 <7.0.0']),
+  patchRouterExecutionContextGuard(['>=6.0.0 <7.0.0']),
+  patchRouterExecutionContextPipes(['>=6.0.0 <7.0.0'])
 ]

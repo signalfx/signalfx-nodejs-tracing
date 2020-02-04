@@ -697,6 +697,23 @@ query HelloWorld {
 | tcp.remote.host    | Remote hostname attempting to connection with |
 | tcp.remote.port    | Remote port attempting to connect to          |
 
+#### Nest
+
+##### Tags
+
+| Tag                      | Description                                               |
+|--------------------------|-----------------------------------------------------------|
+| component                | Always set to `nest`.                                     |            |
+| http.url                 | The complete URL of the request.                          |
+| http.method              | The HTTP method of the request.                           |
+| nest.route.path          | The nest route path matched.                              |
+| nest.controller.instance | The name of the nest controller that handled the request. |
+| nest.callback            | The name of the callback invoked to handle the request.   |
+| nest.interceptors        | Names of nest interceptors that were used.                |
+| nest.pipes               | Names of the nest pipes that were used.                   |
+| nest.guards              | Names of the nest guards that were used.                  |
+
+
 #### node-postgres
 
 ##### Tags

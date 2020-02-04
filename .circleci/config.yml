@@ -546,6 +546,7 @@ workflows:
       - node-mongodb-core
       - node-mysql
       - node-net
+      - node-nest
       - node-pino
       - node-postgres
       - node-q
