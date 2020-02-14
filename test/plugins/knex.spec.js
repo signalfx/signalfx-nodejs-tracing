@@ -4,8 +4,7 @@
 
 const agent = require('./agent')
 const plugin = require('../../src/plugins/knex')
-
-const sort = spans => spans.sort((a, b) => a.start.toString() >= b.start.toString() ? 1 : -1)
+const spanUtils = require('./util/spans')
 
 function normalizeDBStatement (statement) {
   return statement.replace(/"/g, '`')
@@ -69,7 +68,7 @@ describe('Plugin', () => {
 
             const trace = traces[0]
             expect(trace).to.have.length(4)
-            const spans = sort(trace)
+            const spans = spanUtils.sortByStartTime(trace)
 
             expect(spans[0]).to.have.property('service', 'test')
             expect(spans[0]).to.have.property('name', test.name)
@@ -147,7 +146,7 @@ describe('Plugin', () => {
 
         it('should automatically instrument schema builds', done => {
           agent.use(traces => {
-            const spans = sort(traces[0])
+            const spans = spanUtils.sortByStartTime(traces[0])
             expect(spans[0]).to.have.property('service', 'test')
             expect(spans[0]).to.have.property('name', 'knex.client.runner')
             expect(spans[0].meta).to.have.property('component', 'knex')
@@ -169,7 +168,7 @@ describe('Plugin', () => {
 
         it('should automatically instrument simple queries', done => {
           agent.use(traces => {
-            const spans = sort(traces[0])
+            const spans = spanUtils.sortByStartTime(traces[0])
             expect(spans).to.have.length(4)
             const rootSpan = spans[0]
 
@@ -235,7 +234,7 @@ describe('Plugin', () => {
           const span = tracer.startSpan('testSpan')
 
           agent.use(traces => {
-            const spans = sort(traces[0])
+            const spans = spanUtils.sortByStartTime(traces[0])
             expect(spans).to.have.length(6)
             const rootSpan = spans[0]
 
@@ -332,7 +331,7 @@ describe('Plugin', () => {
         })
         it('should work with nested custom spans', done => {
           agent.use(traces => {
-            const spans = sort(traces[0])
+            const spans = spanUtils.sortByStartTime(traces[0])
             expect(spans).to.have.length(5)
             const rootSpan = spans[0]
 

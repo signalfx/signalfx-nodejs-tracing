@@ -8,11 +8,22 @@ const path = require('path')
 const Int64BE = require('int64-buffer').Int64BE
 
 const handlers = new Set()
+const watchers = new Set()
 let receivedRequests = []
 let agent = null
 let server = null
 let listener = null
 let tracer = null
+
+function flat (array) {
+  const flat = []
+  array.forEach(inner => {
+    inner.forEach(item => {
+      flat.push(item)
+    })
+  })
+  return flat
+}
 
 const zipkinV2toDD = trace => {
   // Convert Zipkin v2 JSON to dd format to prevent unnecessary test updates
@@ -57,6 +68,12 @@ module.exports = {
       receivedRequests.push(req.body)
       res.status(200).send()
       handlers.forEach(handler => handler(req.body))
+      const spans = flat(flat(receivedRequests))
+      watchers.forEach(watcher => {
+        if (spans.length >= watcher.numSpans) {
+          watcher.callback(spans)
+        }
+      })
     })
 
     return getPort().then(port => {
@@ -120,6 +137,11 @@ module.exports = {
     return promise
   },
 
+  // Register a callback with expectations to be run after N number of spans are received.
+  watch (callback, numSpans) {
+    watchers.add({ numSpans, callback })
+  },
+
   // Return a promise that will resolve when all expectations have run.
   promise () {
     const promises = Array.from(handlers)
@@ -133,6 +155,7 @@ module.exports = {
   reset () {
     receivedRequests = []
     handlers.clear()
+    watchers.clear()
   },
 
   // Wrap a callback so it will only be called when all expectations have run.
@@ -160,6 +183,7 @@ module.exports = {
     listener = null
     agent = null
     handlers.clear()
+    watchers.clear()
     delete require.cache[require.resolve('../..')]
 
     return new Promise((resolve, reject) => {

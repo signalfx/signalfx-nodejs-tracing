@@ -7,6 +7,8 @@ const semver = require('semver')
 const exec = require('./helpers/exec')
 const plugins = require('../src/plugins')
 const externals = require('../test/plugins/externals')
+const additonalDependencies = require('../test/plugins/dependencies')
+const nohoist = require('../test/plugins/nohoist')
 const mkdirp = require('mkdirp')
 
 const workspaces = new Set()
@@ -77,15 +79,27 @@ function assertFolder (name, version) {
   }
 }
 
+function getAdditionalDependencies (name, version) {
+  if (!version || !additonalDependencies[name]) {
+    return {}
+  }
+  const versionRanges = additonalDependencies[name]
+  for (const range in versionRanges) {
+    if (semver.intersects(version, range)) {
+      return versionRanges[range]
+    }
+  }
+}
+
 function assertPackage (name, version, dependency) {
+  const deps = getAdditionalDependencies(name, version)
+  deps[name] = dependency
   fs.writeFileSync(filename(name, version, 'package.json'), JSON.stringify({
     name: [name, sha1(name).substr(0, 8), sha1(version)].filter(val => val).join('-'),
     version: '1.0.0',
     license: 'BSD-3-Clause',
     private: true,
-    optionalDependencies: {
-      [name]: dependency
-    }
+    dependencies: deps
   }, null, 2) + '\n')
 }
 
@@ -106,7 +120,10 @@ function assertWorkspace () {
     version: '1.0.0',
     license: 'BSD-3-Clause',
     private: true,
-    workspaces: Array.from(workspaces)
+    workspaces: {
+      nohoist,
+      packages: Array.from(workspaces)
+    }
   }, null, 2) + '\n')
 }
 
