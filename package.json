@@ -1,6 +1,6 @@
 {
   "name": "signalfx-tracing",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Provides auto-instrumentation for JavaScript libraries and frameworks",
   "main": "index.js",
   "typings": "index.d.ts",
@@ -75,7 +75,7 @@
     "shimmer": "^1.2.0",
     "tar": "^4.4.8",
     "url-parse": "^1.4.3",
-    "xregexp": "^4.2.4"
+    "xregexp": "^4.3.0"
   },
   "devDependencies": {
     "@adonisjs/fold": "^4.0.9",
