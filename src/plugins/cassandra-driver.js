@@ -165,10 +165,11 @@ function addHost (span, connection) {
 function addError (span, error) {
   if (error && error instanceof Error) {
     span.addTags({
-      'error': 'true',
-      'error.type': error.name,
-      'error.msg': error.message,
-      'error.stack': error.stack
+      'error': true,
+      'sfx.error.kind': error.name,
+      'sfx.error.object': error.name,
+      'sfx.error.message': error.message,
+      'sfx.error.stack': error.stack
     })
   }
 

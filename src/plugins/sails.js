@@ -23,8 +23,10 @@ function wrapActionFunction (tracer, actionFn, identity) {
       if (span) {
         span.addTags({
           'error': true,
-          'error.msg': e.message,
-          'error.stack': e.stack
+          'sfx.error.kind': e.name,
+          'sfx.error.object': e.name,
+          'sfx.error.message': e.message,
+          'sfx.error.stack': e.stack
         })
       }
 

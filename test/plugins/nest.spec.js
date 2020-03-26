@@ -22,6 +22,8 @@ const __decorate = (this && this.__decorate) || function (decorators, target, ke
 
 let UsersController = class UsersController {}
 let UsersModule = class UsersModule {}
+let ErrorController = class ErrorController {}
+let ErrorModule = class ErrorModule {}
 let AppModule = class AppModule {}
 
 describe('Plugin', () => {
@@ -35,10 +37,10 @@ describe('Plugin', () => {
         core = require(`../../versions/@nestjs/core@${version}`).get()
         const common = require(`../../versions/@nestjs/core@${version}/node_modules/@nestjs/common`)
 
+        UsersController = __decorate([common.Controller('users')], UsersController)
         UsersController.prototype.getUsers = function getUsers () {
           return '\nHello, world!\n\n'
         }
-        UsersController = __decorate([common.Controller('users')], UsersController)
         Object.defineProperty(UsersController.prototype, 'getUsers',
           __decorate([common.Get()], UsersController.prototype, 'getUsers',
             Object.getOwnPropertyDescriptor(UsersController.prototype, 'getUsers')))
@@ -49,28 +51,44 @@ describe('Plugin', () => {
           })
         ], UsersModule)
 
+        ErrorController = __decorate([common.Controller('errors')], ErrorController)
+        ErrorController.prototype.getErrors = function getErrors () {
+          throw new Error('custom error')
+        }
+        Object.defineProperty(ErrorController.prototype, 'getErrors',
+          __decorate([common.Get()], ErrorController.prototype, 'getErrors',
+            Object.getOwnPropertyDescriptor(ErrorController.prototype, 'getErrors')))
+
+        ErrorModule = __decorate([
+          common.Module({
+            controllers: [ErrorController]
+          })
+        ], ErrorModule)
+
         if (semver.intersects(version, '>=4.6.3')) {
           AppModule = __decorate([
             common.Module({
-              imports: [UsersModule],
-              controllers: [UsersController]
+              imports: [UsersModule, ErrorModule],
+              controllers: [UsersController, ErrorController]
             })], AppModule)
         } else {
           AppModule = __decorate([
             common.Module({
-              modules: [UsersModule],
-              controllers: [UsersController]
+              modules: [UsersModule, ErrorModule],
+              controllers: [UsersController, ErrorController]
             })], AppModule)
         }
 
         core.NestFactory.create(AppModule)
           .then((application) => {
             app = application
+            getPort().then(newPort => {
+              port = newPort
+              app.listen(port, 'localhost')
+                .then(() => done())
+                .catch(done)
+            })
           })
-
-        getPort()
-          .then(newPort => { port = newPort })
-          .then(() => { done() })
       })
 
       describe('without configuration', () => {
@@ -121,13 +139,57 @@ describe('Plugin', () => {
             done()
           }, 4) // run when 4 spans are received by the agent
 
-          app.listen(port, 'localhost')
-            .then((done) => {
-              axios
-                .get(`http://localhost:${port}/users`)
-                .catch(done)
-            })
+          axios
+            .get(`http://localhost:${port}/users`)
             .catch(done)
+        }).timeout(5000)
+
+        it('should properly record errors', done => {
+          agent.watch(spans => {
+            spans = spanUtils.sortByStartTime(spans)
+            let routePath = '/errors'
+            if (semver.intersects(version, '<5.0.0')) {
+              routePath = '/'
+            }
+
+            // TODO(owais): actually test for errors
+            expect(spans[0]).to.have.property('service', 'test')
+            expect(spans[0]).to.have.property('name', 'nest.factory.create')
+            expect(spans[0].meta).to.have.property('component', 'nest')
+            expect(spans[0].meta).to.have.property('nest.module', 'AppModule')
+
+            expect(spans[1]).to.have.property('service', 'test')
+            expect(spans[1]).to.have.property('name', 'ErrorController(getErrors)')
+            expect(spans[1].meta).to.have.property('component', 'nest')
+            expect(spans[1].meta).to.have.property('http.method', 'GET')
+            expect(spans[1].meta).to.have.property('http.url', '/errors')
+            expect(spans[1].meta).to.have.property('nest.route.path', routePath)
+            expect(spans[1].meta).to.have.property('nest.callback', 'getErrors')
+
+            expect(spans[2]).to.have.property('service', 'test')
+            expect(spans[2]).to.have.property('name', 'nest.guard.canActivate.ErrorController(getErrors)')
+            expect(spans[2].meta).to.have.property('component', 'nest')
+            expect(spans[2].meta).to.have.property('http.url', '/errors')
+            expect(spans[2].meta).to.have.property('nest.controller.instance', 'ErrorController')
+            expect(spans[2].meta).to.have.property('nest.route.path', routePath)
+            expect(spans[2].meta).to.have.property('nest.callback', 'getErrors')
+            expect(spans[2].parent_id.toString()).to.equal(spans[1].span_id.toString())
+
+            expect(spans[3]).to.have.property('service', 'test')
+            expect(spans[3]).to.have.property('name', 'nest.interceptor.intercept')
+            expect(spans[3].meta).to.have.property('component', 'nest')
+            expect(spans[3].meta).to.have.property('http.method', 'GET')
+            expect(spans[3].meta).to.have.property('http.url', '/errors')
+            expect(spans[3].meta).to.have.property('nest.callback', 'getErrors')
+            expect(spans[3].meta).to.have.property('nest.route.path', routePath)
+            expect(spans[3].meta).to.have.property('nest.controller.instance', 'ErrorController')
+            expect(spans[3].parent_id.toString()).to.equal(spans[1].span_id.toString())
+            done()
+          }, 4) // run when 4 spans are received by the agent
+
+          axios
+            .get(`http://localhost:${port}/errors`)
+            .catch(() => {})
         }).timeout(5000)
       })
     })

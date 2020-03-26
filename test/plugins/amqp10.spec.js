@@ -94,9 +94,10 @@ describe('Plugin', () => {
                 const span = traces[0][0]
 
                 expect(span.meta).to.have.property('error', 'true')
-                expect(span.meta).to.have.property('error.type', error.name)
-                expect(span.meta).to.have.property('error.msg', error.message)
-                expect(span.meta).to.have.property('error.stack', error.stack)
+                expect(span.meta).to.have.property('sfx.error.kind', error.name)
+                expect(span.meta).to.have.property('sfx.error.object', error.name)
+                expect(span.meta).to.have.property('sfx.error.message', error.message)
+                expect(span.meta).to.have.property('sfx.error.stack', error.stack)
               }, 2)
               .then(done)
               .catch(done)

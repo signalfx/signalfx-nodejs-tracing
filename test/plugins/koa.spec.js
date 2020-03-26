@@ -402,7 +402,7 @@ describe('Plugin', () => {
 
                 expect(spans[1]).to.have.property('name', 'dispatch')
                 expect(spans[1].meta).to.include({
-                  'error.type': error.name
+                  'sfx.error.kind': error.name
                 })
                 expect(spans[0].meta.error).to.equal('true')
               })

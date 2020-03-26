@@ -41,9 +41,10 @@ class Scope extends Base {
     } catch (e) {
       if (span && typeof span.addTags === 'function') {
         span.addTags({
-          'error.type': e.name,
-          'error.msg': e.message,
-          'error.stack': e.stack
+          'sfx.error.kind': e.name,
+          'sfx.error.object': e.name,
+          'sfx.error.message': e.message,
+          'sfx.error.stack': e.stack
         })
       }
 

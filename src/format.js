@@ -62,9 +62,9 @@ function extractTags (trace, span) {
           trace.error = 1
         }
         break
-      case 'error.type':
-      case 'error.msg':
-      case 'error.stack':
+      case 'sfx.error.kind':
+      case 'sfx.error.message':
+      case 'sfx.error.stack':
         trace.error = 1
       default: // eslint-disable-line no-fallthrough
         addTag(trace.meta, tag, tags[tag])
@@ -85,9 +85,10 @@ function extractError (trace, span) {
   const error = span.context()._tags['error']
 
   if (error instanceof Error) {
-    trace.meta['error.msg'] = error.message
-    trace.meta['error.type'] = error.name
-    trace.meta['error.stack'] = error.stack
+    trace.meta['sfx.error.message'] = error.message
+    trace.meta['sfx.error.object'] = error.name
+    trace.meta['sfx.error.kind'] = error.name
+    trace.meta['sfx.error.stack'] = error.stack
   }
 }
 

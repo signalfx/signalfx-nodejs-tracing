@@ -62,11 +62,12 @@ function createWrapRunnerQuery (tracer, config) {
 }
 
 function addError (span, error) {
-  span.setTag('error', 'true')
-  span.log({
-    'error.type': error.name,
-    'error.msg': error.message,
-    'error.stack': error.stack
+  span.addTags({
+    'error': true,
+    'sfx.error.kind': error.name,
+    'sfx.error.object': error.name,
+    'sfx.error.message': error.message,
+    'sfx.error.stack': error.stack
   })
   return error
 }

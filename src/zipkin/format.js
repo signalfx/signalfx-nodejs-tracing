@@ -69,9 +69,10 @@ function formatTags (formatted, span) {
           formattedTags.error = String(tags[tag])
         }
         break
-      case 'error.type':
-      case 'error.msg':
-      case 'error.stack':
+      case 'sfx.error.kind':
+      case 'sfx.error.object':
+      case 'sfx.error.message':
+      case 'sfx.error.stack':
         formattedTags.error = 'true'
         formattedTags[tag] = String(tags[tag])
         break
