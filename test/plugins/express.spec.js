@@ -778,7 +778,6 @@ describe('Plugin', () => {
 
                 expect(spans[1].meta).to.have.property('error', 'true')
                 expect(spans[1].meta).to.have.property('sfx.error.kind', error.name)
-                expect(spans[1].meta).to.have.property('sfx.error.object', error.name)
                 expect(spans[1].meta).to.have.property('sfx.error.message', error.message)
                 expect(spans[1].meta).to.have.property('sfx.error.stack', error.stack)
               })

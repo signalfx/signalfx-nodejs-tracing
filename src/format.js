@@ -86,7 +86,6 @@ function extractError (trace, span) {
 
   if (error instanceof Error) {
     trace.meta['sfx.error.message'] = error.message
-    trace.meta['sfx.error.object'] = error.name
     trace.meta['sfx.error.kind'] = error.name
     trace.meta['sfx.error.stack'] = error.stack
   }

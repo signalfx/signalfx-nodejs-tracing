@@ -61,7 +61,6 @@ describe('plugins/util/tx', () => {
 
         expect(span.context()._tags).to.have.property('sfx.error.message', error.message)
         expect(span.context()._tags).to.have.property('sfx.error.kind', error.name)
-        expect(span.context()._tags).to.have.property('sfx.error.object', error.name)
         expect(span.context()._tags).to.have.property('sfx.error.stack', error.stack)
       })
 
@@ -104,7 +103,6 @@ describe('plugins/util/tx', () => {
           expect(err).to.equal(error)
           expect(span.context()._tags).to.have.property('sfx.error.message', error.message)
           expect(span.context()._tags).to.have.property('sfx.error.kind', error.name)
-          expect(span.context()._tags).to.have.property('sfx.error.object', error.name)
           expect(span.context()._tags).to.have.property('sfx.error.stack', error.stack)
         })
       })

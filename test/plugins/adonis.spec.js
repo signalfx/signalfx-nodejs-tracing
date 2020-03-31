@@ -138,7 +138,6 @@ describe('Plugin', () => {
           expect(spans[0].meta).to.have.property('component', 'adonis')
           expect(spans[0].meta).to.have.property('error', 'true')
           expect(spans[0].meta).to.have.property('sfx.error.kind', 'Error')
-          expect(spans[0].meta).to.have.property('sfx.error.object', 'Error')
           expect(spans[0].meta).to.have.property('sfx.error.message', 'custom error')
           expect(spans[0].meta).to.have.property('sfx.error.stack')
           expect(spans[0].parent_id.toString()).to.equal(spans[1].span_id.toString())

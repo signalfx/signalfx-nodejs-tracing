@@ -81,7 +81,6 @@ function wrapCallback (tracer, span, done, cursor) {
     if (err) {
       span.addTags({
         'sfx.error.kind': err.name,
-        'sfx.error.object': err.name,
         'sfx.error.message': err.message,
         'sfx.error.stack': err.stack
       })

@@ -24,7 +24,6 @@ function wrapActionFunction (tracer, actionFn, identity) {
         span.addTags({
           'error': true,
           'sfx.error.kind': e.name,
-          'sfx.error.object': e.name,
           'sfx.error.message': e.message,
           'sfx.error.stack': e.stack
         })

@@ -239,7 +239,6 @@ function createGuardsTrace (tracer, args, guards, instance, callback, fn) {
 function addError (span, error) {
   span.addTags({
     'sfx.error.kind': error.name,
-    'sfx.error.object': error.name,
     'sfx.error.message': error.message,
     'sfx.error.stack': error.stack
   })

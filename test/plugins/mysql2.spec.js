@@ -104,7 +104,6 @@ describe('Plugin', () => {
             .use(traces => {
               expect(traces[0][0].meta).to.have.property('error', 'true')
               expect(traces[0][0].meta).to.have.property('sfx.error.kind', error.name)
-              expect(traces[0][0].meta).to.have.property('sfx.error.object', error.name)
               expect(traces[0][0].meta).to.have.property('sfx.error.message', error.message)
               expect(traces[0][0].meta).to.have.property('sfx.error.stack', error.stack)
             })

@@ -70,7 +70,6 @@ function formatTags (formatted, span) {
         }
         break
       case 'sfx.error.kind':
-      case 'sfx.error.object':
       case 'sfx.error.message':
       case 'sfx.error.stack':
         formattedTags.error = 'true'

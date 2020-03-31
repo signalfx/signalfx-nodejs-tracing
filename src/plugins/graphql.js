@@ -358,7 +358,6 @@ function finish (error, span, finishTime) {
   if (error) {
     span.addTags({
       'sfx.error.kind': error.name,
-      'sfx.error.object': error.name,
       'sfx.error.message': error.message,
       'sfx.error.stack': error.stack
     })
