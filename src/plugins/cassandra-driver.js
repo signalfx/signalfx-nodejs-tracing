@@ -3,8 +3,14 @@
 const tx = require('./util/tx')
 
 function createWrapInnerExecute (tracer, config) {
+  const isValid = (args) => {
+    return args.length === 4 || typeof args[3] === 'function'
+  }
   return function wrapInnerExecute (_innerExecute) {
     return function _innerExecuteWithTrace (query, params, execOptions, callback) {
+      if (!isValid(arguments)) {
+        return _innerExecute.apply(this, arguments)
+      }
       const scope = tracer.scope()
       const childOf = scope.active()
       const name = query.split(' ')[0]
@@ -20,11 +26,27 @@ function createWrapInnerExecute (tracer, config) {
   }
 }
 
+function createWrapExecute (tracer, config) {
+  return function wrapExecute (_execute) {
+    return function _executeWithTrace (query, params, execOptions, callback) {
+      const name = query.split(' ')[0]
+      const span = start(tracer, config, this, name, query)
+      const promise = tracer.scope().bind(_execute, span).apply(this, arguments)
+
+      return tx.wrap(span, promise)
+    }
+  }
+}
+
 function createWrapExecutionStart (tracer, config) {
   return function wrapExecutionStart (start) {
     return function startWithTrace (getHostCallback) {
       const span = tracer.scope().active()
       const execution = this
+
+      if (!isRequestValid(this, arguments, 1, span)) {
+        return start.apply(this, arguments)
+      }
 
       return start.call(this, function () {
         addHost(span, execution._connection)
@@ -34,11 +56,27 @@ function createWrapExecutionStart (tracer, config) {
   }
 }
 
+function createWrapSendOnConnection (tracer, config) {
+  return function wrapSendOnConnection (_sendOnConnection) {
+    return function _sendOnConnectionWithTrace () {
+      const span = tracer.scope().active()
+
+      addHost(span, this._connection)
+
+      return _sendOnConnection.apply(this, arguments)
+    }
+  }
+}
+
 function createWrapSend (tracer, config) {
   return function wrapSend (send) {
     return function sendWithTrace (request, options, callback) {
       const span = tracer.scope().active()
       const handler = this
+
+      if (!isRequestValid(this, arguments, 3, span)) {
+        return send.apply(this, arguments)
+      }
 
       return send.call(this, request, options, function () {
         addHost(span, handler.connection)
@@ -57,14 +95,14 @@ function createWrapBatch (tracer, config) {
       const scope = tracer.scope()
       const fn = scope.bind(batch, span)
 
+      callback = arguments[arguments.length - 1]
+
+      if (typeof callback === 'function') {
+        arguments[arguments.length - 1] = tx.wrap(span, callback)
+      }
+
       try {
-        if (typeof callback === 'function') {
-          return fn.call(this, queries, options, tx.wrap(span, callback))
-        } else if (typeof options === 'function') {
-          return fn.call(this, queries, tx.wrap(span, options))
-        } else {
-          return tx.wrap(span, fn.apply(this, arguments))
-        }
+        return tx.wrap(span, fn.apply(this, arguments))
       } catch (e) {
         finish(span, e)
         throw e
@@ -81,7 +119,7 @@ function createWrapStream (tracer, config) {
   }
 }
 
-function start (tracer, config, client, name, query) {
+function start (tracer, config, client = {}, name, query) {
   const scope = tracer.scope()
   const childOf = scope.active()
   const span = tracer.startSpan('cassandra.query', {
@@ -92,7 +130,8 @@ function start (tracer, config, client, name, query) {
       'span.type': 'cassandra',
       'span.kind': 'client',
       'db.type': 'cassandra',
-      'db.statement': trim(query, 1024)
+      'db.statement': trim(query, 1024),
+      'cassandra.keyspace': client.keyspace
     }
   })
 
@@ -142,14 +181,24 @@ function batchName (queries) {
     .join(';')
 }
 
+function isRequestValid (exec, args, length, span) {
+  if (!exec) return false
+  if (args.length !== length || typeof args[length - 1] !== 'function') return false
+  if (!span || span.context()._name !== 'cassandra.query') return false
+
+  return true
+}
+
 function combine (queries) {
+  if (!Array.isArray(queries)) return []
+
   return queries
     .map(query => (query.query || query).replace(/;?$/, ';'))
     .join(' ')
 }
 
 function trim (str, size) {
-  if (str.length <= size) return str
+  if (!str || str.length <= size) return str
 
   return `${str.substr(0, size - 3)}...`
 }
@@ -159,19 +208,48 @@ module.exports = [
     name: 'cassandra-driver',
     versions: ['>=3.0.0'],
     patch (cassandra, tracer, config) {
-      this.wrap(cassandra.Client.prototype, '_innerExecute', createWrapInnerExecute(tracer, config))
       this.wrap(cassandra.Client.prototype, 'batch', createWrapBatch(tracer, config))
       this.wrap(cassandra.Client.prototype, 'stream', createWrapStream(tracer, config))
     },
     unpatch (cassandra) {
-      this.unwrap(cassandra.Client.prototype, '_innerExecute')
       this.unwrap(cassandra.Client.prototype, 'batch')
       this.unwrap(cassandra.Client.prototype, 'stream')
     }
   },
   {
     name: 'cassandra-driver',
+    versions: ['>=4.4'],
+    patch (cassandra, tracer, config) {
+      this.wrap(cassandra.Client.prototype, '_execute', createWrapExecute(tracer, config))
+    },
+    unpatch (cassandra) {
+      this.unwrap(cassandra.Client.prototype, '_execute')
+    }
+  },
+  {
+    name: 'cassandra-driver',
+    versions: ['3 - 4.3'],
+    patch (cassandra, tracer, config) {
+      this.wrap(cassandra.Client.prototype, '_innerExecute', createWrapInnerExecute(tracer, config))
+    },
+    unpatch (cassandra) {
+      this.unwrap(cassandra.Client.prototype, '_innerExecute')
+    }
+  },
+  {
+    name: 'cassandra-driver',
     versions: ['>=3.3.0'],
+    file: 'lib/request-execution.js',
+    patch (RequestExecution, tracer, config) {
+      this.wrap(RequestExecution.prototype, '_sendOnConnection', createWrapSendOnConnection(tracer, config))
+    },
+    unpatch (RequestExecution) {
+      this.unwrap(RequestExecution.prototype, '_sendOnConnection')
+    }
+  },
+  {
+    name: 'cassandra-driver',
+    versions: ['3.3 - 4.3'],
     file: 'lib/request-execution.js',
     patch (RequestExecution, tracer, config) {
       this.wrap(RequestExecution.prototype, 'start', createWrapExecutionStart(tracer, config))
