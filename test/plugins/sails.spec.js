@@ -114,8 +114,9 @@ describe('Plugin', () => {
           expect(traces[0][0].meta).to.have.property('component', 'Sails.js')
           expect(traces[0][0].meta).to.have.property('span.kind', 'server')
           expect(traces[0][0].meta).to.have.property('error', 'true')
-          expect(traces[0][0].meta).to.have.property('error.msg', 'fake error')
-          expect(traces[0][0].meta).to.have.property('error.stack')
+          expect(traces[0][0].meta).to.have.property('sfx.error.kind', 'Error')
+          expect(traces[0][0].meta).to.have.property('sfx.error.message', 'fake error')
+          expect(traces[0][0].meta).to.have.property('sfx.error.stack')
         }).then(done)
           .catch(done)
 

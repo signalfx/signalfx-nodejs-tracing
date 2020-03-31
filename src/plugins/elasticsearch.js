@@ -66,9 +66,9 @@ function wrapCallback (tracer, span, done) {
 function finish (span, err) {
   if (err) {
     span.addTags({
-      'error.type': err.name,
-      'error.msg': err.message,
-      'error.stack': err.stack
+      'sfx.error.kind': err.name,
+      'sfx.error.message': err.message,
+      'sfx.error.stack': err.stack
     })
   }
 
@@ -94,7 +94,7 @@ module.exports = [
   {
     name: '@elastic/elasticsearch',
     file: 'lib/Transport.js',
-    versions: ['>=5.6.16'], // initial version of this module
+    versions: ['>=5.6.16', '>=7.6.0'], // initial version of this module
     patch (Transport, tracer, config) {
       this.wrap(Transport.prototype, 'request', createWrapRequest(tracer, config))
     },

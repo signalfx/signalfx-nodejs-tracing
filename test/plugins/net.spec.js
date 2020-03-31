@@ -179,9 +179,10 @@ describe('Plugin', () => {
             'tcp.remote.port': `${port}`,
             'peer.hostname': 'localhost',
             'peer.port': `${port}`,
-            'error.type': error.name,
-            'error.msg': error.message,
-            'error.stack': error.stack
+            'error': 'true',
+            'sfx.error.kind': error.name,
+            'sfx.error.message': error.message,
+            'sfx.error.stack': error.stack
           })
           expect(traces[0][0].parent_id.toString()).to.equal(utils.idToHex(parent.context()._spanId))
         })

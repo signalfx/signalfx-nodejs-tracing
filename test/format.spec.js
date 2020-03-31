@@ -114,9 +114,9 @@ describe('format', () => {
       spanContext._tags['error'] = error
       trace = format(span)
 
-      expect(trace.meta['error.msg']).to.equal(error.message)
-      expect(trace.meta['error.type']).to.equal(error.name)
-      expect(trace.meta['error.stack']).to.equal(error.stack)
+      expect(trace.meta['sfx.error.message']).to.equal(error.message)
+      expect(trace.meta['sfx.error.kind']).to.equal(error.name)
+      expect(trace.meta['sfx.error.stack']).to.equal(error.stack)
     })
 
     it('should extract the origin', () => {
@@ -188,9 +188,9 @@ describe('format', () => {
     })
 
     it('should set the error flag when there is an error-related tag', () => {
-      spanContext._tags['error.type'] = 'Error'
-      spanContext._tags['error.msg'] = 'boom'
-      spanContext._tags['error.stack'] = ''
+      spanContext._tags['sfx.error.kind'] = 'Error'
+      spanContext._tags['sfx.error.message'] = 'boom'
+      spanContext._tags['sfx.error.stack'] = ''
 
       trace = format(span)
 

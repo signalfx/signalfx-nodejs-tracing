@@ -80,9 +80,9 @@ function getResourceName (method, fields) {
 
 function addError (span, error) {
   span.addTags({
-    'error.type': error.name,
-    'error.msg': error.message,
-    'error.stack': error.stack
+    'sfx.error.kind': error.name,
+    'sfx.error.message': error.message,
+    'sfx.error.stack': error.stack
   })
 
   return error

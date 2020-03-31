@@ -137,9 +137,9 @@ describe('Plugin', () => {
           expect(spans[0]).to.have.property('name', 'adonis.middleware')
           expect(spans[0].meta).to.have.property('component', 'adonis')
           expect(spans[0].meta).to.have.property('error', 'true')
-          expect(spans[0].meta).to.have.property('error.type', 'Error')
-          expect(spans[0].meta).to.have.property('error.msg', 'custom error')
-          expect(spans[0].meta).to.have.property('error.stack')
+          expect(spans[0].meta).to.have.property('sfx.error.kind', 'Error')
+          expect(spans[0].meta).to.have.property('sfx.error.message', 'custom error')
+          expect(spans[0].meta).to.have.property('sfx.error.stack')
           expect(spans[0].parent_id.toString()).to.equal(spans[1].span_id.toString())
 
           expect(spans[1]).to.have.property('service', 'test')
@@ -150,7 +150,6 @@ describe('Plugin', () => {
           expect(spans[1].meta).to.have.property('http.url', `http://localhost:${port}/api/user/${randId}`)
           expect(spans[1].meta).to.have.property('http.method', 'GET')
           expect(spans[1].meta).to.have.property('http.status_code', '500')
-          expect(spans[1].meta).to.have.property('error', 'true')
         }).then(done)
           .catch(done)
 

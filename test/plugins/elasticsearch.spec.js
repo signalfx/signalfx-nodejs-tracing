@@ -2,6 +2,7 @@
 
 const agent = require('./agent')
 const plugin = require('../../src/plugins/elasticsearch')
+const semver = require('semver')
 
 wrapIt()
 
@@ -48,9 +49,13 @@ describe('Plugin', () => {
         })
 
         it('should sanitize ID and query parameter containing request', done => {
+          let method = 'POST'
+          if (semver.intersects(version, '>=7.6.0 <8.0.0')) {
+            method = 'PUT'
+          }
           agent
             .use(traces => {
-              expect(traces[0][0]).to.have.property('name', 'POST /docs/_doc/?')
+              expect(traces[0][0]).to.have.property('name', `${method} /docs/_doc/?`)
               expect(traces[0][0].meta).to.have.property('elasticsearch.url', `/docs/_doc/${randId}`)
             })
             .then(done)
@@ -151,9 +156,10 @@ describe('Plugin', () => {
 
             agent
               .use(traces => {
-                expect(traces[0][0].meta).to.have.property('error.type', error.name)
-                expect(traces[0][0].meta).to.have.property('error.msg', error.message)
-                expect(traces[0][0].meta).to.have.property('error.stack', error.stack)
+                expect(traces[0][0].meta).to.have.property('error', 'true')
+                expect(traces[0][0].meta).to.have.property('sfx.error.kind', error.name)
+                expect(traces[0][0].meta).to.have.property('sfx.error.message', error.message)
+                expect(traces[0][0].meta).to.have.property('sfx.error.stack', error.stack)
               })
               .then(done)
               .catch(done)
@@ -208,9 +214,10 @@ describe('Plugin', () => {
             let error
 
             agent.use(traces => {
-              expect(traces[0][0].meta).to.have.property('error.type', error.name)
-              expect(traces[0][0].meta).to.have.property('error.msg', error.message)
-              expect(traces[0][0].meta).to.have.property('error.stack', error.stack)
+              expect(traces[0][0].meta).to.have.property('error', 'true')
+              expect(traces[0][0].meta).to.have.property('sfx.error.kind', error.name)
+              expect(traces[0][0].meta).to.have.property('sfx.error.message', error.message)
+              expect(traces[0][0].meta).to.have.property('sfx.error.stack', error.stack)
             })
               .then(done)
               .catch(done)

@@ -103,9 +103,9 @@ class SignalFxTracer extends Tracer {
 function addError (span, error) {
   if (error && error instanceof Error) {
     span.addTags({
-      'error.type': error.name,
-      'error.msg': error.message,
-      'error.stack': error.stack
+      'sfx.error.kind': error.name,
+      'sfx.error.message': error.message,
+      'sfx.error.stack': error.stack
     })
   }
 }

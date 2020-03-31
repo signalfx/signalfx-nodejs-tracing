@@ -59,9 +59,9 @@ describe('plugins/util/tx', () => {
 
         wrapper(error)
 
-        expect(span.context()._tags).to.have.property('error.msg', error.message)
-        expect(span.context()._tags).to.have.property('error.type', error.name)
-        expect(span.context()._tags).to.have.property('error.stack', error.stack)
+        expect(span.context()._tags).to.have.property('sfx.error.message', error.message)
+        expect(span.context()._tags).to.have.property('sfx.error.kind', error.name)
+        expect(span.context()._tags).to.have.property('sfx.error.stack', error.stack)
       })
 
       it('should return a wrapper that runs in the current scope', done => {
@@ -101,9 +101,9 @@ describe('plugins/util/tx', () => {
 
         return promise.catch(err => {
           expect(err).to.equal(error)
-          expect(span.context()._tags).to.have.property('error.msg', error.message)
-          expect(span.context()._tags).to.have.property('error.type', error.name)
-          expect(span.context()._tags).to.have.property('error.stack', error.stack)
+          expect(span.context()._tags).to.have.property('sfx.error.message', error.message)
+          expect(span.context()._tags).to.have.property('sfx.error.kind', error.name)
+          expect(span.context()._tags).to.have.property('sfx.error.stack', error.stack)
         })
       })
     })

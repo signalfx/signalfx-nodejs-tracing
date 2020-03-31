@@ -125,9 +125,9 @@ describe('Tracer', () => {
       } catch (e) {
         expect(span.finish).to.have.been.called
         expect(span.context()._tags).to.include({
-          'error.type': e.name,
-          'error.msg': e.message,
-          'error.stack': e.stack
+          'sfx.error.kind': e.name,
+          'sfx.error.message': e.message,
+          'sfx.error.stack': e.stack
         })
       }
     })
@@ -165,9 +165,9 @@ describe('Tracer', () => {
 
         expect(span.finish).to.have.been.called
         expect(span.context()._tags).to.include({
-          'error.type': error.name,
-          'error.msg': error.message,
-          'error.stack': error.stack
+          'sfx.error.kind': error.name,
+          'sfx.error.message': error.message,
+          'sfx.error.stack': error.stack
         })
       })
     })
@@ -210,9 +210,9 @@ describe('Tracer', () => {
           .catch(e => {
             expect(span.finish).to.have.been.called
             expect(span.context()._tags).to.include({
-              'error.type': e.name,
-              'error.msg': e.message,
-              'error.stack': e.stack
+              'sfx.error.kind': e.name,
+              'sfx.error.message': e.message,
+              'sfx.error.stack': e.stack
             })
             done()
           })

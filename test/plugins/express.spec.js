@@ -777,9 +777,9 @@ describe('Plugin', () => {
                 const spans = sort(traces[0])
 
                 expect(spans[1].meta).to.have.property('error', 'true')
-                expect(spans[1].meta).to.have.property('error.type', error.name)
-                expect(spans[1].meta).to.have.property('error.msg', error.message)
-                expect(spans[1].meta).to.have.property('error.stack', error.stack)
+                expect(spans[1].meta).to.have.property('sfx.error.kind', error.name)
+                expect(spans[1].meta).to.have.property('sfx.error.message', error.message)
+                expect(spans[1].meta).to.have.property('sfx.error.stack', error.stack)
               })
               .then(done)
               .catch(done)

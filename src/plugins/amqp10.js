@@ -100,9 +100,9 @@ function addTags (tracer, config, span, link) {
 function finish (span, error) {
   if (error) {
     span.addTags({
-      'error.type': error.name,
-      'error.msg': error.message,
-      'error.stack': error.stack
+      'sfx.error.kind': error.name,
+      'sfx.error.message': error.message,
+      'sfx.error.stack': error.stack
     })
   }
 
