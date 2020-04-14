@@ -329,6 +329,50 @@ describe('Plugin', () => {
               })
           })
         })
+
+        it('should record errors', done => {
+          agent.use(traces => {
+            const spans = spanUtils.sortByStartTime(traces[0])
+            expect(spans).to.have.length(2)
+            const rootSpan = spans[0]
+
+            expect(spans[0]).to.have.property('service', 'test')
+            expect(spans[0]).to.have.property('name', 'testSpan')
+
+            expect(spans[1]).to.have.property('service', 'test')
+            expect(spans[1]).to.have.property('name', 'knex.client.runner.insert')
+            expect(spans[1].meta).to.have.property('component', 'knex')
+            expect(spans[1].meta).to.have.property('db.type', 'sqlite3')
+            expect(spans[1].meta).to.have.property('db.instance', ':memory:')
+            expect(spans[1].meta).to.have.property('db.statement')
+            expect(normalizeDBStatement(spans[1].meta['db.statement'])).to.be.equal(
+              'insert into `fakeTable` (`id`, `title`) values (?, ?)'
+            )
+            expect(spans[1].meta).to.have.property('error', 'true')
+            expect(spans[1].meta).to.have.property('sfx.error.kind', 'Error')
+            expect(normalizeDBStatement(spans[1].meta['sfx.error.message'])).to.be.equal(
+              'insert into `fakeTable` (`id`, `title`) values ' +
+              '(1, \'knex test\') - SQLITE_ERROR: no such table: fakeTable'
+            )
+            expect(spans[1].parent_id.toString()).to.equal(rootSpan.span_id.toString())
+            done()
+          })
+            .catch(done)
+
+          const span = tracer.startSpan('testSpan')
+
+          tracer.scope().activate(span, () => {
+            client.insert({ id: 1, title: 'knex test' }).into('fakeTable')
+              .catch((e) => {
+                expect(normalizeDBStatement(e.message)).to.be.equal(
+                  'insert into `fakeTable` (`id`, `title`) values (1, ' +
+                  '\'knex test\') - SQLITE_ERROR: no such table: fakeTable'
+                )
+                span.finish()
+              })
+          })
+        })
+
         it('should work with nested custom spans', done => {
           agent.use(traces => {
             const spans = spanUtils.sortByStartTime(traces[0])
