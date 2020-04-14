@@ -136,8 +136,15 @@ describe('Plugin', () => {
             expect(spans[3].meta).to.have.property('nest.route.path', routePath)
             expect(spans[3].meta).to.have.property('nest.controller.instance', 'UsersController')
             expect(spans[3].parent_id.toString()).to.equal(spans[1].span_id.toString())
+
+            expect(spans[4]).to.have.property('service', 'test')
+            expect(spans[4]).to.have.property('name', 'getUsers')
+            expect(spans[4].meta).to.not.have.property('error')
+            expect(spans[4].meta).to.have.property('component', 'nest')
+            expect(spans[4].meta).to.have.property('nest.callback', 'getUsers')
+            expect(spans[4].parent_id.toString()).to.equal(spans[3].span_id.toString())
             done()
-          }, 4) // run when 4 spans are received by the agent
+          }, 5) // run when 4 spans are received by the agent
 
           axios
             .get(`http://localhost:${port}/users`)
@@ -152,7 +159,6 @@ describe('Plugin', () => {
               routePath = '/'
             }
 
-            // TODO(owais): actually test for errors
             expect(spans[0]).to.have.property('service', 'test')
             expect(spans[0]).to.have.property('name', 'nest.factory.create')
             expect(spans[0].meta).to.have.property('component', 'nest')
@@ -184,8 +190,18 @@ describe('Plugin', () => {
             expect(spans[3].meta).to.have.property('nest.route.path', routePath)
             expect(spans[3].meta).to.have.property('nest.controller.instance', 'ErrorController')
             expect(spans[3].parent_id.toString()).to.equal(spans[1].span_id.toString())
+
+            expect(spans[4]).to.have.property('service', 'test')
+            expect(spans[4]).to.have.property('name', 'getErrors')
+            expect(spans[4].meta).to.have.property('component', 'nest')
+            expect(spans[4].meta).to.have.property('nest.callback', 'getErrors')
+            expect(spans[4].meta).to.have.property('error', 'true')
+            expect(spans[4].meta).to.have.property('sfx.error.kind', 'Error')
+            expect(spans[4].meta).to.have.property('sfx.error.message', 'custom error')
+            expect(spans[4].meta).to.have.property('sfx.error.stack')
+            expect(spans[4].parent_id.toString()).to.equal(spans[3].span_id.toString())
             done()
-          }, 4) // run when 4 spans are received by the agent
+          }, 5) // run when 4 spans are received by the agent
 
           axios
             .get(`http://localhost:${port}/errors`)

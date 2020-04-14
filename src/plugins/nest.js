@@ -29,6 +29,7 @@ function createWrapNestFactoryCreate (tracer, config) {
 function createWrapCreateHandler (tracer, config) {
   return function wrapCreateHandler (create) {
     return function createHandlerWithTrace (instance, callback) {
+      arguments[1] = createWrapHandler(tracer, callback)
       const handler = create.apply(this, arguments)
       return function (req, res, next) {
         let opName = 'nest.request'
@@ -65,6 +66,36 @@ function createWrapCreateHandler (tracer, config) {
       }
     }
   }
+}
+
+function createWrapHandler (tracer, handler) {
+  let name = 'nestHandler'
+  if (handler.name) {
+    name = handler.name
+  }
+  const wrappedHandler = function () {
+    const scope = tracer.scope()
+    const childOf = scope.active()
+    const tags = { 'component': 'nest' }
+    if (name) {
+      tags['nest.callback'] = name
+    }
+    const span = tracer.startSpan(name, { childOf, tags })
+    return scope.activate(span, () => {
+      try {
+        return handler.apply(this, arguments)
+      } catch (e) {
+        throw addError(span, e)
+      } finally {
+        span.finish()
+      }
+    })
+  }
+
+  if (name) {
+    Object.defineProperty(wrappedHandler, 'name', { value: name })
+  }
+  return wrappedHandler
 }
 
 function createWrapCreateGuardsFn (tracer, config) {
