@@ -1,6 +1,7 @@
 'use strict'
 
 const pick = require('lodash.pick')
+const semver = require('semver')
 const platform = require('../platform')
 const log = require('../log')
 const analyticsSampler = require('../analytics_sampler')
@@ -484,11 +485,15 @@ function pathToArray (path) {
   return flattened.reverse()
 }
 
+const versions = semver.intersects('<10', process.version)
+  ? ['>=0.10 <15']
+  : ['>=0.10']
+
 module.exports = [
   {
     name: 'graphql',
     file: 'execution/execute.js',
-    versions: ['>=0.10'],
+    versions: versions,
     patch (execute, tracer, config) {
       this.wrap(execute, 'execute', createWrapExecute(
         tracer,
@@ -503,7 +508,7 @@ module.exports = [
   {
     name: 'graphql',
     file: 'language/parser.js',
-    versions: ['>=0.10'],
+    versions: versions,
     patch (parser, tracer, config) {
       this.wrap(parser, 'parse', createWrapParse(tracer, validateConfig(config)))
     },
@@ -514,7 +519,7 @@ module.exports = [
   {
     name: 'graphql',
     file: 'validation/validate.js',
-    versions: ['>=0.10'],
+    versions: versions,
     patch (validate, tracer, config) {
       this.wrap(validate, 'validate', createWrapValidate(tracer, validateConfig(config)))
     },
