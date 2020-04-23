@@ -3,15 +3,20 @@
 [![npm (tag)](https://img.shields.io/npm/v/signalfx-tracing.svg)](https://www.npmjs.com/package/signalfx-tracing)
 [![CircleCI](https://circleci.com/gh/signalfx/signalfx-nodejs-tracing.svg?style=shield)](https://circleci.com/gh/signalfx/signalfx-nodejs-tracing)
 
-The SignalFx Tracing Library for JavaScript automatically instruments your Node.js application to capture and report distributed traces to SignalFx. The library configures an OpenTracing-compatible tracer to capture and export trace spans.
+The SignalFx Tracing Library for JavaScript automatically instruments your
+Node.js application to capture and report distributed traces to SignalFx. The
+library configures an OpenTracing-compatible tracer to capture and export
+trace spans.
 
-By default, the tracer has constant sampling (i.e., 100% chance of tracing) and reports every span. Where applicable, context propagation uses
+By default, the tracer has constant sampling (i.e., 100% chance of tracing) and
+reports every span. Where applicable, context propagation uses
 [B3 headers](https://github.com/openzipkin/b3-propagation).
 
-For more information about configuring and using the agent, see
-the [examples](https://github.com/signalfx/tracing-examples/tree/master/signalfx-tracing/signalfx-nodejs-tracing).
+For more information about configuring and using the agent, see the
+[examples](https://github.com/signalfx/tracing-examples/tree/master/signalfx-tracing/signalfx-nodejs-tracing).
 
-For advanced configuration information, see [SignalFx Tracing Library for JavaScript - API](./docs/API.md)
+For advanced configuration information, see
+[SignalFx Tracing Library for JavaScript - API](./docs/API.md).
 
 ## Requirements and supported software
 
@@ -54,6 +59,32 @@ These are the supported libraries. Instrumentation for each library is in beta.
 
 ## Configure the SignalFx Tracing Library for JavaScript
 
+Send traces from your Java application to a local or remote Smart Agent,
+OpenTelemetry Collector, or SignalFx ingest endpoint.
+
+### Configuration values
+
+Configure these options as parameters for the `init()` method or as environment variables.
+
+| Config        | Environment Variable         | Default   | Description |
+| ------------- | ---------------------------- | --------- | ----------- |
+| service       | SIGNALFX_SERVICE_NAME        | unnamed-nodejs-service | The service name to be used for this program. |
+| url           | SIGNALFX_ENDPOINT_URL        | http://localhost:9080/v1/trace | The url of the Agent or Gateway to which the tracer will submit traces. |
+| accessToken   | SIGNALFX_ACCESS_TOKEN        |           | The optional organization access token for trace submission requests |
+| enabled       | SIGNALFX_TRACING_ENABLED     | true      | Whether to enable the tracer. |
+| debug         | SIGNALFX_TRACING_DEBUG       | false     | Enable debug logging in the tracer. |
+| logInjection  | SIGNALFX_LOGS_INJECTION      | false     | Enable automatic injection of trace IDs in logs for supported logging libraries. |
+| tags          |                              | {}        | Set global tags that should be applied to all spans. |
+| sampleRate    |                              | 1         | Percentage of spans to sample as a float between 0 and 1. |
+| flushInterval |                              | 2000      | Interval in milliseconds at which the tracer will submit traces to the agent. |
+| experimental  |                              | {}        | Experimental features can be enabled all at once using boolean `true` or individually using key/value pairs. There are currently no experimental features available. |
+| plugins       |                              | true      | Whether or not to enable automatic instrumentation of external libraries using the built-in plugins. |
+
+### Steps
+
+To set up the library, install it and add the OpenTracing-compatible tracer
+to your application.
+
 1. Install the tracing library. You can install directly from npm or directly
 from the  GitHub repository.
       
@@ -69,21 +100,33 @@ from the  GitHub repository.
 2. Set the service name for your application:
       ```bash
         $ SIGNALFX_SERVICE_NAME=your_app_name node your_app.js
-3. Configure the OpenTracing-compatible tracer to report traces to a Smart Agent or OpenTelemetry Collector. You have to include this before the target library require statements.
+3. Configure the OpenTracing-compatible tracer to report traces to a Smart
+Agent or OpenTelemetry Collector. You have to include this before you import
+the target library.
+
       ```javascript
-      const tracer = require('signalfx-tracing').init({
-        service: '${IGNALFX_SERVICE_NAME}',
-      })
+      // init() invocation must occur before importing any traced library (e.g. Express)
+      const tracer = require('signalfx-tracing').init(
+        // Service name, also configurable via
+        // SIGNALFX_SERVICE_NAME environment variable
+        service: 'my-traced-service',
+        // Smart Agent or Gateway endpoint, also configurable via
+        // SIGNALFX_ENDPOINT_URL environment variable
+        url: 'http://my_agent_or_gateway:9080/v1/trace', // http://localhost:9080/v1/trace by default
+        // Optional organization access token, also configurable via
+        // SIGNALFX_ACCESS_TOKEN environment variable
+        accessToken: 'myOptionalOrganizationAccessToken'
+        // Optional environment tag
+        tags: 'environment:myEnvironment'
+      ) 
 
-      const express = require('express')
+      // auto-instrumented example Express application
+      const express = require('express') 
       const app = express()
-
-      app.get('/my_automatically_traced_endpoint', (req, res, next) => {
-        res.status(200).send()
-      })
-
-      app.listen(3000)
       ```
 
 ## About
-The SignalFx-Tracing Library for JavaScript is a fork of the DataDog APM JavaScript Tracer that has been modified to provide Zipkin v2 JSON formatting, B3 trace propagation functionality, and properly annotated trace data for handling by [SignalFx Microservices APM](https://docs.signalfx.com/en/latest/apm2/apm2-overview/apm2-overview.html).
+The SignalFx-Tracing Library for JavaScript is a fork of the DataDog APM
+JavaScript Tracer that has been modified to provide Zipkin v2 JSON formatting,
+B3 trace propagation functionality, and properly annotated trace data for
+handling by [SignalFx Microservices APM](https://docs.signalfx.com/en/latest/apm2/apm2-overview/apm2-overview.html).
