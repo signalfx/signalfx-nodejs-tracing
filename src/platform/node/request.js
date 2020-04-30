@@ -42,20 +42,16 @@ function request (options, callback) {
 }
 
 function byteLength (data) {
-  return data.length > 0 ? data.reduce((prev, next) => prev + next.length, 0) : 0
-  /*
   if (data.length === 0) {
     return 0
   }
 
   return data.reduce((prev, next) => {
-
     if (Buffer.isBuffer(next)) {
       return prev + next.length
     }
     return prev + Buffer.byteLength(next, 'utf8')
   }, 0)
-  */
 }
 
 module.exports = request
