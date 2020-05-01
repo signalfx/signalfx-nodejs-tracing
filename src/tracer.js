@@ -25,6 +25,22 @@ class SignalFxTracer extends Tracer {
 
     this._scopeManager = new ScopeManager()
     this._scope = new Scope()
+
+    this._extraTags = {}
+    if (process.env.SIGNALFX_SPAN_TAGS) {
+      for (const segment of process.env.SIGNALFX_SPAN_TAGS.split(',')) {
+        const kv = segment.split(':')
+        if (kv.length === 2 && kv[0].length !== 0 && kv[1].length !== 0) {
+          this._extraTags[kv[0]] = kv[1]
+        }
+      }
+    }
+  }
+
+  startSpan (name, options) {
+    const span = super.startSpan(name, options)
+    span.addTags(this._extraTags)
+    return span
   }
 
   trace (name, options, fn) {
