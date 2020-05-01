@@ -1,4 +1,5 @@
-# SignalFx Tracing Library for JavaScript
+# 
+
 
 [![npm (tag)](https://img.shields.io/npm/v/signalfx-tracing.svg)](https://www.npmjs.com/package/signalfx-tracing)
 [![CircleCI](https://circleci.com/gh/signalfx/signalfx-nodejs-tracing.svg?style=shield)](https://circleci.com/gh/signalfx/signalfx-nodejs-tracing)
@@ -85,7 +86,7 @@ Configure these options as parameters for the `init()` method or as environment 
 To set up the library, install it and add the OpenTracing-compatible tracer
 to your application.
 
-1. Install the tracing library. You can install directly from npm or directly
+1. Install the [latest release](https://github.com/signalfx/signalfx-nodejs-tracing/releases/latest) of the tracing library. You can install directly from npm or directly
 from the  GitHub repository.
       
       npm:
@@ -125,7 +126,10 @@ the target library.
       const app = express()
       ```
 
-## About
+## License and versioning
+
+The SignalFx Tracing Library for JavaScript is released under the terms of the BSD 3-Clause License. See the [the license file](./LICENSE) for more details.
+
 The SignalFx-Tracing Library for JavaScript is a fork of the DataDog APM
 JavaScript Tracer that has been modified to provide Zipkin v2 JSON formatting,
 B3 trace propagation functionality, and properly annotated trace data for
