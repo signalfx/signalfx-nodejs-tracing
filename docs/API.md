@@ -822,6 +822,7 @@ Options can be configured as a parameter to the `init()` method or as environmen
 | flushInterval |                              | 2000      | Interval in milliseconds at which the tracer will submit traces to the agent. |
 | experimental  |                              | {}        | Experimental features can be enabled all at once using boolean `true` or individually using key/value pairs. There are currently no experimental features available. |
 | plugins       |                              | true      | Whether or not to enable automatic instrumentation of external libraries using the built-in plugins. |
+|               | SIGNALFX_SPAN_TAGS           |           | Global tags for all spans (like config `tags`) in format `key1:val1,key2:val2`. |
 
 #### Custom Logging
 
