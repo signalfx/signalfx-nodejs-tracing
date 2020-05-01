@@ -1,5 +1,4 @@
-# 
-
+# SignalFx Tracing Library for JavaScript
 
 [![npm (tag)](https://img.shields.io/npm/v/signalfx-tracing.svg)](https://www.npmjs.com/package/signalfx-tracing)
 [![CircleCI](https://circleci.com/gh/signalfx/signalfx-nodejs-tracing.svg?style=shield)](https://circleci.com/gh/signalfx/signalfx-nodejs-tracing)
@@ -9,7 +8,7 @@ Node.js application to capture and report distributed traces to SignalFx. The
 library configures an OpenTracing-compatible tracer to capture and export
 trace spans.
 
-By default, the tracer has constant sampling (i.e., 100% chance of tracing) and
+The tracer has constant sampling (i.e., 100% chance of tracing) and
 reports every span. Where applicable, context propagation uses
 [B3 headers](https://github.com/openzipkin/b3-propagation).
 
@@ -76,9 +75,7 @@ Configure these options as parameters for the `init()` method or as environment 
 | debug         | SIGNALFX_TRACING_DEBUG       | false     | Enable debug logging in the tracer. |
 | logInjection  | SIGNALFX_LOGS_INJECTION      | false     | Enable automatic injection of trace IDs in logs for supported logging libraries. |
 | tags          |                              | {}        | Set global tags that should be applied to all spans. |
-| sampleRate    |                              | 1         | Percentage of spans to sample as a float between 0 and 1. |
 | flushInterval |                              | 2000      | Interval in milliseconds at which the tracer will submit traces to the agent. |
-| experimental  |                              | {}        | Experimental features can be enabled all at once using boolean `true` or individually using key/value pairs. There are currently no experimental features available. |
 | plugins       |                              | true      | Whether or not to enable automatic instrumentation of external libraries using the built-in plugins. |
 
 ### Steps
