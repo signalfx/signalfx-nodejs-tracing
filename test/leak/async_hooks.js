@@ -1,12 +1,6 @@
 'use strict'
 
-const tracer = require('../../')
-
-const ASYNC_HOOKS = require('../../src/scope/new/scope').ASYNC_HOOKS
-
-tracer.init({
-  scope: ASYNC_HOOKS
-})
+require('../../').init({ sampleRate: 0 })
 
 const ah = require('async_hooks')
 const test = require('tape')
