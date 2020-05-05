@@ -30,8 +30,8 @@ class SignalFxTracer extends Tracer {
     if (process.env.SIGNALFX_SPAN_TAGS) {
       for (const segment of process.env.SIGNALFX_SPAN_TAGS.split(',')) {
         const kv = segment.split(':')
-        if (kv.length === 2 && kv[0].length !== 0 && kv[1].length !== 0) {
-          this._extraTags[kv[0]] = kv[1]
+        if (kv.length === 2 && kv[0].trim().length !== 0 && kv[1].trim().length !== 0) {
+          this._extraTags[kv[0].trim()] = kv[1].trim()
         }
       }
     }
