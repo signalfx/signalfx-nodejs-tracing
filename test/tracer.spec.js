@@ -115,6 +115,7 @@ describe('Tracer', () => {
 
     it('should accept SIGNALFX_SPAN_TAGS', () => {
       process.env.SIGNALFX_SPAN_TAGS = 'key.1:val1,nocolon,:emptykey,emptyval:,too:many:pieces, key.2 : val2 '
+      config = new Config('test', { service: 'service' })
       tracer = new Tracer(config)
       delete process.env.SIGNALFX_SPAN_TAGS
       const span = tracer.startSpan('name', {})

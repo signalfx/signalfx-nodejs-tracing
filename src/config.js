@@ -63,6 +63,14 @@ class Config {
       'signalfx.tracing.library': 'nodejs-tracing',
       'signalfx.tracing.version': version
     }, options.tags)
+    if (process.env.SIGNALFX_SPAN_TAGS) {
+      for (const segment of process.env.SIGNALFX_SPAN_TAGS.split(',')) {
+        const kv = segment.split(':')
+        if (kv.length === 2 && kv[0].trim().length !== 0 && kv[1].trim().length !== 0) {
+          this.tags[kv[0].trim()] = kv[1].trim()
+        }
+      }
+    }
     this.dogstatsd = {
       port: String(coalesce(dogstatsd.port, platform.env('DD_DOGSTATSD_PORT'), 8125))
     }
