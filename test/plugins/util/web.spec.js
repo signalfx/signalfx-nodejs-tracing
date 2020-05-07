@@ -160,9 +160,10 @@ describe('plugins/util/web', () => {
         res.statusCode = '200'
 
         web.instrument(tracer, config, req, res, 'test.request', span => {
+          const tags = span.context()._tags
           res.end()
 
-          expect(span.context()._tags).to.include({
+          expect(tags).to.include({
             [SPAN_TYPE]: HTTP,
             [HTTP_URL]: 'http://localhost/user/123',
             [HTTP_METHOD]: 'GET',
@@ -175,9 +176,10 @@ describe('plugins/util/web', () => {
         config.headers = ['host', 'server']
 
         web.instrument(tracer, config, req, res, 'test.request', span => {
+          const tags = span.context()._tags
           res.end()
 
-          expect(span.context()._tags).to.include({
+          expect(tags).to.include({
             [`${HTTP_REQUEST_HEADERS}.host`]: 'localhost',
             [`${HTTP_RESPONSE_HEADERS}.server`]: 'test'
           })
@@ -226,9 +228,10 @@ describe('plugins/util/web', () => {
 
         web.instrument(tracer, config, req, res, 'test.request', () => {
           web.instrument(tracer, override, req, res, 'test.request', span => {
+            const tags = span.context()._tags
             res.end()
 
-            expect(span.context()._tags).to.include({
+            expect(tags).to.include({
               [`${HTTP_REQUEST_HEADERS}.date`]: 'now'
             })
           })
@@ -241,9 +244,10 @@ describe('plugins/util/web', () => {
         res.statusCode = '200'
 
         web.instrument(tracer, config, req, res, 'test.request', span => {
+          const tags = span.context()._tags
           res.end()
 
-          expect(span.context()._tags).to.include({
+          expect(tags).to.include({
             [HTTP_URL]: 'http://localhost/user/123'
           })
         })
@@ -310,9 +314,10 @@ describe('plugins/util/web', () => {
         req.url = '/user/123'
         res.statusCode = '200'
 
+        const tags = span.context()._tags
         res.end()
 
-        expect(span.context()._tags).to.include({
+        expect(tags).to.include({
           [RESOURCE_NAME]: 'handle.request',
           [HTTP_STATUS_CODE]: '200'
         })
@@ -321,9 +326,10 @@ describe('plugins/util/web', () => {
       it('should set the error tag if the request is an error', () => {
         res.statusCode = 500
 
+        const tags = span.context()._tags
         res.end()
 
-        expect(span.context()._tags).to.include({
+        expect(tags).to.include({
           [ERROR]: true
         })
       })
@@ -331,9 +337,10 @@ describe('plugins/util/web', () => {
       it('should set the error tag if the configured validator returns false', () => {
         config.validateStatus = () => false
 
+        const tags = span.context()._tags
         res.end()
 
-        expect(span.context()._tags).to.include({
+        expect(tags).to.include({
           [ERROR]: true
         })
       })
@@ -341,9 +348,10 @@ describe('plugins/util/web', () => {
       it('should use the user provided route', () => {
         span.setTag('http.route', '/custom/route')
 
+        const tags = span.context()._tags
         res.end()
 
-        expect(span.context()._tags).to.include({
+        expect(tags).to.include({
           [HTTP_ROUTE]: '/custom/route'
         })
       })
@@ -374,9 +382,10 @@ describe('plugins/util/web', () => {
         }
 
         web.instrument(tracer, config, req, res, 'test.request', span => {
+          const tags = span.context()._tags
           res.end()
 
-          expect(span.context()._tags).to.have.property('resource.name', '/custom/route')
+          expect(tags).to.have.property('resource.name', '/custom/route')
         })
       })
     })
@@ -395,10 +404,12 @@ describe('plugins/util/web', () => {
 
       web.enterRoute(req, '/foo')
       web.enterRoute(req, '/bar')
+
+      const tags = span.context()._tags
       res.end()
 
-      expect(span.context()._tags).to.have.property(RESOURCE_NAME, '/foo/bar')
-      expect(span.context()._tags).to.have.property(HTTP_ROUTE, '/foo/bar')
+      expect(tags).to.have.property(RESOURCE_NAME, '/foo/bar')
+      expect(tags).to.have.property(HTTP_ROUTE, '/foo/bar')
     })
   })
 
@@ -416,9 +427,11 @@ describe('plugins/util/web', () => {
       web.enterRoute(req, '/foo')
       web.enterRoute(req, '/bar')
       web.exitRoute(req)
+
+      const tags = span.context()._tags
       res.end()
 
-      expect(span.context()._tags).to.have.property(RESOURCE_NAME, '/foo')
+      expect(tags).to.have.property(RESOURCE_NAME, '/foo')
     })
   })
 
