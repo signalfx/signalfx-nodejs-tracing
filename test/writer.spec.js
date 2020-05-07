@@ -18,8 +18,6 @@ describe('Writer', () => {
 
   beforeEach(() => {
     trace = {
-      started: [span],
-      finished: [span]
     }
 
     span = {
@@ -28,6 +26,9 @@ describe('Writer', () => {
         _sampling: {}
       })
     }
+
+    trace.started = [span]
+    trace.finished = [span]
 
     response = JSON.stringify({
       rate_by_service: {
@@ -118,6 +119,18 @@ describe('Writer', () => {
       writer.append(span)
 
       expect(prioritySampler.sample).to.have.been.calledWith(span.context())
+    })
+
+    it('should erase the trace once finished', () => {
+      trace.started = [span]
+      trace.finished = [span]
+
+      writer.append(span)
+
+      expect(trace).to.have.deep.property('started', [])
+      expect(trace).to.have.deep.property('finished', [])
+      expect(span.context()).to.have.deep.property('_tags', {})
+      expect(span.context()).to.have.deep.property('_metrics', {})
     })
   })
 
