@@ -1,7 +1,7 @@
 'use strict'
 
 const asyncHooks = require('../async_hooks')
-const executionAsyncId = asyncHooks.executionAsyncId || asyncHooks.currentId
+const eid = asyncHooks.executionAsyncId || asyncHooks.currentId
 const Base = require('./base')
 const platform = require('../../platform')
 const semver = require('semver')
@@ -32,11 +32,11 @@ class Scope extends Base {
   }
 
   _active () {
-    return this._spans[executionAsyncId()] || null
+    return this._spans[eid()] || null
   }
 
   _activate (span, callback) {
-    const asyncId = executionAsyncId()
+    const asyncId = eid()
     const oldSpan = this._spans[asyncId]
 
     this._spans[asyncId] = span
