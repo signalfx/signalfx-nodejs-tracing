@@ -4,9 +4,8 @@
 [![CircleCI](https://circleci.com/gh/signalfx/signalfx-nodejs-tracing.svg?style=shield)](https://circleci.com/gh/signalfx/signalfx-nodejs-tracing)
 
 The SignalFx Tracing Library for JavaScript automatically instruments your
-Node.js application to capture and report distributed traces to SignalFx. The
-library configures an OpenTracing-compatible tracer to capture and export
-trace spans.
+Node.js application to capture and report distributed traces to SignalFx
+with an OpenTracing-compatible tracer.
 
 The tracer has constant sampling (i.e., 100% chance of tracing) and
 reports every span. Where applicable, context propagation uses
