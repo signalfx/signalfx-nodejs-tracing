@@ -119,11 +119,11 @@ describe('Tracer', () => {
       tracer = new Tracer(config)
       delete process.env.SIGNALFX_SPAN_TAGS
       const span = tracer.startSpan('name', {})
-      span.finish()
       expect(span.context()._tags).to.include({
         'key.1': 'val1',
         'key.2': 'val2'
       })
+      span.finish()
     })
 
     it('should handle exceptions', () => {
