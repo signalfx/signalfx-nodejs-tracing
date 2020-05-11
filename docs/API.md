@@ -817,7 +817,7 @@ Options can be configured as a parameter to the `init()` method or as environmen
 | enabled       | SIGNALFX_TRACING_ENABLED     | true      | Whether to enable the tracer. |
 | debug         | SIGNALFX_TRACING_DEBUG       | false     | Enable debug logging in the tracer. |
 | logInjection  | SIGNALFX_LOGS_INJECTION      | false     | Enable automatic injection of trace IDs in logs for supported logging libraries. |
-| tags          |                              | {}        | Set global tags that should be applied to all spans. |
+| tags          | SIGNALFX_SPAN_TAGS           | {}        | Set global tags that should be applied to all spans. Format for the environment variable is `key1:val1,key2:val2`.|
 | sampleRate    |                              | 1         | Percentage of spans to sample as a float between 0 and 1. |
 | flushInterval |                              | 2000      | Interval in milliseconds at which the tracer will submit traces to the agent. |
 | experimental  |                              | {}        | Experimental features can be enabled all at once using boolean `true` or individually using key/value pairs. There are currently no experimental features available. |
