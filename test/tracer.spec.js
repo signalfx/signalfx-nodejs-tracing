@@ -113,18 +113,33 @@ describe('Tracer', () => {
       expect(span.finish).to.have.been.called
     })
 
+    it('should accept SIGNALFX_SPAN_TAGS', () => {
+      process.env.SIGNALFX_SPAN_TAGS = 'key.1:val1,nocolon,:emptykey,emptyval:,too:many:pieces, key.2 : val2 '
+      config = new Config('test', { service: 'service' })
+      tracer = new Tracer(config)
+      delete process.env.SIGNALFX_SPAN_TAGS
+      const span = tracer.startSpan('name', {})
+      expect(span.context()._tags).to.include({
+        'key.1': 'val1',
+        'key.2': 'val2'
+      })
+      span.finish()
+    })
+
     it('should handle exceptions', () => {
       let span
+      let tags
 
       try {
         tracer.trace('name', {}, _span => {
           span = _span
+          tags = span.context()._tags
           sinon.spy(span, 'finish')
           throw new Error('boom')
         })
       } catch (e) {
         expect(span.finish).to.have.been.called
-        expect(span.context()._tags).to.include({
+        expect(tags).to.include({
           'sfx.error.kind': e.name,
           'sfx.error.message': e.message,
           'sfx.error.stack': e.stack
@@ -154,9 +169,11 @@ describe('Tracer', () => {
         const error = new Error('boom')
         let span
         let done
+        let tags
 
         tracer.trace('name', {}, (_span, _done) => {
           span = _span
+          tags = span.context()._tags
           sinon.spy(span, 'finish')
           done = _done
         })
@@ -164,7 +181,7 @@ describe('Tracer', () => {
         done(error)
 
         expect(span.finish).to.have.been.called
-        expect(span.context()._tags).to.include({
+        expect(tags).to.include({
           'sfx.error.kind': error.name,
           'sfx.error.message': error.message,
           'sfx.error.stack': error.stack
@@ -200,16 +217,18 @@ describe('Tracer', () => {
 
       it('should handle rejected promises', done => {
         let span
+        let tags
 
         tracer
           .trace('name', {}, _span => {
             span = _span
+            tags = span.context()._tags
             sinon.spy(span, 'finish')
             return Promise.reject(new Error('boom'))
           })
           .catch(e => {
             expect(span.finish).to.have.been.called
-            expect(span.context()._tags).to.include({
+            expect(tags).to.include({
               'sfx.error.kind': e.name,
               'sfx.error.message': e.message,
               'sfx.error.stack': e.stack

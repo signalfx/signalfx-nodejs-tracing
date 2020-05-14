@@ -1,9 +1,13 @@
 'use strict'
 
 const asyncHooks = require('../async_hooks')
-const executionAsyncId = asyncHooks.executionAsyncId || asyncHooks.currentId
+const eid = asyncHooks.executionAsyncId || asyncHooks.currentId
 const Base = require('./base')
 const platform = require('../../platform')
+const semver = require('semver')
+
+// https://github.com/nodejs/node/issues/19859
+const hasKeepAliveBug = !semver.satisfies(process.version, '^8.13 || >=10.14.2')
 
 let singleton = null
 
@@ -17,6 +21,7 @@ class Scope extends Base {
 
     this._spans = Object.create(null)
     this._types = Object.create(null)
+    this._weaks = new WeakMap()
     this._hook = asyncHooks.createHook({
       init: this._init.bind(this),
       destroy: this._destroy.bind(this),
@@ -27,11 +32,11 @@ class Scope extends Base {
   }
 
   _active () {
-    return this._spans[executionAsyncId()] || null
+    return this._spans[eid()] || null
   }
 
   _activate (span, callback) {
-    const asyncId = executionAsyncId()
+    const asyncId = eid()
     const oldSpan = this._spans[asyncId]
 
     this._spans[asyncId] = span
@@ -57,9 +62,14 @@ class Scope extends Base {
     }
   }
 
-  _init (asyncId, type) {
+  _init (asyncId, type, triggerAsyncId, resource) {
     this._spans[asyncId] = this._active()
     this._types[asyncId] = type
+
+    if (hasKeepAliveBug && (type === 'TCPWRAP' || type === 'HTTPPARSER')) {
+      this._destroy(this._weaks.get(resource))
+      this._weaks.set(resource, asyncId)
+    }
 
     platform.metrics().increment('async.resources')
     platform.metrics().increment('async.resources.by.type', `resource_type:${type}`)

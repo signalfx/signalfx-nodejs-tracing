@@ -30,6 +30,7 @@ class Writer {
       this._prioritySampler.sample(spanContext)
 
       const formattedTrace = trace.finished.map(this.format)
+      this._erase(trace)
 
       if (spanContext._sampling.drop === true) {
         log.debug(() => `Dropping trace due to user configured filtering: ${JSON.stringify(formattedTrace)}`)
@@ -95,6 +96,17 @@ class Writer {
         this._prioritySampler.update(JSON.parse(res).rate_by_service)
       })
       .catch(e => log.error(e))
+  }
+
+  _erase (trace) {
+    trace.finished.forEach(span => {
+      span.context()._tags = {}
+      span.context()._logs = []
+      span.context()._metrics = {}
+    })
+
+    trace.started = []
+    trace.finished = []
   }
 }
 

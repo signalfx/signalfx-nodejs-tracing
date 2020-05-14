@@ -261,6 +261,31 @@ describe('Platform', () => {
         })
       })
 
+      it('should send an http request with correct content-length for unicode chars', () => {
+        nock('http://test:333', {
+          reqheaders: {
+            'content-type': 'application/octet-stream',
+            'content-length': '2'
+          }
+        })
+          .put('/unicode')
+          .reply(200, 'OK')
+
+        return request({
+          protocol: 'http:',
+          hostname: 'test',
+          port: 333,
+          path: '/unicode',
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/octet-stream'
+          },
+          data: ['æ']
+        }).then(res => {
+          expect(res).to.equal('OK')
+        })
+      })
+
       it('should handle an http error', done => {
         nock('http://localhost:80')
           .put('/path')
