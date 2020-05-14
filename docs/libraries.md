@@ -479,7 +479,7 @@ instrumentation compatibility during chaining.
 
 #### Sails
 
-This instrumentation only adds traces for Sails actions registered by your app.
+This instrumentation adds only spans for Sails actions registered by your app.
 The router and request handling is done by Express instrumentation.
 
 #### Socket.IO
