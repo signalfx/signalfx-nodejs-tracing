@@ -30,7 +30,7 @@ These are the supported libraries. Instrumentation for each library is in beta.
 | [amqplib](http://www.squaremobius.net/amqp.node/) | 0.5+ | `use('amqplib')` | |
 | [Bluebird](https://github.com/petkaantonov/bluebird) | 2+ | `use('bluebird')` | |
 | [Bunyan](https://github.com/trentm/node-bunyan) | 1+ | `use('bunyan')`| |
-| [cassandra-driver](https://github.com/datastax/nodejs-driver) | | `use('cassandra-driver')` | |
+| [cassandra-driver](https://github.com/datastax/nodejs-driver) | 3+ | `use('cassandra-driver')` | |
 | [DNS](https://nodejs.org/api/dns.html) | Supported Node | `use('dns')` | |
 | [elasticsearch](https://www.elastic.co/guide/en/elasticsearch/client/javascript-api/current/index.html) | 10+ | `use('elasticsearch')` | |
 | [Express](http://expressjs.com/) | 4+ | `use('express')` | |
@@ -73,7 +73,7 @@ Configure these options as parameters for the `init()` method or as environment 
 | enabled       | SIGNALFX_TRACING_ENABLED     | true      | Whether to enable the tracer. |
 | debug         | SIGNALFX_TRACING_DEBUG       | false     | Enable debug logging in the tracer. |
 | logInjection  | SIGNALFX_LOGS_INJECTION      | false     | Enable automatic injection of trace IDs in logs for supported logging libraries. |
-| tags          |                              | {}        | Set global tags that should be applied to all spans. |
+| tags          | SIGNALFX_SPAN_TAGS           | {}        | Set global tags that should be applied to all spans. Format for the environment variable is `key1:val1,key2:val2`. |
 | flushInterval |                              | 2000      | Interval in milliseconds at which the tracer will submit traces to the agent. |
 | plugins       |                              | true      | Whether or not to enable automatic instrumentation of external libraries using the built-in plugins. |
 
@@ -94,7 +94,7 @@ from the  GitHub repository.
         $ git clone https://github.com/signalfx/signalfx-nodejs-tracing.git
         $ npm install ./signalfx-nodejs-tracing
       ```
-2. Set the service name for your application:
+2. Set the service name for your application if not set via tracer configuration code:
       ```bash
         $ SIGNALFX_SERVICE_NAME=your_app_name node your_app.js
 3. Configure the OpenTracing-compatible tracer to report traces to a Smart
@@ -114,7 +114,7 @@ the target library.
         // SIGNALFX_ACCESS_TOKEN environment variable
         accessToken: 'myOptionalOrganizationAccessToken'
         // Optional environment tag
-        tags: 'environment:myEnvironment'
+        tags: {environment: 'myEnvironment'}
       ) 
 
       // auto-instrumented example Express application

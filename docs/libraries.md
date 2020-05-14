@@ -15,7 +15,7 @@ tracer.use('express', { headers: ['x-my-tagged-header'] })
 * [amqplib 0.5+](#amqplib) - `use('amqplib')`
 * [Bluebird 2+](#Bluebird) - `use('bluebird')`
 * [Bunyan 1+](#Bunyan) - `use('bunyan')`
-* [cassandra-driver](#cassandra-driver) - `use('cassandra-driver')`
+* [cassandra-driver 3+](#cassandra-driver) - `use('cassandra-driver')`
 * [DNS](#DNS) - `use('dns')`
 * [elasticsearch 10+](#elasticsearch) - `use('elasticsearch')`
 * [Express 4+](#Express) - `use('express')`

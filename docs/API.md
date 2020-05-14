@@ -14,7 +14,7 @@ see [SignalFx Tracing Library for JavaScript](/README.md).
 
 In addition to instrumentation the SignalFx Tracing Library for JavaScript
 provides, you can add custom instrumentation to your application with the
-[OpenTracing API](#opentracing-api) and [Scope](#scope) manager.
+[OpenTracing API](#Use-the-OpenTracing-API-with-the-SignalFx-Tracing-Library-for-JavaScript) and [Scope](#Use-the-Scope-manager-with-the-SignalFx-Tracing-Library-for-JavaScript) manager.
 
 Because a number of helpful methods aren't provided by the current OpenTracing
 JavaScript API, the delegation pattern of the OpenTracing global tracer
@@ -59,24 +59,10 @@ To provide span context propagation within a Node.js application, the library
 includes a scope manager. A scope manager is a utility for registering and
 providing a span that can cross both synchronous and asynchronous contexts.
 The span it provides is registered as active, and you can use it for noting an
-accessor's execution state and for parenting child spans. This means you can
-reference an existing span in a particular section of traced functionality
-without already explicitly passing the span as an argument.
+accessor's execution state and for parenting child spans. 
 
-The scope manager is available via `tracer.scope()`. Use its return value in a
-global context. It has three methods for active span management:
-
-* scope.active()
-* scope.activate(span, fn)
-* scope.bind(target, [span])
-
-Because the scope manager isn't defined in the current OpenTracing JavaScript
-API, the delegation pattern of the OpenTracing global tracer
-(`require('opentracing').globalTracer()`) can't provide access to the
-scope manager via the `scope()` method. 
-
-As a result, a reference to the tracer instance returned by `init()` should be
-made accessible where manual scope management is necessary:
+This means you can reference an existing span in a particular section of
+traced functionality without already explicitly passing the span as an argument:
 
 ```javascript
 // explicit span reference as parameter
@@ -106,6 +92,21 @@ function myApplicationLogic (argOne) {
   })
 }
 ```
+
+The scope manager is available via `tracer.scope()`. Use its return value in a
+global context. It has three methods for active span management:
+
+* scope.active()
+* scope.activate(span, fn)
+* scope.bind(target, [span])
+
+Because the scope manager isn't defined in the current OpenTracing JavaScript
+API, the delegation pattern of the OpenTracing global tracer
+(`require('opentracing').globalTracer()`) can't provide access to the
+scope manager via the `scope()` method. 
+
+As a result, a reference to the tracer instance returned by `init()` should
+be made accessible where manual scope management is necessary.
 
 You can export the tracer for other modules afterward.
 
@@ -282,10 +283,11 @@ outerEmitter.emit('request')
 
 ## Manually report traces
 
-If reporting all enqueued traces is necessary, you can manually flush the
-internal tracer writer is possible. The tracer's `flush()` method will return
-the writer's request promise that represents the trace submission to the
-SignalFx Smart Agent or OpenTelemetry Collector.
+If reporting all enqueued traces is necessary, like before suspending activity
+in a serverless environment, you can manually flush the internal tracer writer
+is possible. The tracer's `flush()` method will return the writer's request
+promise that represents the trace submission to the SignalFx Smart Agent or
+OpenTelemetry Collector.
 
 ```javascript
 const tracer = require('signalfx-tracing').init();
