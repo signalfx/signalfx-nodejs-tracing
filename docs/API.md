@@ -1,9 +1,8 @@
 # SignalFx Tracing Library for JavaScript - API
 
 The SignalFx Tracing Library for JavaScript exports an OpenTracing
-[tracer](https://doc.esdoc.org/github.com/opentracing/opentracing-javascript/class/src/tracer.js~Tracer.html).
-The library implements a [scope manager](https://github.com/opentracing/specification/blob/10497dfe0ffef806e97ccf3173ebbeba83f401be/rfc/scope_manager.md), which isn't currently in the OpenTracing JavaScript reference API, but the
-development is ongoing.
+[tracer](https://doc.esdoc.org/github.com/opentracing/opentracing-javascript/class/src/tracer.js~Tracer.html)
+and implements a [scope manager](https://github.com/opentracing/specification/blob/10497dfe0ffef806e97ccf3173ebbeba83f401be/rfc/scope_manager.md).
 
 The library uses [`require-in-the-middle`](https://www.npmjs.com/package/require-in-the-middle)
 and [`shimmer`](https://www.npmjs.com/package/shimmer) to instrument your Node.js application.

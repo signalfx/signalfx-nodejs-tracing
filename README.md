@@ -4,9 +4,8 @@
 [![CircleCI](https://circleci.com/gh/signalfx/signalfx-nodejs-tracing.svg?style=shield)](https://circleci.com/gh/signalfx/signalfx-nodejs-tracing)
 
 The SignalFx Tracing Library for JavaScript automatically instruments your
-Node.js application to capture and report distributed traces to SignalFx. The
-library configures an OpenTracing-compatible tracer to capture and export
-trace spans.
+Node.js application to capture and report distributed traces to SignalFx
+with an OpenTracing-compatible tracer.
 
 The tracer has constant sampling (i.e., 100% chance of tracing) and
 reports every span. Where applicable, context propagation uses
@@ -32,12 +31,12 @@ These are the supported libraries. Instrumentation for each library is in beta.
 | [Bluebird](https://github.com/petkaantonov/bluebird) | 2+ | `use('bluebird')` | |
 | [Bunyan](https://github.com/trentm/node-bunyan) | 1+ | `use('bunyan')`| |
 | [cassandra-driver](https://github.com/datastax/nodejs-driver) | | `use('cassandra-driver')` | |
-| [DNS](https://nodejs.org/api/dns.html) | | `use('dns')` | |
+| [DNS](https://nodejs.org/api/dns.html) | Supported Node | `use('dns')` | |
 | [elasticsearch](https://www.elastic.co/guide/en/elasticsearch/client/javascript-api/current/index.html) | 10+ | `use('elasticsearch')` | |
 | [Express](http://expressjs.com/) | 4+ | `use('express')` | |
 | [GraphQL](https://github.com/graphql/graphql-js) | 0.10+ | `use('graphql')` | |
 | [hapi](https://hapijs.com/) | 2+ | `use('hapi')` | |
-| [http/https](https://nodejs.org/api/http.html) | | `use('http')`, `use('https')` | |
+| [http/https](https://nodejs.org/api/http.html) | Supported Node | `use('http')`, `use('https')` | |
 | [ioredis](https://github.com/luin/ioredis)| 2+ | `use('ioredis')` | |
 | [Koa](https://koajs.com/) | 2+ | `use('koa')` | |
 | [Knex](https://knexjs.org/) | 0.10+ | `use('bluebird'); use('knex')` | Depends on bluebird instrumentation |
@@ -45,8 +44,8 @@ These are the supported libraries. Instrumentation for each library is in beta.
 | [MongoDB-Core](https://github.com/mongodb-js/mongodb-core) | 2+ | `use('mongodb-core')` | |
 | [mysql](https://github.com/mysqljs/mysql) | 2+ | `use('mysql')` | |
 | [MySQL2](https://github.com/sidorares/node-mysql2) | 1+ | `use('mysql2')` | |
-| [Nest](https://nestjs.com/) | | `use('nest')` | |
-| [Net](https://nodejs.org/api/net.html) | | `use('net')` | |
+| [Nest](https://nestjs.com/) | 4.x - 6.x | `use('nest')` | |
+| [Net](https://nodejs.org/api/net.html) | Supported Node | `use('net')` | |
 | [node-postgres](https://github.com/brianc/node-postgres) | 4+ | `use('pg')` | |
 | [Pino](http://getpino.io/#/) | 2+ | `use('pino')` | |
 | [Q](https://github.com/kriskowal/q) | 1+ | `use('q')` | |
