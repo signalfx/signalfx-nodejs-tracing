@@ -24,6 +24,7 @@ tracer.use('express', { headers: ['x-my-tagged-header'] })
 * [http/https](#httphttps) - `use('http')`, `use('https')`
 * [ioredis 2+](#ioredis) - `use('ioredis')`
 * [Koa 2+](#Koa) - `use('koa')`
+* [Knex 0.10+](#Knex) - `use('bluebird')`, `use('knex')` (depends on bluebird instrumentation)
 * [Memcached 2.2+](#Memcached) - `use('memcached')`
 * [MongoDB-Core 2+](#MongoDB-Core) - `use('mongodb-core')`
 * [mysql 2+](#mysql) - `use('mysql')`
