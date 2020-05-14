@@ -29,7 +29,7 @@ tracer.use('express', { headers: ['x-my-tagged-header'] })
 * [MongoDB-Core 2+](#MongoDB-Core) - `use('mongodb-core')`
 * [mysql 2+](#mysql) - `use('mysql')`
 * [MySQL2 1+](#MySQL2) - `use('mysql2')`
-* [Nest 4.6 - 6.x](https://nestjs.com/) - `use('nest')`
+* [Nest 4.6 - 6.x](#nest) - `use('nest')`
 * [Net](#Net) - `use('net')`
 * [node-postgres 4+](#node-postgres) - `use('pg')`
 * [Pino 2+](#pino) - `use('pino')`
