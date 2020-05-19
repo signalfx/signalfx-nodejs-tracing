@@ -284,9 +284,9 @@ outerEmitter.emit('request')
 ## Manually report traces
 
 If reporting all enqueued traces is necessary, like before suspending activity
-in a serverless environment, you can manually flush the internal tracer writer
-is possible. The tracer's `flush()` method will return the writer's request
-promise that represents the trace submission to the SignalFx Smart Agent or
+in a serverless environment, you can manually flush the internal tracer writer.
+The tracer's `flush()` method will return the writer's request promise that
+represents the trace submission to the SignalFx Smart Agent or
 OpenTelemetry Collector.
 
 ```javascript
