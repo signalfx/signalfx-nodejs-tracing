@@ -1308,7 +1308,7 @@ describe('Plugin', () => {
               mergeSchemas = graphqlTools.mergeSchemas
               makeExecutableSchema = graphqlTools.makeExecutableSchema
               done()
-            })
+            }).catch(done)
         })
 
         after(() => {

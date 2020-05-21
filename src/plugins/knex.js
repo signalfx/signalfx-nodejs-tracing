@@ -14,17 +14,23 @@ function createWrapBuilder (tracer, config) {
   }
 }
 
-function createWrapRunner (wrapper, tracer, config, usePromise) {
+function createWrapRunner (wrapper, tracer, config) {
   return function wrapRunner (original) {
     return function runnerWithTrace () {
       const runner = original.apply(this, arguments)
-      wrapper.wrap(runner, 'query', createWrapRunnerQuery(tracer, config, usePromise))
+      let formatter
+      if (runner.client && runner.client._formatQuery) {
+        formatter = runner.client._formatQuery.bind(runner.client)
+      } else if (runner.client.SqlString) {
+        formatter = runner.client.SqlString.format.bind(runner.client.SqlString)
+      }
+      wrapper.wrap(runner, 'query', createWrapRunnerQuery(tracer, config, formatter))
       return runner
     }
   }
 }
 
-function createWrapRunnerQuery (tracer, config, usePromise) {
+function createWrapRunnerQuery (tracer, config, formatter) {
   return function wrapQuery (original) {
     return function queryWithTrace (q) {
       const scope = tracer.scope()
@@ -49,41 +55,37 @@ function createWrapRunnerQuery (tracer, config, usePromise) {
       setDBTags(this, span)
 
       return scope.activate(span, () => {
-        if (usePromise) {
-          return new Promise((resolve, reject) => {
-            // we can't use then.catch.finally because finally is not supported
-            // on node 8 which knex still supports.
-            const that = this
-            original.apply(this, arguments)
-              .then(function () {
-                resolve.apply(that, arguments)
-                span.finish()
-              })
-              .catch(function (e) {
-                addError(span, e)
-                reject.apply(that, arguments)
-                span.finish()
-              })
-          })
-        } else {
-          try {
-            return original.apply(this, arguments)
-          } catch (e) {
-            throw addError(span, e)
-          } finally {
-            span.finish()
+        return new Promise((resolve, reject) => {
+          // we can't use then.catch.finally because finally is not supported
+          // on node 8 which knex still supports.
+          const that = this
+          const query = arguments[0]
+          let formattedQuery = ''
+          if (formatter && query && query.sql) {
+            formattedQuery = formatter(query.sql, query.bindings || [])
           }
-        }
+
+          original.apply(this, arguments)
+            .then(function () {
+              resolve.apply(that, arguments)
+              span.finish()
+            })
+            .catch(function (e) {
+              addError(span, e, formattedQuery)
+              reject.apply(that, arguments)
+              span.finish()
+            })
+        })
       })
     }
   }
 }
 
-function addError (span, error) {
+function addError (span, error, formattedQuery) {
   span.addTags({
     'error': true,
     'sfx.error.kind': error.name,
-    'sfx.error.message': error.message,
+    'sfx.error.message': error.message.replace(formattedQuery + ' - ', ''),
     'sfx.error.stack': error.stack
   })
   return error
@@ -107,7 +109,7 @@ function setDBTags (obj, span) {
   }
 }
 
-function patchKnex (version, basePath, usePromise) {
+function patchKnex (version, basePath) {
   return [
     {
       name: 'knex',
@@ -117,7 +119,7 @@ function patchKnex (version, basePath, usePromise) {
         this.wrap(Client.prototype, 'queryBuilder', createWrapBuilder(tracer, config))
         this.wrap(Client.prototype, 'schemaBuilder', createWrapBuilder(tracer, config))
         this.wrap(Client.prototype, 'raw', createWrapBuilder(tracer, config))
-        this.wrap(Client.prototype, 'runner', createWrapRunner(this, tracer, config, usePromise))
+        this.wrap(Client.prototype, 'runner', createWrapRunner(this, tracer, config))
       },
       unpatch (Client) {
         this.unwrap(Client.prototype, 'runner')
@@ -129,6 +131,5 @@ function patchKnex (version, basePath, usePromise) {
   ]
 }
 
-module.exports = patchKnex(['>=0.10.0 <0.18.0', '>=0.19.0 <=0.20.10'], 'lib')
-  .concat(patchKnex(['>=0.20.11 <0.21.0'], 'lib', true))
+module.exports = patchKnex(['>=0.10.0 <0.18.0', '>=0.19.0 <=0.20.10', '>=0.20.11 <0.21.0'], 'lib')
   .concat(patchKnex(['>=0.18.0 <0.19.0'], 'src'))

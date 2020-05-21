@@ -91,7 +91,8 @@ describe('Plugin', () => {
               expect(traces[0][0].meta).to.have.property('span.kind', 'server')
               expect(traces[0][0].meta).to.have.property('http.url', `http://localhost:${port}/user/123`)
               expect(traces[0][0].meta).to.have.property('http.method', 'GET')
-              expect(traces[0][0].meta).to.have.property('http.status_code', '200')
+              const statusCode = traces[0][0].meta['http.status_code']
+              expect(statusCode).to.be.oneOf(['200', '204'])
             })
             .then(done)
             .catch(done)

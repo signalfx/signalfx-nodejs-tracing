@@ -351,8 +351,7 @@ describe('Plugin', () => {
             expect(spans[1].meta).to.have.property('error', 'true')
             expect(spans[1].meta).to.have.property('sfx.error.kind', 'Error')
             expect(normalizeDBStatement(spans[1].meta['sfx.error.message'])).to.be.equal(
-              'insert into `fakeTable` (`id`, `title`) values ' +
-              '(1, \'knex test\') - SQLITE_ERROR: no such table: fakeTable'
+              'SQLITE_ERROR: no such table: fakeTable'
             )
             expect(spans[1].parent_id.toString()).to.equal(rootSpan.span_id.toString())
             done()
