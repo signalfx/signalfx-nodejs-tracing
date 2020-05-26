@@ -1,5 +1,6 @@
 'use strict'
 
+const semver = require('semver')
 const web = require('./util/web')
 
 function createWrapGenerate (tracer, config) {
@@ -56,93 +57,38 @@ function createWrapDispatch (tracer, config) {
   }
 }
 
-module.exports = [
-  {
-    name: '@hapi/hapi',
-    versions: ['>=17.9'],
-    file: 'lib/request.js',
-    patch (Request, tracer, config) {
-      this.wrap(Request, 'generate', createWrapGenerate(tracer, config))
+function patch (name, versions, file, property, method, notPrototypical) {
+  return {
+    name: name,
+    versions: versions,
+    file: file,
+    patch (Obj, tracer, config) {
+      const target = notPrototypical ? Obj : Obj.prototype
+      this.wrap(target, property, method(tracer, config))
     },
-    unpatch (Request) {
-      this.unwrap(Request, 'generate')
-    }
-  },
-  {
-    name: 'hapi',
-    versions: ['>=17.1'],
-    file: 'lib/request.js',
-    patch (Request, tracer, config) {
-      this.wrap(Request, 'generate', createWrapGenerate(tracer, config))
-    },
-    unpatch (Request) {
-      this.unwrap(Request, 'generate')
-    }
-  },
-  {
-    name: 'hapi',
-    versions: ['8.5 - 17.0'],
-    file: 'lib/request.js',
-    patch (Generator, tracer, config) {
-      this.wrap(Generator.prototype, 'request', createWrapGenerate(tracer, config))
-    },
-    unpatch (Generator) {
-      this.unwrap(Generator.prototype, 'request')
-    }
-  },
-  {
-    name: 'hapi',
-    versions: ['2 - 8.4'],
-    file: 'lib/request.js',
-    patch (Request, tracer, config) {
-      this.wrap(Request.prototype, '_execute', createWrapExecute(tracer, config))
-    },
-    unpatch (Request) {
-      this.unwrap(Request.prototype, '_execute')
-    }
-  },
-  {
-    name: 'hapi',
-    versions: ['7.2 - 16'],
-    file: 'lib/connection.js',
-    patch (Connection, tracer, config) {
-      this.wrap(Connection.prototype, '_dispatch', createWrapDispatch(tracer, config))
-    },
-    unpatch (Connection) {
-      this.unwrap(Connection.prototype, '_dispatch')
-    }
-  },
-  {
-    name: '@hapi/hapi',
-    versions: ['>=17.9'],
-    file: 'lib/core.js',
-    patch (Core, tracer, config) {
-      this.wrap(Core.prototype, '_dispatch', createWrapDispatch(tracer, config))
-    },
-    unpatch (Core) {
-      this.unwrap(Core.prototype, '_dispatch')
-    }
-  },
-  {
-    name: 'hapi',
-    versions: ['>=17'],
-    file: 'lib/core.js',
-    patch (Core, tracer, config) {
-      this.wrap(Core.prototype, '_dispatch', createWrapDispatch(tracer, config))
-    },
-    unpatch (Core) {
-      this.unwrap(Core.prototype, '_dispatch')
-    }
-  },
-  {
-    name: 'hapi',
-    versions: ['2 - 7.1'],
-    file: 'lib/server.js',
-    patch (Server, tracer, config) {
-      this.wrap(Server.prototype, '_dispatch', createWrapDispatch(tracer, config))
-    },
-    unpatch (Server) {
-      this.unwrap(Server.prototype, '_dispatch')
+    unpatch (Obj) {
+      const target = notPrototypical ? Obj : Obj.prototype
+      this.unwrap(target, property)
     }
   }
+}
+
+let patches = [
+  patch('@hapi/hapi', ['>=17.9 <19.0'], 'lib/request.js', 'generate', createWrapGenerate, true),
+  patch('hapi', ['>=17.1'], 'lib/request.js', 'generate', createWrapGenerate, true),
+  patch('hapi', ['8.5 - 17.0'], 'lib/request.js', 'request', createWrapGenerate),
+  patch('hapi', ['2 - 8.4'], 'lib/request.js', '_execute', createWrapExecute),
+  patch('hapi', ['7.2 - 16'], 'lib/connection.js', '_dispatch', createWrapDispatch),
+  patch('@hapi/hapi', ['>=17.9 <19.0'], 'lib/core.js', '_dispatch', createWrapDispatch),
+  patch('hapi', ['>=17'], 'lib/core.js', '_dispatch', createWrapDispatch),
+  patch('hapi', ['2 - 7.1'], 'lib/server.js', '_dispatch', createWrapDispatch)
 ]
+
+if (semver.gte(process.version, '12.0.0')) {
+  patches = patches.concat([
+    patch('@hapi/hapi', ['>=19.0'], 'lib/request.js', 'generate', createWrapGenerate, true),
+    patch('@hapi/hapi', ['>=19.0'], 'lib/core.js', '_dispatch', createWrapDispatch)
+  ])
+}
+
+module.exports = patches

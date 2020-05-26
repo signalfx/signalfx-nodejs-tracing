@@ -72,7 +72,7 @@ node-plugin-base: &node-plugin-base
         command: yarn test:plugins
     - run:
         name: Memory leak tests
-        command: yarn leak:plugins
+        command: if [[ -z $SKIP_LEAK_TESTS ]]; then yarn leak:plugins ; fi
 
 jobs:
   # Linting
@@ -270,12 +270,21 @@ jobs:
         environment:
           - PLUGINS=graphql
 
-  node-hapi:
+  node-8-hapi:
     <<: *node-plugin-base
     docker:
       - image: node:8
         environment:
           - PLUGINS=hapi
+
+  node-hapi:
+    <<: *node-plugin-base
+    docker:
+      - image: node:12
+        environment:
+          - PLUGINS=hapi
+          - SKIP_LEAK_TESTS=true
+
 
   node-http:
     <<: *node-plugin-base
@@ -552,6 +561,7 @@ workflows:
       - node-8-graphql
       - node-graphql
       - node-hapi
+      - node-8-hapi
       - node-http
       - node-knex
       - node-koa
