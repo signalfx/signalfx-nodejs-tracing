@@ -103,7 +103,7 @@ the target library.
 
       ```javascript
       // init() invocation must occur before importing any traced library (e.g. Express)
-      const tracer = require('signalfx-tracing').init(
+      const tracer = require('signalfx-tracing').init({
         // Service name, also configurable via
         // SIGNALFX_SERVICE_NAME environment variable
         service: 'my-traced-service',
@@ -112,10 +112,10 @@ the target library.
         url: 'http://my_agent_or_gateway:9080/v1/trace', // http://localhost:9080/v1/trace by default
         // Optional organization access token, also configurable via
         // SIGNALFX_ACCESS_TOKEN environment variable
-        accessToken: 'myOptionalOrganizationAccessToken'
+        accessToken: 'myOptionalOrganizationAccessToken',
         // Optional environment tag
         tags: {environment: 'myEnvironment'}
-      ) 
+      })
 
       // auto-instrumented example Express application
       const express = require('express') 
