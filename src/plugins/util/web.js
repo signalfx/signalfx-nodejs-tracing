@@ -69,7 +69,8 @@ const web = {
     wrapEnd(req)
     wrapEvents(req)
 
-    if (process.env.SIGNALFX_SERVER_TIMING_CONTEXT === 'true') {
+    const enableServerTiming = process.env.SIGNALFX_SERVER_TIMING_CONTEXT
+    if (enableServerTiming && enableServerTiming.trim().toLowerCase() === 'true') {
       res.setHeader('Server-Timing', traceParentHeader(span.context()))
     }
 
