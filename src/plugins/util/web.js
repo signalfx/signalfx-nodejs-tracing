@@ -71,7 +71,10 @@ const web = {
 
     const enableServerTiming = process.env.SIGNALFX_SERVER_TIMING_CONTEXT
     if (enableServerTiming && enableServerTiming.trim().toLowerCase() === 'true') {
-      res.setHeader('Server-Timing', traceParentHeader(span.context()))
+      if (!res._sfx_serverTimingAdded) {
+        res.setHeader('Server-Timing', traceParentHeader(span.context()))
+        res._sfx_serverTimingAdded = true
+      }
     }
 
     return callback && tracer.scope().activate(span, () => callback(span))
