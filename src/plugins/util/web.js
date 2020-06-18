@@ -73,7 +73,7 @@ const web = {
     if (enableServerTiming && enableServerTiming.trim().toLowerCase() === 'true') {
       if (!res._sfx_serverTimingAdded) {
         res.setHeader('Server-Timing', traceParentHeader(span.context()))
-        res._sfx_serverTimingAdded = true
+        Object.defineProperty(res, '_sfx_serverTimingAdded', { value: true })
       }
     }
 
