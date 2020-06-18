@@ -43,7 +43,8 @@ describe('plugins/util/web', () => {
     end = sinon.stub()
     res = {
       end,
-      getHeader: sinon.stub()
+      getHeader: sinon.stub(),
+      setHeader: sinon.stub()
     }
     res.getHeader.withArgs('server').returns('test')
     config = { hooks: {} }
@@ -251,6 +252,22 @@ describe('plugins/util/web', () => {
             [HTTP_URL]: 'http://localhost/user/123'
           })
         })
+      })
+
+      it('should set Server-Timing when configured', () => {
+        try {
+          process.env.SIGNALFX_SERVER_TIMING_CONTEXT = 'true'
+          web.instrument(tracer, config, req, res, 'test.request', span => {
+            config.service = 'test2'
+            web.instrument(tracer, config, req, res, 'test.request')
+            expect(res.setHeader.args[0][0]).to.equal('Server-Timing')
+            const serverTiming = res.setHeader.args[0][1]
+            const regex = new RegExp('traceparent;desc="00-[0-9a-f]{32}-[0-9a-f]{16}-01"')
+            expect(serverTiming.match(regex)).to.not.equal(null)
+          })
+        } finally {
+          delete process.env.SIGNALFX_SERVER_TIMING_CONTEXT
+        }
       })
     })
 

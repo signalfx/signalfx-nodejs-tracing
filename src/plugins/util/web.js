@@ -69,6 +69,14 @@ const web = {
     wrapEnd(req)
     wrapEvents(req)
 
+    const enableServerTiming = process.env.SIGNALFX_SERVER_TIMING_CONTEXT
+    if (enableServerTiming && enableServerTiming.trim().toLowerCase() === 'true') {
+      if (!res._sfx_serverTimingAdded) {
+        res.setHeader('Server-Timing', traceParentHeader(span.context()))
+        Object.defineProperty(res, '_sfx_serverTimingAdded', { value: true })
+      }
+    }
+
     return callback && tracer.scope().activate(span, () => callback(span))
   },
 
@@ -449,6 +457,17 @@ function getSynthesizeRequestingContext (config) {
     log.error('Expected `synthesizeRequestingContext` to be an object of paths to booleans')
   }
   return {}
+}
+
+function padTo128 (hexId) {
+  const padded = '0000000000000000' + hexId
+  return padded.slice(-32)
+}
+
+function traceParentHeader (spanContext) {
+  // https://www.w3.org/TR/server-timing/
+  // https://www.w3.org/TR/trace-context/#traceparent-header
+  return 'traceparent;desc="00-' + padTo128(idToHex(spanContext._traceId)) + '-' + idToHex(spanContext._spanId) + '-01"'
 }
 
 module.exports = web
