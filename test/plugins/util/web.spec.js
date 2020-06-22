@@ -264,6 +264,8 @@ describe('plugins/util/web', () => {
             const serverTiming = res.setHeader.args[0][1]
             const regex = new RegExp('traceparent;desc="00-[0-9a-f]{32}-[0-9a-f]{16}-01"')
             expect(serverTiming.match(regex)).to.not.equal(null)
+            expect(res.setHeader.args[1][0]).to.equal('Access-Control-Expose-Headers')
+            expect(res.setHeader.args[1][1]).to.equal('Server-Timing')
           })
         } finally {
           delete process.env.SIGNALFX_SERVER_TIMING_CONTEXT
