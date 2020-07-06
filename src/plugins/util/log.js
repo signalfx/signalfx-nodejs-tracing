@@ -10,9 +10,9 @@ const log = {
     if (!span) return record
 
     return Object.assign({}, record, {
-      dd: {
-        trace_id: span.context().toTraceId(),
-        span_id: span.context().toSpanId()
+      signalfx: {
+        trace_id: span.context().toTraceIdHex(),
+        span_id: span.context().toSpanIdHex()
       }
     })
   }

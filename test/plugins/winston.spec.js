@@ -51,9 +51,9 @@ describe('Plugin', () => {
 
         it('should not alter the default behavior', () => {
           const meta = {
-            dd: {
-              trace_id: span.context().toTraceId(),
-              span_id: span.context().toSpanId()
+            signalfx: {
+              trace_id: span.context().toTraceIdHex(),
+              span_id: span.context().toSpanIdHex()
             }
           }
 
@@ -77,9 +77,9 @@ describe('Plugin', () => {
 
         it('should add the trace identifiers to the default logger', () => {
           const meta = {
-            dd: {
-              trace_id: span.context().toTraceId(),
-              span_id: span.context().toSpanId()
+            signalfx: {
+              trace_id: span.context().toTraceIdHex(),
+              span_id: span.context().toSpanIdHex()
             }
           }
 
@@ -100,9 +100,9 @@ describe('Plugin', () => {
           }
 
           const meta = {
-            dd: {
-              trace_id: span.context().toTraceId(),
-              span_id: span.context().toSpanId()
+            signalfx: {
+              trace_id: span.context().toTraceIdHex(),
+              span_id: span.context().toSpanIdHex()
             }
           }
 
@@ -134,9 +134,9 @@ describe('Plugin', () => {
               })
 
               expect(transport.log).to.have.been.calledWithMatch({
-                dd: {
-                  trace_id: span.context().toTraceId(),
-                  span_id: span.context().toSpanId()
+                signalfx: {
+                  trace_id: span.context().toTraceIdHex(),
+                  span_id: span.context().toSpanIdHex()
                 }
               })
             })
