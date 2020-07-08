@@ -49,7 +49,7 @@ describe('Plugin', () => {
 
             const record = JSON.parse(stream.write.firstCall.args[0].toString())
 
-            expect(record).to.not.have.property('dd')
+            expect(record).to.not.have.property('signalfx')
           })
         })
       })
@@ -68,9 +68,9 @@ describe('Plugin', () => {
 
             const record = JSON.parse(stream.write.firstCall.args[0].toString())
 
-            expect(record).to.have.deep.property('dd', {
-              trace_id: span.context().toTraceId(),
-              span_id: span.context().toSpanId()
+            expect(record).to.have.deep.property('signalfx', {
+              trace_id: span.context().toTraceIdHex(),
+              span_id: span.context().toSpanIdHex()
             })
           })
         })

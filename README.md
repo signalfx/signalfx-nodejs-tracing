@@ -122,6 +122,30 @@ the target library.
       const app = express()
       ```
 
+## Log injection with custom logger
+
+We support injecting trace-context into logs automatically for Bunyan, Pino and Winston. If you are using a custom logger, you can enable log injection as follows:
+
+```javascript
+const tracer = require('signalfx-tracing').init()
+const formats = require('signalfx-tracing/ext/formats');
+
+class Logger {
+    log(level, message) {
+        const span = tracer.scope().active();
+        const time = new Date().toISOString();
+        const record = { time, level, message };
+
+        if (span) {
+            tracer.inject(span.context(), formats.LOG, record);
+        }
+
+        console.log(JSON.stringify(record));
+    }
+}
+
+module.exports = Logger;
+```
 ## License and versioning
 
 The SignalFx Tracing Library for JavaScript is released under the terms of the BSD 3-Clause License. See the [the license file](./LICENSE) for more details.

@@ -18,9 +18,9 @@ describe('plugins/util/log', () => {
       tracer.scope().activate(span, () => {
         const record = log.correlate(tracer, {})
 
-        expect(record).to.have.deep.property('dd', {
-          trace_id: span.context().toTraceId(),
-          span_id: span.context().toSpanId()
+        expect(record).to.have.deep.property('signalfx', {
+          trace_id: span.context().toTraceIdHex(),
+          span_id: span.context().toSpanIdHex()
         })
       })
     })
@@ -31,9 +31,9 @@ describe('plugins/util/log', () => {
       tracer.scope().activate(span, () => {
         const record = log.correlate(tracer)
 
-        expect(record).to.have.deep.property('dd', {
-          trace_id: span.context().toTraceId(),
-          span_id: span.context().toSpanId()
+        expect(record).to.have.deep.property('signalfx', {
+          trace_id: span.context().toTraceIdHex(),
+          span_id: span.context().toSpanIdHex()
         })
       })
     })
@@ -41,7 +41,7 @@ describe('plugins/util/log', () => {
     it('should do nothing if there is no active scope', () => {
       const record = log.correlate(tracer, {})
 
-      expect(record).to.not.have.property('dd')
+      expect(record).to.not.have.property('signalfx')
     })
 
     it('should do nothing if the active span is null', () => {
@@ -60,7 +60,7 @@ describe('plugins/util/log', () => {
 
         log.correlate(tracer, record)
 
-        expect(record).to.not.have.property('dd')
+        expect(record).to.not.have.property('signalfx')
       })
     })
   })

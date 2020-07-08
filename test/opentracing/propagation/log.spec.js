@@ -12,9 +12,9 @@ describe('LogPropagator', () => {
     LogPropagator = require('../../../src/opentracing/propagation/log')
     propagator = new LogPropagator()
     log = {
-      dd: {
-        trace_id: '123',
-        span_id: '18446744073709551160' // -456 casted to uint64
+      signalfx: {
+        trace_id: 'bd2c0d1c675af6a8',
+        span_id: '4201c352d6856b67'
       }
     }
   })
@@ -23,16 +23,16 @@ describe('LogPropagator', () => {
     it('should inject the span context into the carrier', () => {
       const carrier = {}
       const spanContext = new SpanContext({
-        traceId: new platform.Uint64BE(0, 123),
-        spanId: new platform.Uint64BE(-456)
+        traceId: new platform.Uint64BE('bd2c0d1c675af6a8', 16),
+        spanId: new platform.Uint64BE('4201c352d6856b67', 16)
       })
 
       propagator.inject(spanContext, carrier)
 
       expect(carrier).to.deep.include({
-        dd: {
-          trace_id: '123',
-          span_id: '18446744073709551160' // -456 casted to uint64
+        signalfx: {
+          trace_id: 'bd2c0d1c675af6a8',
+          span_id: '4201c352d6856b67'
         }
       })
     })
@@ -44,8 +44,8 @@ describe('LogPropagator', () => {
       const spanContext = propagator.extract(carrier)
 
       expect(spanContext).to.deep.equal(new SpanContext({
-        traceId: new platform.Uint64BE(0, 123),
-        spanId: new platform.Uint64BE(-456)
+        traceId: new platform.Uint64BE('bd2c0d1c675af6a8', 16),
+        spanId: new platform.Uint64BE('4201c352d6856b67', 16)
       }))
     })
 

@@ -1,5 +1,7 @@
 'use strict'
 
+const utils = require('../utils')
+
 const SpanContext = require('opentracing').SpanContext
 
 class SignalFxSpanContext extends SpanContext {
@@ -24,8 +26,16 @@ class SignalFxSpanContext extends SpanContext {
     }
   }
 
+  toTraceIdHex () {
+    return utils.idToHex(this._traceId)
+  }
+
   toTraceId () {
     return this._traceId.toString()
+  }
+
+  toSpanIdHex () {
+    return utils.idToHex(this._spanId)
   }
 
   toSpanId () {
