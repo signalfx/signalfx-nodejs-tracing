@@ -61,8 +61,8 @@ tracer.init({
 
 const httpOptions = {
   service: 'test',
-  whitelist: ['url', /url/, url => true],
-  blacklist: ['url', /url/, url => true],
+  include: ['url', /url/, url => true],
+  exclude: ['url', /url/, url => true],
   validateStatus: code => code < 400,
   headers: ['host']
 };

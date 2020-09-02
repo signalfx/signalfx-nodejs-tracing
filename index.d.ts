@@ -400,15 +400,15 @@ declare namespace plugins {
      *
      * @default /^.*$/
      */
-    whitelist?: string | RegExp | ((url: string) => boolean) | (string | RegExp | ((url: string) => boolean))[];
+    include?: string | RegExp | ((url: string) => boolean) | (string | RegExp | ((url: string) => boolean))[];
 
     /**
      * List of URLs that should not be instrumented. Takes precedence over
-     * whitelist if a URL matches an entry in both.
+     * include if a URL matches an entry in both.
      *
      * @default []
      */
-    blacklist?: string | RegExp | ((url: string) => boolean) | (string | RegExp | ((url: string) => boolean))[];
+    exclude?: string | RegExp | ((url: string) => boolean) | (string | RegExp | ((url: string) => boolean))[];
 
     /**
      * An array of headers to include in the span metadata.
