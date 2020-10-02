@@ -84,7 +84,7 @@ to your application.
 
 1. Install the [latest release](https://github.com/signalfx/signalfx-nodejs-tracing/releases/latest) of the tracing library. You can install directly from npm or directly
 from the  GitHub repository.
-      
+
       npm:
       ```bash
         $ npm install signalfx-tracing
@@ -118,13 +118,44 @@ the target library.
       })
 
       // auto-instrumented example Express application
-      const express = require('express') 
+      const express = require('express')
       const app = express()
       ```
 
-## Log injection with custom logger
+## Inject trace IDs in logs
 
-We support injecting trace-context into logs automatically for Bunyan, Pino and Winston. If you are using a custom logger, you can enable log injection as follows:
+Link individual log entries with trace IDs and span IDs associated with
+corresponding events. Inject trace context in logs with these loggers:
+
+* Bunyan
+* Pino
+* Winston
+
+You can also enable trace ID log injection with a custom logger.
+
+When you configure trace ID log injection, your logger receives this info for
+the `span.context`:
+
+```json
+signalfx: {
+  trace_id: <trace_id>,
+  span_id: <span_id>      
+}
+```
+
+### Inject trace IDs with Bunyan, Pino, or Winston
+
+To transfer trace context to logs with Bunyan, Pino, or Winston, enable trace
+ID log injection with this environment variable:
+
+```bash
+$ SIGNALFX_LOGS_INJECTION=true
+```
+
+### Inject trace IDs with a custom logger
+
+To transfer trace context with a custom logger, add `tracer.inject` to your
+custom logger class like this:
 
 ```javascript
 const tracer = require('signalfx-tracing').init()
@@ -137,15 +168,18 @@ class Logger {
         const record = { time, level, message };
 
         if (span) {
-            tracer.inject(span.context(), formats.LOG, record);
+            tracer.inject(span.context(), formats.LOG, yourRecordObject);
         }
 
-        console.log(JSON.stringify(record));
+        console.log(JSON.stringify(yourRecordObject));
     }
 }
 
 module.exports = Logger;
 ```
+
+where `yourRecordObject` is the object you want to inject `span.context` in.
+
 ## License and versioning
 
 The SignalFx Tracing Library for JavaScript is released under the terms of the BSD 3-Clause License. See the [the license file](./LICENSE) for more details.
