@@ -1,6 +1,7 @@
 'use strict'
 
 const Span = require('opentracing').Span
+const NonReportingSpan = require('../src/opentracing/nonreporting_span')
 const Config = require('../src/config')
 const tags = require('../ext/tags')
 
@@ -32,6 +33,18 @@ describe('Tracer', () => {
     })
 
     tracer = new Tracer(config)
+  })
+
+  describe('withNonReportingScope', () => {
+    it('should create disabled spans inside the scope', () => {
+      const result = tracer.withNonReportingScope(() => {
+        tracer.trace('name', {}, span => {
+          expect(span).to.be.instanceof(NonReportingSpan)
+        })
+        return '1234'
+      })
+      expect(result).to.equal('1234')
+    })
   })
 
   describe('trace', () => {

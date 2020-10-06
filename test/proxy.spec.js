@@ -16,6 +16,7 @@ describe('TracerProxy', () => {
   beforeEach(() => {
     tracer = {
       use: sinon.stub().returns('tracer'),
+      withNonReportingScope: sinon.stub().returns('result'),
       trace: sinon.stub().returns('test'),
       wrap: sinon.stub().returns('fn'),
       startSpan: sinon.stub().returns('span'),
@@ -28,6 +29,7 @@ describe('TracerProxy', () => {
 
     noop = {
       use: sinon.stub().returns('tracer'),
+      withNonReportingScope: sinon.stub().returns('result'),
       trace: sinon.stub().returns('test'),
       wrap: sinon.stub().returns('fn'),
       startSpan: sinon.stub().returns('span'),
@@ -238,6 +240,16 @@ describe('TracerProxy', () => {
         expect(returnValue).to.equal('flush')
       })
     })
+
+    describe('withNonReportingScope', () => {
+      it('should ignore with NoopTracer', () => {
+        const callback = () => 'result'
+        const returnValue = proxy.withNonReportingScope(callback)
+
+        expect(noop.withNonReportingScope).to.have.been.calledWith(callback)
+        expect(returnValue).to.equal('result')
+      })
+    })
   })
 
   describe('initialized', () => {
@@ -251,6 +263,16 @@ describe('TracerProxy', () => {
 
         expect(instrumenter.use).to.have.been.calledWith('a', 'b', 'c')
         expect(returnValue).to.equal(proxy)
+      })
+    })
+
+    describe('withNonReportingScope', () => {
+      it('should create disabled scope span', () => {
+        const callback = () => 'result'
+        const returnValue = proxy.withNonReportingScope(callback)
+
+        expect(tracer.withNonReportingScope).to.have.been.calledWith(callback)
+        expect(returnValue).to.equal('result')
       })
     })
 
