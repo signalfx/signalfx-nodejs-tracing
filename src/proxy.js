@@ -73,6 +73,10 @@ class Tracer extends BaseTracer {
     return this
   }
 
+  withNonReportingScope (callback) {
+    return this._tracer.withNonReportingScope(callback)
+  }
+
   use () {
     this._instrumenter.use.apply(this._instrumenter, arguments)
     return this

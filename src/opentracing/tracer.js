@@ -4,7 +4,9 @@ const opentracing = require('opentracing')
 const Tracer = opentracing.Tracer
 const Reference = opentracing.Reference
 const Span = require('./span')
+const NonReportingSpan = require('./nonreporting_span')
 const SpanContext = require('./span_context')
+const NonReportingSpanContext = require('./nonreporting_span_context')
 const Writer = require('../writer')
 const ZipkinV2Writer = require('../zipkin/writer')
 const Recorder = require('../recorder')
@@ -69,6 +71,12 @@ class SignalFxTracer extends Tracer {
     const type = reference && reference.type()
     const parent = reference && reference.referencedContext()
     const noopSpan = this._noopSpan
+
+    if (parent instanceof NonReportingSpan || parent instanceof NonReportingSpanContext) {
+      return new NonReportingSpan(this, this._recorder, this._sampler, this._prioritySampler, {
+        operationName: fields.operationName || 'nonReportingSFXSpan'
+      })
+    }
 
     if (type === REFERENCE_NOOP) return noopSpan
     if (parent && parent === noopSpan.context()) return noopSpan

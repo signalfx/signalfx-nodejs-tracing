@@ -1,6 +1,7 @@
 'use strict'
 
 const Tracer = require('./opentracing/tracer')
+const NonReportingSpan = require('./opentracing/nonreporting_span')
 const tags = require('../ext/tags')
 
 const SPAN_TYPE = tags.SPAN_TYPE
@@ -25,6 +26,15 @@ class SignalFxTracer extends Tracer {
 
     this._scopeManager = new ScopeManager()
     this._scope = new Scope()
+  }
+
+  withNonReportingScope (callback) {
+    const span = new NonReportingSpan(this, this._recorder, this._sampler, this._prioritySampler, {
+      operationName: 'nonReportingSFXSpan'
+    })
+    return this.scope().activate(span, () => {
+      return callback()
+    })
   }
 
   trace (name, options, fn) {

@@ -21,6 +21,10 @@ class NoopTracer extends Tracer {
     this._span = new Span(this)
   }
 
+  withNonReportingScope (callback) {
+    return callback()
+  }
+
   trace (name, options, fn) {
     return fn(this._span, () => {})
   }
