@@ -65,17 +65,18 @@ OpenTelemetry Collector, or SignalFx ingest endpoint.
 
 Configure these options as parameters for the `init()` method or as environment variables.
 
-| Config        | Environment Variable         | Default   | Description |
-| ------------- | ---------------------------- | --------- | ----------- |
-| service       | SIGNALFX_SERVICE_NAME        | unnamed-nodejs-service | The service name to be used for this program. |
-| url           | SIGNALFX_ENDPOINT_URL        | http://localhost:9080/v1/trace | The url of the Agent or Gateway to which the tracer will submit traces. |
-| accessToken   | SIGNALFX_ACCESS_TOKEN        |           | The optional organization access token for trace submission requests |
-| enabled       | SIGNALFX_TRACING_ENABLED     | true      | Whether to enable the tracer. |
-| debug         | SIGNALFX_TRACING_DEBUG       | false     | Enable debug logging in the tracer. |
-| logInjection  | SIGNALFX_LOGS_INJECTION      | false     | Enable automatic injection of trace IDs in logs for supported logging libraries. |
-| tags          | SIGNALFX_SPAN_TAGS           | {}        | Set global tags that should be applied to all spans. Format for the environment variable is `key1:val1,key2:val2`. |
-| flushInterval |                              | 2000      | Interval in milliseconds at which the tracer will submit traces to the agent. |
-| plugins       |                              | true      | Whether or not to enable automatic instrumentation of external libraries using the built-in plugins. |
+| Config                  | Environment Variable                | Default   | Description |
+| ----------------------- | ----------------------------------- | --------- | ----------- |
+| service                 | SIGNALFX_SERVICE_NAME               | unnamed-nodejs-service | The service name to be used for this program. |
+| url                     | SIGNALFX_ENDPOINT_URL               | http://localhost:9080/v1/trace | The url of the Agent or Gateway to which the tracer will submit traces. |
+| accessToken             | SIGNALFX_ACCESS_TOKEN               |           | The optional organization access token for trace submission requests |
+| enabled                 | SIGNALFX_TRACING_ENABLED            | true      | Whether to enable the tracer. |
+| debug                   | SIGNALFX_TRACING_DEBUG              | false     | Enable debug logging in the tracer. |
+| logInjection            | SIGNALFX_LOGS_INJECTION             | false     | Enable automatic injection of trace IDs in logs for supported logging libraries. |
+| tags                    | SIGNALFX_SPAN_TAGS                  | {}        | Set global tags that should be applied to all spans. Format for the environment variable is `key1:val1,key2:val2`. |
+| flushInterval           |                                     | 2000      | Interval in milliseconds at which the tracer will submit traces to the agent. |
+| plugins                 |                                     | true      | Whether or not to enable automatic instrumentation of external libraries using the built-in plugins. |
+| recordedValueMaxLength  | SIGNALFX_RECORDED_VALUE_MAX_LENGTH  | 1200      | Maximum length an attribute value can have. Values longer than this limit are truncated. Any negative value turns off truncation. |
 
 ### Steps
 

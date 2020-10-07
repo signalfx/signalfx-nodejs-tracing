@@ -5,6 +5,8 @@ const platform = require('./platform')
 const version = require('../lib/version')
 const coalesce = require('koalas')
 
+const DEFAULT_RECORDED_VALUE_MAX_LENGTH = 1200
+
 class Config {
   constructor (service, options) {
     options = options || {}
@@ -71,6 +73,13 @@ class Config {
         }
       }
     }
+
+    this.recordedValueMaxLength = coalesce(
+      parseInt(options.recordedValueMaxLength, 10),
+      parseInt(platform.env('SIGNALFX_RECORDED_VALUE_MAX_LENGTH'), 10),
+      DEFAULT_RECORDED_VALUE_MAX_LENGTH
+    )
+
     this.dogstatsd = {
       port: String(coalesce(dogstatsd.port, platform.env('DD_DOGSTATSD_PORT'), 8125))
     }

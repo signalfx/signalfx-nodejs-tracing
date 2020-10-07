@@ -4,6 +4,7 @@ const Span = require('opentracing').Span
 const NonReportingSpan = require('../src/opentracing/nonreporting_span')
 const Config = require('../src/config')
 const tags = require('../ext/tags')
+const _truncate = require('lodash.truncate')
 
 const SPAN_TYPE = tags.SPAN_TYPE
 const RESOURCE_NAME = tags.RESOURCE_NAME
@@ -155,7 +156,7 @@ describe('Tracer', () => {
         expect(tags).to.include({
           'sfx.error.kind': e.name,
           'sfx.error.message': e.message,
-          'sfx.error.stack': e.stack
+          'sfx.error.stack': _truncate(e.stack, { length: 1200 })
         })
       }
     })
@@ -197,7 +198,7 @@ describe('Tracer', () => {
         expect(tags).to.include({
           'sfx.error.kind': error.name,
           'sfx.error.message': error.message,
-          'sfx.error.stack': error.stack
+          'sfx.error.stack': _truncate(error.stack, { length: 1200 })
         })
       })
     })
@@ -244,7 +245,7 @@ describe('Tracer', () => {
             expect(tags).to.include({
               'sfx.error.kind': e.name,
               'sfx.error.message': e.message,
-              'sfx.error.stack': e.stack
+              'sfx.error.stack': e.stack.substring(0, 1197) + '...'
             })
             done()
           })

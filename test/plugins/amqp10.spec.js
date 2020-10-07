@@ -2,6 +2,7 @@
 
 const agent = require('./agent')
 const plugin = require('../../src/plugins/amqp10')
+const _truncate = require('lodash.truncate')
 
 wrapIt()
 
@@ -96,7 +97,7 @@ describe('Plugin', () => {
                 expect(span.meta).to.have.property('error', 'true')
                 expect(span.meta).to.have.property('sfx.error.kind', error.name)
                 expect(span.meta).to.have.property('sfx.error.message', error.message)
-                expect(span.meta).to.have.property('sfx.error.stack', error.stack)
+                expect(span.meta).to.have.property('sfx.error.stack', _truncate(error.stack, { length: 1200 }))
               }, 2)
               .then(done)
               .catch(done)

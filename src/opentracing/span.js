@@ -2,12 +2,13 @@
 
 const opentracing = require('opentracing')
 const Span = opentracing.Span
-const truncate = require('lodash.truncate')
+const _truncate = require('lodash.truncate')
 const SpanContext = require('./span_context')
 const platform = require('../platform')
 const log = require('../log')
 const constants = require('../constants')
 const utils = require('../utils')
+const truncate = require('../truncate')
 
 const SAMPLE_RATE_METRIC_KEY = constants.SAMPLE_RATE_METRIC_KEY
 
@@ -46,7 +47,7 @@ class SignalFxSpan extends Span {
       parentId: utils.idToHex(spanContext._parentId),
       service: spanContext._tags['service.name'],
       name: spanContext._name,
-      resource: truncate(spanContext._tags['resource.name'], { length: 100 })
+      resource: _truncate(spanContext._tags['resource.name'], { length: 100 })
     })
 
     return `Span${json}`
@@ -99,20 +100,19 @@ class SignalFxSpan extends Span {
 
   _addTags (keyValuePairs) {
     try {
-      Object.keys(keyValuePairs).forEach(key => {
-        this._spanContext._tags[key] = keyValuePairs[key]
-      })
+      for (const key of Object.keys(keyValuePairs)) {
+        this._spanContext._tags[key] = truncate(keyValuePairs[key], this.tracer()._recordedValueMaxLength)
+      }
     } catch (e) {
       log.error(e)
     }
   }
 
   _log (keyValuePairs, timestamp) {
-    const logged = {
+    this._spanContext._logs.push({
       timestamp: timestamp || platform.now(),
-      value: keyValuePairs
-    }
-    this._spanContext._logs.push(logged)
+      value: truncate(keyValuePairs, this.tracer()._recordedValueMaxLength)
+    })
   }
 
   _finish (finishTime) {

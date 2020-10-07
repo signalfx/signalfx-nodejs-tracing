@@ -4,6 +4,7 @@ const axios = require('axios')
 const getPort = require('get-port')
 const agent = require('./agent')
 const plugin = require('../../src/plugins/express')
+const _truncate = require('lodash.truncate')
 
 wrapIt()
 
@@ -779,7 +780,7 @@ describe('Plugin', () => {
                 expect(spans[1].meta).to.have.property('error', 'true')
                 expect(spans[1].meta).to.have.property('sfx.error.kind', error.name)
                 expect(spans[1].meta).to.have.property('sfx.error.message', error.message)
-                expect(spans[1].meta).to.have.property('sfx.error.stack', error.stack)
+                expect(spans[1].meta).to.have.property('sfx.error.stack', _truncate(error.stack, { length: 1200 }))
               })
               .then(done)
               .catch(done)
