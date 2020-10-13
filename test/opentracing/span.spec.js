@@ -145,6 +145,39 @@ describe('Span', () => {
 
       expect(span.context()._tags).to.have.property('foo', 'bar')
     })
+
+    it('should truncate values exceeding length limit', () => {
+      tracer._recordedValueMaxLength = 100
+      span = new Span(tracer, recorder, sampler, prioritySampler, { operationName: 'operation' })
+
+      span.setTag('longString', 'x'.repeat(101))
+      expect(span.context()._tags).to.have.property('longString', 'x'.repeat(97) + '...')
+
+      span.setTag('longNum', 1e101)
+      expect(span.context()._tags).to.have.property('longNum', 1e101)
+
+      span.setTag('longObject', { prop: 'x'.repeat(100) })
+      expect(span.context()._tags).to.have.property('longObject', '{"prop":"' + 'x'.repeat(88) + '...')
+
+      span.setTag('longArray', [1, 2, 3, 'x'.repeat(100)])
+      expect(span.context()._tags).to.have.property('longArray', '[1,2,3,"' + 'x'.repeat(89) + '...')
+    })
+
+    it('should not truncate values if there is no length limit', () => {
+      span = new Span(tracer, recorder, sampler, prioritySampler, { operationName: 'operation' })
+
+      span.setTag('longString', 'x'.repeat(101))
+      expect(span.context()._tags).to.have.property('longString').that.does.equal('x'.repeat(101))
+
+      span.setTag('longNum', 1e101)
+      expect(span.context()._tags).to.have.property('longNum', 1e101)
+
+      span.setTag('longObject', { prop: 'x'.repeat(100) })
+      expect(span.context()._tags).to.have.property('longObject').to.deep.equal({ prop: 'x'.repeat(100) })
+
+      span.setTag('longArray', [1, 2, 3, 'x'.repeat(100)])
+      expect(span.context()._tags).to.have.property('longArray').to.deep.equal([1, 2, 3, 'x'.repeat(100)])
+    })
   })
 
   describe('addTags', () => {
@@ -166,6 +199,74 @@ describe('Span', () => {
       span = new Span(tracer, recorder, sampler, prioritySampler, { operationName: 'operation' })
 
       expect(() => span.addTags()).not.to.throw()
+    })
+
+    it('should truncate values exceeding length limit', () => {
+      tracer._recordedValueMaxLength = 100
+      span = new Span(tracer, recorder, sampler, prioritySampler, { operationName: 'operation' })
+
+      span.addTags({
+        longString: 'x'.repeat(101),
+        longNum: 1e101,
+        longObject: { prop: 'x'.repeat(100) },
+        longArray: [1, 2, 3, 'x'.repeat(100)]
+      })
+
+      expect(span.context()._tags).to.have.property('longString', 'x'.repeat(97) + '...')
+      expect(span.context()._tags).to.have.property('longNum', 1e101)
+      expect(span.context()._tags).to.have.property('longObject', '{"prop":"' + 'x'.repeat(88) + '...')
+      expect(span.context()._tags).to.have.property('longArray', '[1,2,3,"' + 'x'.repeat(89) + '...')
+    })
+
+    it('should not truncate values if there is no length limit', () => {
+      span = new Span(tracer, recorder, sampler, prioritySampler, { operationName: 'operation' })
+
+      span.addTags({
+        longString: 'x'.repeat(101),
+        longNum: 1e101,
+        longObject: { prop: 'x'.repeat(100) },
+        longArray: [1, 2, 3, 'x'.repeat(100)]
+      })
+
+      expect(span.context()._tags).to.have.property('longObject').to.deep.equal({ prop: 'x'.repeat(100) })
+      expect(span.context()._tags).to.have.property('longNum', 1e101)
+      expect(span.context()._tags).to.have.property('longString').that.does.equal('x'.repeat(101))
+      expect(span.context()._tags).to.have.property('longArray').to.deep.equal([1, 2, 3, 'x'.repeat(100)])
+    })
+  })
+
+  describe('logging', () => {
+    it('should truncate log values exceeding length limit', () => {
+      tracer._recordedValueMaxLength = 100
+      span = new Span(tracer, recorder, sampler, prioritySampler, { operationName: 'operation' })
+
+      span.log({ longString: 'x'.repeat(101) }, 0)
+      expect(span.context()._logs[0].value).to.equal('{"longString":"' + 'x'.repeat(82) + '...')
+
+      span.log({ longNum: 1e101 }, 0)
+      expect(span.context()._logs[1].value).to.equal('{"longNum":1e+101}')
+
+      span.log({ longObject: { prop: 'x'.repeat(100) } }, 0)
+      expect(span.context()._logs[2].value).to.equal('{"longObject":{"prop":"' + 'x'.repeat(74) + '...')
+
+      span.log({ longArray: [1, 2, 3, 'x'.repeat(100)] }, 0)
+      expect(span.context()._logs[3].value).to.equal('{"longArray":[1,2,3,"' + 'x'.repeat(76) + '...')
+    })
+
+    it('should not truncate log values if there is no length limit', () => {
+      span = new Span(tracer, recorder, sampler, prioritySampler, { operationName: 'operation' })
+
+      span.log({ longString: 'x'.repeat(101) }, 0)
+      expect(span.context()._logs[0].value).to.have.property('longString', 'x'.repeat(101))
+
+      span.log({ longNum: 1e101 }, 0)
+      expect(span.context()._logs[1].value).to.have.property('longNum', 1e101)
+
+      span.log({ longObject: { prop: 'x'.repeat(100) } }, 0)
+      expect(span.context()._logs[2].value).to.have.property('longObject').to.deep.equal({ prop: 'x'.repeat(100) })
+
+      span.log({ longArray: [1, 2, 3, 'x'.repeat(100)] }, 0)
+      expect(span.context()._logs[3].value).to.have.property('longArray').to.deep.equal([1, 2, 3, 'x'.repeat(100)])
     })
   })
 

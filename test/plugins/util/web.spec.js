@@ -505,7 +505,7 @@ describe('plugins/util/web', () => {
 
         expect(span.context()._tags['sfx.error.kind']).to.equal(error.name)
         expect(span.context()._tags['sfx.error.message']).to.equal(error.message)
-        expect(span.context()._tags['sfx.error.stack']).to.equal(error.stack)
+        expect(span.context()._tags['sfx.error.stack']).to.equal(error.stack.substring(0, 1197) + '...')
 
         done()
       }

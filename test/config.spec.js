@@ -34,6 +34,7 @@ describe('Config', () => {
     })
     expect(config).to.have.property('plugins', true)
     expect(config).to.have.property('env', undefined)
+    expect(config).to.have.property('recordedValueMaxLength', 1200)
   })
 
   it('should initialize from the default service', () => {
@@ -50,6 +51,7 @@ describe('Config', () => {
     platform.env.withArgs('SIGNALFX_TRACE_ANALYTICS').returns('true')
     platform.env.withArgs('SIGNALFX_SERVICE_NAME').returns('service')
     platform.env.withArgs('SIGNALFX_ENV').returns('test')
+    platform.env.withArgs('SIGNALFX_RECORDED_VALUE_MAX_LENGTH').returns('1201')
 
     const config = new Config()
 
@@ -62,6 +64,7 @@ describe('Config', () => {
     expect(config).to.have.property('runtimeMetrics', false)
     expect(config).to.have.property('service', 'service')
     expect(config).to.have.property('env', 'test')
+    expect(config).to.have.property('recordedValueMaxLength', 1201)
   })
 
   it('should initialize from environment variables with url taking precedence', () => {
@@ -106,7 +109,8 @@ describe('Config', () => {
       flushInterval: 5000,
       accessToken: 'MyToken',
       runtimeMetrics: true,
-      plugins: false
+      plugins: false,
+      recordedValueMaxLength: 1202
     })
 
     expect(config).to.have.property('enabled', false)
@@ -130,6 +134,7 @@ describe('Config', () => {
       'signalfx.tracing.library': 'nodejs-tracing',
       'signalfx.tracing.version': version
     })
+    expect(config).to.have.property('recordedValueMaxLength', 1202)
   })
 
   it('should initialize from the options with url taking precedence', () => {
@@ -183,6 +188,7 @@ describe('Config', () => {
     platform.env.withArgs('SIGNALFX_SERVICE_NAME').returns('service')
     platform.env.withArgs('SIGNALFX_ENV').returns('test')
     platform.env.withArgs('SIGNALFX_RUNTIME_METRICS_ENABLED').returns('true')
+    platform.env.withArgs('SIGNALFX_RECORDED_VALUE_MAX_LENGTH').returns('1203')
 
     const config = new Config('test', {
       enabled: true,
@@ -196,7 +202,8 @@ describe('Config', () => {
       },
       runtimeMetrics: false,
       service: 'test',
-      env: 'development'
+      env: 'development',
+      recordedValueMaxLength: 1204
     })
 
     expect(config).to.have.property('enabled', true)
@@ -209,6 +216,7 @@ describe('Config', () => {
     expect(config).to.have.property('runtimeMetrics', false)
     expect(config).to.have.property('service', 'test')
     expect(config).to.have.property('env', 'development')
+    expect(config).to.have.property('recordedValueMaxLength', 1204)
   })
 
   it('should give priority to the options especially url', () => {

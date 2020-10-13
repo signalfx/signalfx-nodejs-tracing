@@ -63,6 +63,8 @@ class SignalFxTracer extends Tracer {
       this._propagators[formats.TEXT_MAP] = new TextMapPropagator()
       this._propagators[formats.HTTP_HEADERS] = new HttpPropagator()
     }
+
+    this._recordedValueMaxLength = config.recordedValueMaxLength
   }
 
   _startSpan (name, fields) {
