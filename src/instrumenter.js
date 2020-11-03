@@ -108,6 +108,31 @@ class Instrumenter {
     })
   }
 
+  wrapExport (moduleExports, wrapper) {
+    if (typeof moduleExports !== 'function') return moduleExports
+
+    const props = Object.keys(moduleExports)
+    const shim = function () {
+      return moduleExports._datadog_wrapper.apply(this, arguments)
+    }
+
+    for (const prop of props) {
+      shim[prop] = moduleExports[prop]
+    }
+
+    moduleExports._datadog_wrapper = wrapper
+
+    return shim
+  }
+
+  unwrapExport (moduleExports) {
+    if (moduleExports && moduleExports._datadog_wrapper) {
+      moduleExports._datadog_wrapper = moduleExports
+    }
+
+    return moduleExports
+  }
+
   hookModule (moduleExports, moduleName, moduleBaseDir) {
     moduleName = moduleName.replace(pathSepExpr, '/')
 
@@ -137,7 +162,7 @@ class Instrumenter {
               const config = this._plugins.get(plugin).config
 
               if (config.enabled !== false) {
-                this._patch(instrumentation, moduleExports, config)
+                moduleExports = this._patch(instrumentation, moduleExports, config) || moduleExports
               }
             })
         } catch (e) {
@@ -204,7 +229,7 @@ class Instrumenter {
 
     if (!instrumented.has(moduleExports)) {
       instrumented.add(moduleExports)
-      instrumentation.patch.call(this, moduleExports, this._tracer._tracer, config)
+      return instrumentation.patch.call(this, moduleExports, this._tracer._tracer, config)
     }
   }
 

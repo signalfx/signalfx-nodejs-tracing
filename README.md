@@ -34,6 +34,7 @@ These are the supported libraries. Instrumentation for each library is in beta.
 | [DNS](https://nodejs.org/api/dns.html) | Supported Node | `use('dns')` | |
 | [elasticsearch](https://www.elastic.co/guide/en/elasticsearch/client/javascript-api/current/index.html) | 10+ | `use('elasticsearch')` | |
 | [Express](http://expressjs.com/) | 4+ | `use('express')` | |
+| [fastify](https://fastify.io/) | 1+ | `use('fastify')` | |
 | [GraphQL](https://github.com/graphql/graphql-js) | 0.10+ | `use('graphql')` | |
 | [hapi](https://hapijs.com/) | 2+ | `use('hapi')` | |
 | [http/https](https://nodejs.org/api/http.html) | Supported Node | `use('http')`, `use('https')` | |

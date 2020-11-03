@@ -324,6 +324,7 @@ interface Plugins {
   "dns": plugins.dns;
   "elasticsearch": plugins.elasticsearch;
   "express": plugins.express;
+  "fastify": plugins.fastify;
   "generic-pool": plugins.generic_pool;
   "graphql": plugins.graphql;
   "hapi": plugins.hapi;
@@ -710,6 +711,12 @@ declare namespace plugins {
    * [restify](http://restify.com/) module.
    */
   interface restify extends HttpServer {}
+
+  /**
+   * This plugin automatically instruments the
+   * [fastify](https://www.fastify.io/) module.
+   */
+  interface fastify extends HttpServer {}
 
   /**
    * This plugin automatically instruments the
