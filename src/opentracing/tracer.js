@@ -43,7 +43,7 @@ class SignalFxTracer extends Tracer {
     this._prioritySampler = new PrioritySampler(config.env)
     if (config.zipkin) {
       this._writer = new ZipkinV2Writer(
-        this._prioritySampler, config.url, config.path, config.headers
+        this._prioritySampler, config.url, config.path, config.headers, this
       )
     } else {
       this._writer = new Writer(this._prioritySampler, config.url)
@@ -130,6 +130,15 @@ class SignalFxTracer extends Tracer {
       return Promise.resolve()
     }
     return flushed
+  }
+
+  withNonReportingScope (callback) {
+    const span = new NonReportingSpan(this, this._recorder, this._sampler, this._prioritySampler, {
+      operationName: 'nonReportingSFXSpan'
+    })
+    return this.scope().activate(span, () => {
+      return callback()
+    })
   }
 }
 
