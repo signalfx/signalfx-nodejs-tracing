@@ -6,7 +6,7 @@ const format = require('./format')
 const Writer = require('../writer')
 
 class ZipkinV2Writer extends Writer {
-  constructor (prioritySampler, url, path, headers) {
+  constructor (prioritySampler, url, path, headers, tracer) {
     super(prioritySampler, url)
     // The dd-writer updates service-based sampling priorities for each
     // trace write to the agent.  We just need to prime the default
@@ -17,24 +17,27 @@ class ZipkinV2Writer extends Writer {
     this.encode = (trace) => trace
     this._path = path
     this._headers = headers
+    this._tracer = tracer
   }
 
   flush () {
-    if (this._queue.length > 0) {
-      const spans = []
-      this._queue.forEach((trace) => {
-        trace.forEach((span) => {
-          spans.push(span)
+    return this._tracer.withNonReportingScope(() => {
+      if (this._queue.length > 0) {
+        const spans = []
+        this._queue.forEach((trace) => {
+          trace.forEach((span) => {
+            spans.push(span)
+          })
         })
-      })
-      const data = JSON.stringify(spans)
+        const data = JSON.stringify(spans)
 
-      const request = this._request(data)
+        const request = this._request(data)
 
-      this._queue = []
-      this._size = 0
-      return request
-    }
+        this._queue = []
+        this._size = 0
+        return request
+      }
+    })
   }
 
   _request (data) {

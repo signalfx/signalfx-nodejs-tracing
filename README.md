@@ -170,10 +170,11 @@ class Logger {
         const record = { time, level, message };
 
         if (span) {
-            tracer.inject(span.context(), formats.LOG, yourRecordObject);
+            // inject trace and span ID into `record` object
+            tracer.inject(span.context(), formats.LOG, record);
         }
 
-        console.log(JSON.stringify(yourRecordObject));
+        console.log(JSON.stringify(record));
     }
 }
 
