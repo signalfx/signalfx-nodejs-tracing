@@ -19,6 +19,7 @@ class NoopTracer extends Tracer {
     this._scopeManager = new ScopeManager()
     this._scope = new Scope()
     this._span = new Span(this)
+    this._logInjectionTags = new Set()
   }
 
   withNonReportingScope (callback) {
@@ -51,6 +52,10 @@ class NoopTracer extends Tracer {
 
   flush () {
     return Promise.resolve()
+  }
+
+  logInjectionTags () {
+    return this._logInjectionTags
   }
 }
 
