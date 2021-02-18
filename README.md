@@ -74,7 +74,7 @@ Configure these options as parameters for the `init()` method or as environment 
 | debug                   | SIGNALFX_TRACING_DEBUG              | false     | Enable debug logging in the tracer. |
 | tags                    | SIGNALFX_SPAN_TAGS                  | {}        | Set global tags that should be applied to all spans. Format for the environment variable is `key1:val1,key2:val2`. |
 | logInjection            | SIGNALFX_LOGS_INJECTION             | false     | Enable automatic injection of trace IDs in logs for supported logging libraries. |
-| logInjectionTags        | SIGNALFX_LOG_INJECTION_TAGS         | ['service.name'] | If log injection is on, these tags will be injected to log context. |
+| logInjectionTags        | SIGNALFX_LOGS_INJECTION_TAGS         | ['service.name'] | If log injection is on, these tags will be injected to log context. |
 | flushInterval           |                                     | 2000      | Interval in milliseconds at which the tracer will submit traces to the agent. |
 | plugins                 |                                     | true      | Whether or not to enable automatic instrumentation of external libraries using the built-in plugins. |
 | recordedValueMaxLength  | SIGNALFX_RECORDED_VALUE_MAX_LENGTH  | 1200      | Maximum length an attribute value can have. Values longer than this limit are truncated. Any negative value turns off truncation. |
@@ -177,10 +177,10 @@ signalfx: {
 }
 ```
 
-Or set the same injected tag via an environment var:
+Or set the same injected tag via an environment var (with environment vars taking precendence):
 
 ```bash
-$ SIGNALFX_LOG_INJECTION_TAGS=region
+$ SIGNALFX_LOGS_INJECTION_TAGS=region
 ```
 
 ### Inject trace IDs with a custom logger

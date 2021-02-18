@@ -75,8 +75,8 @@ class Config {
       }
     }
 
-    if (process.env.SIGNALFX_LOG_INJECTION_TAGS) {
-      for (const tag of process.env.SIGNALFX_LOG_INJECTION_TAGS.split(',')) {
+    if (process.env.SIGNALFX_LOGS_INJECTION_TAGS) {
+      for (const tag of process.env.SIGNALFX_LOGS_INJECTION_TAGS.split(',')) {
         if (tag.trim().length !== 0) {
           this.logInjectionTags.add(tag.trim())
         }
