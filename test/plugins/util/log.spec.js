@@ -7,7 +7,12 @@ describe('plugins/util/log', () => {
   let tracer
 
   beforeEach(() => {
-    tracer = require('../../..').init({ service: 'test', plugins: false, zipkin: false })
+    tracer = require('../../..').init({
+      service: 'test',
+      plugins: false,
+      zipkin: false,
+      tags: { environment: 'prod' }
+    })
     log = require('../../../src/plugins/util/log')
   })
 
@@ -20,7 +25,8 @@ describe('plugins/util/log', () => {
 
         expect(record).to.have.deep.property('signalfx', {
           trace_id: span.context().toTraceIdHex(),
-          span_id: span.context().toSpanIdHex()
+          span_id: span.context().toSpanIdHex(),
+          'service.name': 'test'
         })
       })
     })
@@ -33,7 +39,8 @@ describe('plugins/util/log', () => {
 
         expect(record).to.have.deep.property('signalfx', {
           trace_id: span.context().toTraceIdHex(),
-          span_id: span.context().toSpanIdHex()
+          span_id: span.context().toSpanIdHex(),
+          'service.name': 'test'
         })
       })
     })
@@ -61,6 +68,23 @@ describe('plugins/util/log', () => {
         log.correlate(tracer, record)
 
         expect(record).to.not.have.property('signalfx')
+      })
+    })
+
+    it('should add selected span tags to log record', () => {
+      tracer._tracer._logInjectionTags.add('environment')
+
+      const span = tracer.startSpan('test')
+
+      tracer.scope().activate(span, () => {
+        const record = log.correlate(tracer, {})
+
+        expect(record).to.have.deep.property('signalfx', {
+          trace_id: span.context().toTraceIdHex(),
+          span_id: span.context().toSpanIdHex(),
+          'service.name': 'test',
+          'environment': 'prod'
+        })
       })
     })
   })

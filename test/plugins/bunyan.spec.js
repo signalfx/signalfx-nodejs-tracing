@@ -70,7 +70,8 @@ describe('Plugin', () => {
 
             expect(record).to.have.deep.property('signalfx', {
               trace_id: span.context().toTraceIdHex(),
-              span_id: span.context().toSpanIdHex()
+              span_id: span.context().toSpanIdHex(),
+              'service.name': tracer._tracer._service
             })
           })
         })

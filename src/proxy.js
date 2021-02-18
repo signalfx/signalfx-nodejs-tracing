@@ -146,6 +146,10 @@ class Tracer extends BaseTracer {
   flush () {
     return this._tracer.flush.apply(this._tracer, arguments)
   }
+
+  logInjectionTags () {
+    return this._tracer.logInjectionTags.apply(this._tracer, arguments)
+  }
 }
 
 module.exports = Tracer

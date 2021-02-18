@@ -57,6 +57,7 @@ describe('Plugin', () => {
       describe('with configuration', () => {
         beforeEach(() => {
           tracer._tracer._logInjection = true
+          tracer._tracer._logInjectionTags.clear()
           setup(version)
         })
 

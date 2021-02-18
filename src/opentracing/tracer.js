@@ -39,6 +39,7 @@ class SignalFxTracer extends Tracer {
     this._env = config.env
     this._tags = config.tags
     this._logInjection = config.logInjection
+    this._logInjectionTags = config.logInjectionTags
     this._analytics = config.analytics
     this._prioritySampler = new PrioritySampler(config.env)
     if (config.zipkin) {
@@ -139,6 +140,10 @@ class SignalFxTracer extends Tracer {
     return this.scope().activate(span, () => {
       return callback()
     })
+  }
+
+  logInjectionTags () {
+    return this._logInjectionTags
   }
 }
 

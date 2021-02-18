@@ -45,6 +45,7 @@ class Config {
     this.enabled = String(enabled) === 'true'
     this.debug = String(debug) === 'true'
     this.logInjection = String(logInjection) === 'true'
+    this.logInjectionTags = new Set(coalesce(options.logInjectionTags, ['service.name']))
     this.env = env
     this.url = url ? new URL(url) : new URL(`${protocol}://${hostname}:${port}${path}`)
     this.zipkin = zipkin
@@ -70,6 +71,14 @@ class Config {
         const kv = segment.split(':')
         if (kv.length === 2 && kv[0].trim().length !== 0 && kv[1].trim().length !== 0) {
           this.tags[kv[0].trim()] = kv[1].trim()
+        }
+      }
+    }
+
+    if (process.env.SIGNALFX_LOGS_INJECTION_TAGS) {
+      for (const tag of process.env.SIGNALFX_LOGS_INJECTION_TAGS.split(',')) {
+        if (tag.trim().length !== 0) {
+          this.logInjectionTags.add(tag.trim())
         }
       }
     }
