@@ -11,7 +11,8 @@ describe('plugins/util/log', () => {
       service: 'test',
       plugins: false,
       zipkin: false,
-      tags: { environment: 'prod' }
+      tags: { environment: 'test-env' },
+      logInjectionTags: []
     })
     log = require('../../../src/plugins/util/log')
   })
@@ -26,7 +27,7 @@ describe('plugins/util/log', () => {
         expect(record).to.have.deep.property('signalfx', {
           trace_id: span.context().toTraceIdHex(),
           span_id: span.context().toSpanIdHex(),
-          'service.name': 'test'
+          service: 'test'
         })
       })
     })
@@ -40,7 +41,7 @@ describe('plugins/util/log', () => {
         expect(record).to.have.deep.property('signalfx', {
           trace_id: span.context().toTraceIdHex(),
           span_id: span.context().toSpanIdHex(),
-          'service.name': 'test'
+          service: 'test'
         })
       })
     })
@@ -82,8 +83,8 @@ describe('plugins/util/log', () => {
         expect(record).to.have.deep.property('signalfx', {
           trace_id: span.context().toTraceIdHex(),
           span_id: span.context().toSpanIdHex(),
-          'service.name': 'test',
-          'environment': 'prod'
+          service: 'test',
+          environment: 'test-env'
         })
       })
     })

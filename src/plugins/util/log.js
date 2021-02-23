@@ -19,10 +19,13 @@ const log = {
 
     if (!span) return record
 
+    const context = span.context()
+
     return Object.assign({}, record, {
       signalfx: Object.assign(injectedTags(tracer, span), {
-        trace_id: span.context().toTraceIdHex(),
-        span_id: span.context().toSpanIdHex()
+        trace_id: context.toTraceIdHex(),
+        span_id: context.toSpanIdHex(),
+        service: context._tags['service.name']
       })
     })
   }
