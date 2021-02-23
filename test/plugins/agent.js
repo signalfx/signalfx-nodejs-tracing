@@ -94,7 +94,9 @@ module.exports = {
           service: 'test',
           url: `http://localhost:${port}/v1/trace`,
           flushInterval: 0,
-          plugins: false
+          plugins: false,
+          tags: { environment: 'test-env' },
+          logInjectionTags: ['environment']
         })
 
         for (let i = 0, l = pluginName.length; i < l; i++) {

@@ -74,7 +74,7 @@ Configure these options as parameters for the `init()` method or as environment 
 | debug                   | SIGNALFX_TRACING_DEBUG              | false     | Enable debug logging in the tracer. |
 | tags                    | SIGNALFX_SPAN_TAGS                  | {}        | Set global tags that should be applied to all spans. Format for the environment variable is `key1:val1,key2:val2`. |
 | logInjection            | SIGNALFX_LOGS_INJECTION             | false     | Enable automatic injection of trace IDs in logs for supported logging libraries. |
-| logInjectionTags        | SIGNALFX_LOGS_INJECTION_TAGS         | ['service.name'] | If log injection is on, these tags will be injected to log context. |
+| logInjectionTags        | SIGNALFX_LOGS_INJECTION_TAGS         | ['environment'] | If log injection is on, these tags will be injected to log context. |
 | flushInterval           |                                     | 2000      | Interval in milliseconds at which the tracer will submit traces to the agent. |
 | plugins                 |                                     | true      | Whether or not to enable automatic instrumentation of external libraries using the built-in plugins. |
 | recordedValueMaxLength  | SIGNALFX_RECORDED_VALUE_MAX_LENGTH  | 1200      | Maximum length an attribute value can have. Values longer than this limit are truncated. Any negative value turns off truncation. |
@@ -141,30 +141,30 @@ the `span.context`:
 ```json
 signalfx: {
   trace_id: <trace_id>,
-  span_id: <span_id>      
+  span_id: <span_id>,
+  service: <service name>,
+  environment: <environment tag>
 }
 ```
 
-### Inject trace IDs with Bunyan, Pino, or Winston
+### Inject trace information with Bunyan, Pino, or Winston
 
-To transfer trace context to logs with Bunyan, Pino, or Winston, enable trace
-ID log injection with this environment variable:
+To transfer trace context (trace ID, span ID, service name, environment) to logs with Bunyan, Pino, or Winston, enable log injection with this environment variable:
 
 ```bash
 $ SIGNALFX_LOGS_INJECTION=true
 ```
 
-### Inject span tags into logs
+### Inject additional span tags into log context
 
 If log injection is enabled, in addition to trace ID and span ID, span tags can
-be injected to logs. By default only `service.name` is injected. To select which
-tags to inject, add `logInjectionTags` to init config:
+be injected to logs. To select which tags to inject, add `logInjectionTags` to init config, by default only
+`environment` is injected:
 
 ```javascript
 const tracer = require('signalfx-tracing').init({
   tags: {environment: 'production', region: 'eu'},
-  // Only 'region' will be added to logs besides trace_id, and span_id
-  logInjectionTags: ['region']
+  logInjectionTags: ['environment', 'region']
 })
 ```
 
@@ -173,6 +173,8 @@ After which your logger will receive:
 signalfx: {
   trace_id: <trace_id>,
   span_id: <span_id>,
+  service: <service name>
+  environment: 'production',
   region: 'eu'
 }
 ```
@@ -180,7 +182,7 @@ signalfx: {
 Or set the same injected tag via an environment var (with environment vars taking precendence):
 
 ```bash
-$ SIGNALFX_LOGS_INJECTION_TAGS=region
+$ SIGNALFX_LOGS_INJECTION_TAGS=environment,region
 ```
 
 ### Inject trace IDs with a custom logger

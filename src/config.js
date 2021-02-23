@@ -45,7 +45,7 @@ class Config {
     this.enabled = String(enabled) === 'true'
     this.debug = String(debug) === 'true'
     this.logInjection = String(logInjection) === 'true'
-    this.logInjectionTags = new Set(coalesce(options.logInjectionTags, ['service.name']))
+    this.logInjectionTags = new Set(coalesce(options.logInjectionTags, ['environment']))
     this.env = env
     this.url = url ? new URL(url) : new URL(`${protocol}://${hostname}:${port}${path}`)
     this.zipkin = zipkin

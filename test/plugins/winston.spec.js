@@ -80,7 +80,7 @@ describe('Plugin', () => {
             signalfx: {
               trace_id: span.context().toTraceIdHex(),
               span_id: span.context().toSpanIdHex(),
-              'service.name': tracer._tracer._service
+              service: tracer._tracer._service
             }
           }
 
