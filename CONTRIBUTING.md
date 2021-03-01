@@ -3,6 +3,9 @@
 Please reach out via a [GitHub issue](https://github.com/signalfx/signalfx-nodejs-tracing/issues)
 before developing anything requiring a major code change.
 
+If you are not a Splunk employee and would like to contribute code to this project, please read and fill out the
+[Splunk CLA](https://www.splunk.com/en_us/form/contributions.html).
+
 # Running Unit and Integration Tests
 
 ```bash
