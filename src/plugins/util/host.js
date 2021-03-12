@@ -6,7 +6,6 @@ module.exports = {
       return false
     }
 
-    let noColon = true
     let hasHostChar = false
 
     for (let i = 0; i < Math.min(name.length, 5); i++) {
@@ -14,8 +13,7 @@ module.exports = {
 
       // ':'
       if (c === 58) {
-        noColon = false
-        break
+        return false
       }
 
       // 'a' to 'z' or 'A' to 'Z' or '-'
@@ -24,6 +22,6 @@ module.exports = {
       }
     }
 
-    return hasHostChar && noColon
+    return hasHostChar
   }
 }
