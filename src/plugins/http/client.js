@@ -203,7 +203,7 @@ function hasAmazonSignature (options) {
         return true
       }
 
-      if (header === 'authorization' && String(options.headers[header]).startsWith('AWS4-HMAC-SHA256')) {
+      if (header === 'authorization' && hasAmazonHmac([].concat(options.headers[headers[i]]))) {
         return true
       }
     }
@@ -212,8 +212,16 @@ function hasAmazonSignature (options) {
   return options.path && options.path.toLowerCase().indexOf('x-amz-signature=') !== -1
 }
 
-function startsWith (searchString) {
-  return value => String(value).startsWith(searchString)
+function hasAmazonHmac (fields) {
+  for (let i = 0; i < fields.length; i++) {
+    const field = fields[i]
+
+    if (typeof field === 'string' && field.startsWith('AWS4-HMAC-SHA256')) {
+      return true
+    }
+  }
+
+  return false
 }
 
 function unpatch (http) {
