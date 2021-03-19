@@ -195,24 +195,33 @@ function hasAmazonSignature (options) {
 
   if (options.headers) {
     const headers = Object.keys(options.headers)
-      .reduce((prev, next) => Object.assign(prev, {
-        [next.toLowerCase()]: options.headers[next]
-      }), {})
 
-    if (headers['x-amz-signature']) {
-      return true
-    }
+    for (let i = 0; i < headers.length; i++) {
+      const header = headers[i].toLowerCase()
 
-    if ([].concat(headers['authorization']).some(startsWith('AWS4-HMAC-SHA256'))) {
-      return true
+      if (header === 'x-amz-signature') {
+        return true
+      }
+
+      if (header === 'authorization' && hasAmazonHmac([].concat(options.headers[headers[i]]))) {
+        return true
+      }
     }
   }
 
   return options.path && options.path.toLowerCase().indexOf('x-amz-signature=') !== -1
 }
 
-function startsWith (searchString) {
-  return value => String(value).startsWith(searchString)
+function hasAmazonHmac (fields) {
+  for (let i = 0; i < fields.length; i++) {
+    const field = fields[i]
+
+    if (typeof field === 'string' && field.startsWith('AWS4-HMAC-SHA256')) {
+      return true
+    }
+  }
+
+  return false
 }
 
 function unpatch (http) {
