@@ -256,7 +256,7 @@ describe('plugins/util/web', () => {
 
       it('should set Server-Timing when configured', () => {
         try {
-          process.env.SIGNALFX_SERVER_TIMING_CONTEXT = 'true'
+          config.enableServerTiming = true
           web.instrument(tracer, config, req, res, 'test.request', span => {
             config.service = 'test2'
             web.instrument(tracer, config, req, res, 'test.request')
@@ -268,7 +268,7 @@ describe('plugins/util/web', () => {
             expect(res.setHeader.args[1][1]).to.equal('Server-Timing')
           })
         } finally {
-          delete process.env.SIGNALFX_SERVER_TIMING_CONTEXT
+          config.enableServerTiming = false
         }
       })
     })

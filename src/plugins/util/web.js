@@ -69,8 +69,7 @@ const web = {
     wrapEnd(req)
     wrapEvents(req)
 
-    const enableServerTiming = process.env.SIGNALFX_SERVER_TIMING_CONTEXT
-    if (enableServerTiming && enableServerTiming.trim().toLowerCase() === 'true') {
+    if (config.enableServerTiming) {
       if (!res._sfx_serverTimingAdded) {
         res.setHeader('Server-Timing', traceParentHeader(span.context()))
         res.setHeader('Access-Control-Expose-Headers', 'Server-Timing')

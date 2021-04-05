@@ -94,6 +94,9 @@ class Config {
     }
     this.runtimeMetrics = String(runtimeMetrics) === 'true'
     this.experimental = {}
+
+    this.enableServerTiming =
+      String(coalesce(options.enableServerTiming, platform.env('SIGNALFX_SERVER_TIMING_CONTEXT'), false)) === 'true'
   }
 }
 
