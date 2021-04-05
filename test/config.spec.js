@@ -35,7 +35,7 @@ describe('Config', () => {
     expect(config).to.have.property('plugins', true)
     expect(config).to.have.property('env', undefined)
     expect(config).to.have.property('recordedValueMaxLength', 1200)
-    expect(config).to.have.property('enableServerTiming', false)
+    expect(config).to.have.property('enableServerTiming', true)
   })
 
   it('should initialize from the default service', () => {
