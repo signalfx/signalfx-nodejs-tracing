@@ -94,7 +94,24 @@ class Config {
     }
     this.runtimeMetrics = String(runtimeMetrics) === 'true'
     this.experimental = {}
+
+    this.enableServerTiming =
+      coalesce(options.enableServerTiming, booleanEnvVar('SIGNALFX_SERVER_TIMING_CONTEXT'), true)
   }
+}
+
+function booleanEnvVar (key) {
+  const value = platform.env(key)
+
+  if (typeof value !== 'string') {
+    return undefined
+  }
+
+  if (['false', 'no', '0'].indexOf(value.trim().toLowerCase()) >= 0) {
+    return false
+  }
+
+  return true
 }
 
 module.exports = Config
