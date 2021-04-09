@@ -40,12 +40,24 @@ class Instrumenter {
   patch (config) {
     config = config || {}
 
-    if (config.plugins !== false) {
+    const loadPlugin = (name, plugin) => {
+      if (!this._plugins.has(plugin)) {
+        this._set(plugin, { name, config: {} })
+      }
+    }
+
+    if (process.env.SIGNALFX_ENABLED_PLUGINS) {
+      const enabledPlugins = process.env.SIGNALFX_ENABLED_PLUGINS.trim().split(',')
+      enabledPlugins.forEach(name => {
+        name = name.trim()
+        loadPlugin(name, require(`./plugins/${name}`))
+      })
+    } else if (config.plugins !== false) {
       const plugins = require('./plugins')
 
       Object.keys(plugins)
         .forEach(name => {
-          this._plugins.has(plugins[name]) || this._set(plugins[name], { name, config: {} })
+          loadPlugin(name, plugins[name])
         })
     }
 

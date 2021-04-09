@@ -1,6 +1,7 @@
 'use strict'
 
 const proxyquire = require('proxyquire').noCallThru()
+const { expect } = require('chai')
 const path = require('path')
 
 describe('Instrumenter', () => {
@@ -309,6 +310,24 @@ describe('Instrumenter', () => {
         expect(mysql).to.deep.equal({ name: 'mysql' })
 
         expect(integrations.mysql[0].patch).to.have.been.calledWithMatch(Connection, 'tracer', {})
+      })
+
+      it('should patch only explicitly enabled modules', () => {
+        process.env.SIGNALFX_ENABLED_PLUGINS = 'http, express'
+        instrumenter._plugins = new Map()
+        instrumenter.patch()
+
+        const instrumentations = []
+        instrumenter._plugins.forEach(plugin => {
+          instrumentations.push(plugin.name)
+        })
+        expect(instrumentations).to.have.length(2)
+        expect(instrumentations).to.contain('express')
+        expect(instrumentations).to.contain('http')
+
+        process.env.SIGNALFX_ENABLED_PLUGINS = ''
+        instrumenter._plugins = new Map()
+        instrumenter.patch()
       })
     })
 
