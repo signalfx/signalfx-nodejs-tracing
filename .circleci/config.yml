@@ -583,13 +583,13 @@ workflows:
           filters:
             branches:
               only:
-                - master
+                - main 
                 - /v\d+\.\d+\.\d+([-a-z]+\.\d+)?/
       - prebuild-linux-x32:
           filters:
             branches:
               only:
-                - master
+                - main 
                 - /v\d+\.\d+\.\d+([-a-z]+\.\d+)?/
       - alpine
       - alpine-prebuilt:
@@ -602,7 +602,7 @@ workflows:
           filters:
             branches:
               only:
-                - master
+                - main 
     jobs:
       - node-core-4
       - node-core-6
