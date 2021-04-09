@@ -77,6 +77,7 @@ Configure these options as parameters for the `init()` method or as environment 
 | logInjectionTags        | SIGNALFX_LOGS_INJECTION_TAGS         | ['environment'] | If log injection is on, these tags will be injected to log context. |
 | flushInterval           |                                     | 2000      | Interval in milliseconds at which the tracer will submit traces to the agent. |
 | plugins                 |                                     | true      | Whether or not to enable automatic instrumentation of external libraries using the built-in plugins. |
+|                         | SIGNALFX_ENABLED_PLUGINS            |           | A comma separated list of plugins that should be used. Only the plugins specified will be used and all other plugins will be ignore. All plugins will be used when no value is set.
 | recordedValueMaxLength  | SIGNALFX_RECORDED_VALUE_MAX_LENGTH  | 1200      | Maximum length an attribute value can have. Values longer than this limit are truncated. Any negative value turns off truncation. |
 | enableServerTiming      | SIGNALFX_SERVER_TIMING_CONTEXT      | true      | Enable injection of `Server-Timing` response header containing the current trace (e.g. `Server-Timing: traceparent;desc="00-traceId-spanId-01"`). |
 

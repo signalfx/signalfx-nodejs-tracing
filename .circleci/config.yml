@@ -98,34 +98,6 @@ jobs:
 
   # Core tests
 
-  node-core-4:
-    <<: *node-core-base
-    docker:
-      - image: node:4
-    steps:
-      - checkout
-      - *yarn-versions
-      - *restore-yarn-cache
-      - *yarn-install
-      - *save-yarn-cache
-      - *yarn-rebuild
-      - *yarn-test-core
-      - *run-benchmark
-
-  node-core-6:
-    <<: *node-core-base
-    docker:
-      - image: node:6
-    steps:
-      - checkout
-      - *yarn-versions
-      - *restore-yarn-cache
-      - *yarn-install
-      - *save-yarn-cache
-      - *yarn-rebuild
-      - *yarn-test-core
-      - *run-benchmark
-
   node-core-8:
     <<: *node-core-base
     docker:
@@ -542,8 +514,6 @@ workflows:
       - lint
       - typescript
       - node-leaks
-      - node-core-4
-      - node-core-6
       - node-core-8
       - node-core-10
       - node-core-12
@@ -604,8 +574,6 @@ workflows:
               only:
                 - main 
     jobs:
-      - node-core-4
-      - node-core-6
       - node-core-8
       - node-core-10
       - node-core-12
