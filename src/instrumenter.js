@@ -42,7 +42,9 @@ class Instrumenter {
 
     const loadPlugin = (name, plugin) => {
       if (!this._plugins.has(plugin)) {
-        this._set(plugin, { name, config: {} })
+        this._set(plugin, { name, config: {
+          enableServerTiming: config.enableServerTiming,
+        } })
       }
     }
 
