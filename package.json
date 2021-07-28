@@ -17,7 +17,7 @@
     "startContainers": "docker-compose up -d -V --remove-orphans --force-recreate",
     "tdd": "yarn services && NO_DEPRECATION=* mocha --watch 'test/setup/**/*.js'",
     "test": "SERVICES=* yarn services && NO_DEPRECATION=* cov8 --include \"src/**/*.js\" -- mocha --exit 'test/setup/all.js' 'test/**/*.spec.js'",
-    "test:core": "yarn dev:dependencies && mocha --exit --exclude \"test/plugins/*.spec.js\" --exclude \"test/plugins/http/*.spec.js\" --exclude \"test/scope/async/*.spec.js\" --file test/setup/core.js \"test/**/*.spec.js\"",
+    "test:core": "mocha --exit --exclude \"test/plugins/**.spec.js\" --file test/setup/core.js \"test/**/*.spec.js\"",
     "test:plugins": "yarn services && NO_DEPRECATION=* cov8 --include \"src/**/*.js\" -- mocha --exit --file \"test/setup/all.js\" \"test/plugins/@($(echo $PLUGINS)).spec.js\" \"test/plugins/@($(echo $PLUGINS))/**/*.spec.js\"",
     "test:async": "mocha --exit --file test/setup/core.js \"test/scope/async/*.spec.js\"",
     "leak:core": "node ./scripts/install_plugin_modules && (cd test/leak && yarn) && NODE_PATH=./test/leak/node_modules node --no-warnings ./node_modules/.bin/tape 'test/leak/{,!(node_modules|plugins)/**/}/*.js'",
@@ -44,7 +44,7 @@
   },
   "homepage": "https://signalfx.com/microservices-apm/",
   "engines": {
-    "node": ">=4"
+    "node": ">=8 <17"
   },
   "dependencies": {
     "@types/node": "^10.12.18",
@@ -105,6 +105,7 @@
     "sinon-chai": "^2.14.0",
     "socket.io-client": "^1.2.0",
     "tape": "^4.9.1",
-    "v8-coverage": "^1.0.8"
+    "v8-coverage": "^1.0.8",
+    "yarn": "^1.22.11"
   }
 }
