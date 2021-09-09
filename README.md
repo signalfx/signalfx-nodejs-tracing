@@ -1,3 +1,9 @@
+# Deprecation Notice
+
+:warning: **Only critical security fixes and bugs will be provided.** :warning:
+
+We recommend using our [Splunk Distribution of OpenTelemetry Node.js](https://github.com/signalfx/splunk-otel-js) going forward, which offers the same capabilities and fully supports the [OpenTelemetry standard](https://opentelemetry.io/).
+
 # SignalFx Tracing Library for JavaScript
 
 [![npm (tag)](https://img.shields.io/npm/v/signalfx-tracing.svg)](https://www.npmjs.com/package/signalfx-tracing)
