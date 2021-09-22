@@ -2,7 +2,7 @@ version: 2
 
 node-core-base: &node-core-base
   docker:
-    - image: node:8
+    - image: node:10
   working_directory: ~/signalfx-nodejs-tracing
   resource_class: small
   steps:
@@ -45,7 +45,7 @@ node-core-base: &node-core-base
 
 node-plugin-base: &node-plugin-base
   docker:
-    - image: node:8
+    - image: node:10
   working_directory: ~/signalfx-nodejs-tracing
   resource_class: small
   steps:
@@ -98,11 +98,6 @@ jobs:
 
   # Core tests
 
-  node-core-8:
-    <<: *node-core-base
-    docker:
-      - image: node:8
-
   node-core-10:
     <<: *node-core-base
     docker:
@@ -120,7 +115,7 @@ jobs:
 
   node-leaks:
     docker:
-      - image: node:8
+      - image: node:10
     working_directory: ~/signalfx-nodejs-tracing
     resource_class: small
     steps:
@@ -133,7 +128,7 @@ jobs:
           name: Install dependencies
           command: yarn install
       - run:
-          name: Install memwatch 
+          name: Install memwatch
           command: yarn add --dev @airbnb/node-memwatch@1.0.2
       - *save-yarn-cache
       - run:
@@ -144,14 +139,14 @@ jobs:
   node-adonis:
     <<: *node-plugin-base
     docker:
-      - image: node:8
+      - image: node:10
         environment:
           - PLUGINS=adonis
 
   node-amqplib:
     <<: *node-plugin-base
     docker:
-      - image: node:8
+      - image: node:10
         environment:
           - SERVICES=rabbitmq
           - PLUGINS=amqplib
@@ -160,7 +155,7 @@ jobs:
   node-amqp10:
     <<: *node-plugin-base
     docker:
-      - image: node:8
+      - image: node:10
         environment:
           - SERVICES=qpid
           - PLUGINS=amqp10
@@ -173,21 +168,21 @@ jobs:
   node-bluebird:
     <<: *node-plugin-base
     docker:
-      - image: node:8
+      - image: node:10
         environment:
           - PLUGINS=bluebird
 
   node-bunyan:
     <<: *node-plugin-base
     docker:
-      - image: node:8
+      - image: node:10
         environment:
           - PLUGINS=bunyan
 
   node-cassandra:
     <<: *node-plugin-base
     docker:
-      - image: node:8
+      - image: node:10
         environment:
           - SERVICES=cassandra
           - PLUGINS=cassandra-driver
@@ -198,14 +193,14 @@ jobs:
   node-dns:
     <<: *node-plugin-base
     docker:
-      - image: node:8
+      - image: node:10
         environment:
           - PLUGINS=dns
 
   node-elasticsearch:
     <<: *node-plugin-base
     docker:
-      - image: node:8
+      - image: node:10
         environment:
           - SERVICES=elasticsearch
           - PLUGINS=elasticsearch
@@ -217,21 +212,21 @@ jobs:
   node-express:
     <<: *node-plugin-base
     docker:
-      - image: node:8
+      - image: node:10
         environment:
           - PLUGINS=express
 
   node-generic-pool:
     <<: *node-plugin-base
     docker:
-      - image: node:8
+      - image: node:10
         environment:
           - PLUGINS=generic-pool
 
   node-8-graphql:
     <<: *node-plugin-base
     docker:
-      - image: node:8
+      - image: node:10
         environment:
           - PLUGINS=graphql
 
@@ -245,7 +240,7 @@ jobs:
   node-8-hapi:
     <<: *node-plugin-base
     docker:
-      - image: node:8
+      - image: node:10
         environment:
           - PLUGINS=hapi
 
@@ -261,28 +256,28 @@ jobs:
   node-http:
     <<: *node-plugin-base
     docker:
-      - image: node:8
+      - image: node:10
         environment:
           - PLUGINS=http
 
   node-koa:
     <<: *node-plugin-base
     docker:
-      - image: node:8
+      - image: node:10
         environment:
           - PLUGINS=koa
 
   node-knex:
     <<: *node-plugin-base
     docker:
-      - image: node:8
+      - image: node:10
         environment:
           - PLUGINS=knex
-  
+
   node-memcached:
     <<: *node-plugin-base
     docker:
-      - image: node:8
+      - image: node:10
         environment:
           - SERVICES=memcached
           - PLUGINS=memcached
@@ -291,7 +286,7 @@ jobs:
   node-mysql:
     <<: *node-plugin-base
     docker:
-      - image: node:8
+      - image: node:10
         environment:
           - SERVICES=mysql
           - PLUGINS=mysql|mysql2
@@ -303,7 +298,7 @@ jobs:
   node-mongodb-core:
     <<: *node-plugin-base
     docker:
-      - image: node:8
+      - image: node:10
         environment:
           - SERVICES=mongo
           - PLUGINS=mongodb-core
@@ -318,28 +313,28 @@ jobs:
   node-net:
     <<: *node-plugin-base
     docker:
-      - image: node:8
+      - image: node:10
         environment:
           - PLUGINS=net
 
   node-nest:
     <<: *node-plugin-base
     docker:
-      - image: node:8
+      - image: node:10
         environment:
           - PLUGINS=nest
 
   node-pino:
     <<: *node-plugin-base
     docker:
-      - image: node:8
+      - image: node:10
         environment:
           - PLUGINS=pino
 
   node-postgres:
     <<: *node-plugin-base
     docker:
-      - image: node:8
+      - image: node:10
         environment:
           - SERVICES=postgres
           - PLUGINS=pg
@@ -351,14 +346,14 @@ jobs:
   node-q:
     <<: *node-plugin-base
     docker:
-      - image: node:8
+      - image: node:10
         environment:
           - PLUGINS=q
 
   node-redis:
     <<: *node-plugin-base
     docker:
-      - image: node:8
+      - image: node:10
         environment:
           - SERVICES=redis
           - PLUGINS=redis|ioredis
@@ -367,48 +362,48 @@ jobs:
   node-restify:
     <<: *node-plugin-base
     docker:
-      - image: node:8
+      - image: node:10
         environment:
           - PLUGINS=restify
 
   node-router:
     <<: *node-plugin-base
     docker:
-      - image: node:8
+      - image: node:10
         environment:
           - PLUGINS=router
 
   node-sails:
     <<: *node-plugin-base
     docker:
-      - image: node:8
+      - image: node:10
         environment:
           - PLUGINS=sails
 
   node-socket-io:
     <<: *node-plugin-base
     docker:
-      - image: node:8
+      - image: node:10
         environment:
           - PLUGINS=socket.io
 
   node-when:
     <<: *node-plugin-base
     docker:
-      - image: node:8
+      - image: node:10
         environment:
           - PLUGINS=when
 
   node-winston:
     <<: *node-plugin-base
     docker:
-      - image: node:8
+      - image: node:10
         environment:
           - PLUGINS=winston
 
   typescript:
     docker:
-      - image: node:8
+      - image: node:10
     working_directory: ~/signalfx-nodejs-tracing
     resource_class: small
     steps:
@@ -553,13 +548,13 @@ workflows:
           filters:
             branches:
               only:
-                - main 
+                - main
                 - /v\d+\.\d+\.\d+([-a-z]+\.\d+)?/
       - prebuild-linux-x32:
           filters:
             branches:
               only:
-                - main 
+                - main
                 - /v\d+\.\d+\.\d+([-a-z]+\.\d+)?/
       - alpine
       - alpine-prebuilt:
@@ -572,7 +567,7 @@ workflows:
           filters:
             branches:
               only:
-                - main 
+                - main
     jobs:
       - node-core-8
       - node-core-10
