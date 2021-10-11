@@ -1,5 +1,5 @@
 > # :warning: Deprecation Notice
-> **The SignalFx Tracing Library for JavaScript is deprecated and will reach End of Support on October 21st, 2022. After that date, this repository will be archived. Until then, only critical security fixes and bugs will be provided.**
+> **The SignalFx Tracing Library for JavaScript is deprecated and will reach End of Support on October 21st, 2022. After that date, this repository will be archived. Until then, only critical security fixes and bug fixes will be provided.**
 >
 >For applications running on Java 8 or higher, use the [Splunk Distribution of OpenTelemetry
 >JS](https://github.com/signalfx/splunk-otel-js), which offers the same capabilities and fully supports the OpenTelemetry standard.
