@@ -1,8 +1,8 @@
 > # :warning: Deprecation Notice
 > **The SignalFx Tracing Library for Node.js is deprecated. Only critical security fixes and bug fixes are provided.**
 >
->Consider using the [Splunk Distribution of OpenTelemetry
->JS](https://github.com/signalfx/splunk-otel-js), which offers similar capabilities and fully supports the OpenTelemetry standard. To learn how to migrate, see [Migrate from the SignalFx Node.js Tracing Library](https://quickdraw.splunk.com/redirect/?product=Observability&location=nodejs.otel.repo.migration&version=current).
+> Consider using the [Splunk Distribution of OpenTelemetry JS](https://github.com/signalfx/splunk-otel-js), which offers similar capabilities and fully supports the OpenTelemetry standard. To learn how to migrate, see [Migrate from the SignalFx Node.js Tracing Library](https://quickdraw.splunk.com/redirect/?product=Observability&location=nodejs.otel.repo.migration&version=current).
+
 # SignalFx Tracing Library for JavaScript
 
 [![npm (tag)](https://img.shields.io/npm/v/signalfx-tracing.svg)](https://www.npmjs.com/package/signalfx-tracing)
